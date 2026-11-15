@@ -1,7 +1,7 @@
 # Animal Pairs
 
 A gentle animal memory-matching game for iPad, for children of about 3–7.
-Ten soft animal friends — Momo, Luna, Nori, Sprout, Mochi, Sunny, Maple,
+Ten soft animal friends — Momo, Iris, Nori, Sprout, Mochi, Sunny, Maple,
 Clover, Rusty and Pebble — hide under lavender cards. No timers, no lives, no
 failure screens, no ads, no accounts, and it works fully offline.
 

@@ -20,7 +20,7 @@ final class ManifestTests: XCTestCase {
         XCTAssertEqual(manifest.artworks.count, 30, "30 launch animal-pose illustrations")
         XCTAssertEqual(manifest.artworks.filter { $0.tier == .free }.count, 10)
         XCTAssertEqual(Set(manifest.characters.map(\.id.rawValue)),
-                       ["momo", "luna", "nori", "sprout", "mochi", "sunny", "maple", "clover", "rusty", "pebble"])
+                       ["momo", "iris", "nori", "sprout", "mochi", "sunny", "maple", "clover", "rusty", "pebble"])
         for character in manifest.characters {
             XCTAssertEqual(manifest.artworks.filter { $0.characterID == character.id }.count, 3)
         }

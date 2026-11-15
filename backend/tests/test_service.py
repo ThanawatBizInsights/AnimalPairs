@@ -39,12 +39,12 @@ def test_validation_catches_duplicates_and_bad_defaults(bundled_manifest):
     broken = copy.deepcopy(bundled_manifest)
     broken["artworks"].append(copy.deepcopy(broken["artworks"][0]))
     broken["artworks"][1]["tier"] = "gold"
-    default = next(a for a in broken["artworks"] if a["assetID"] == "luna.signature")
+    default = next(a for a in broken["artworks"] if a["assetID"] == "iris.signature")
     default["tier"] = "premium"
     errors = validate_manifest(broken)
     assert any("duplicate asset" in e for e in errors)
     assert any("tier must be" in e for e in errors)
-    assert any("luna: default pose must be free" in e for e in errors)
+    assert any("iris: default pose must be free" in e for e in errors)
     assert validate_manifest({"schemaVersion": 2}) != []
 
 

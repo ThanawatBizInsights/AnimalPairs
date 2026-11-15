@@ -89,7 +89,7 @@ curl -X POST localhost:8000/v1/admin/manifests -H "Authorization: Bearer $TOKEN"
 curl -X PUT localhost:8000/v1/admin/assets/momo.signature/versions/1 -H "Authorization: Bearer $TOKEN" \
      -H 'Content-Type: image/png' --data-binary @../AnimalPairs/Assets.xcassets/Artwork/art_momo_signature.imageset/art_momo_signature.png
 # …repeat for every artwork, then:
-curl -X POST localhost:8000/v1/admin/manifests/2026.11.0/publish -H "Authorization: Bearer $TOKEN"
+curl -X POST localhost:8000/v1/admin/manifests/2026.11.1/publish -H "Authorization: Bearer $TOKEN"
 ```
 
 In `production`, manifests containing `"status": "placeholder"` artwork are

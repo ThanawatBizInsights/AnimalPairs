@@ -95,7 +95,7 @@ final class DeckBuilderTests: XCTestCase {
     }
 
     func testMissingArtworkIsNeverDealt() throws {
-        let missing: Set<AssetID> = ["momo.signature", "luna.play", "nori.nap"]
+        let missing: Set<AssetID> = ["momo.signature", "iris.play", "nori.nap"]
         for seed in 0..<40 as Range<UInt64> {
             let tiles = try board(.exactPose, .twenty, seed: seed, catalog: Fixtures.catalog(missing: missing))
             XCTAssertTrue(Set(tiles.map(\.pairKey)).isDisjoint(with: missing))
@@ -103,7 +103,7 @@ final class DeckBuilderTests: XCTestCase {
     }
 
     func testInsufficientContentThrowsInsteadOfDuplicating() {
-        let small = Fixtures.manifest(characters: ["momo", "luna"], poses: ["signature"])
+        let small = Fixtures.manifest(characters: ["momo", "iris"], poses: ["signature"])
         XCTAssertThrowsError(try board(.classic, .six, seed: 1, catalog: Fixtures.catalog(small))) { error in
             XCTAssertEqual(error as? DeckBuilderError, .notEnoughCharacters(needed: 3, available: 2))
         }

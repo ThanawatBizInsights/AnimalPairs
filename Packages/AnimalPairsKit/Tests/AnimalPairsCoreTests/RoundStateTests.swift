@@ -66,8 +66,8 @@ final class RoundStateTests: XCTestCase {
         let otherPose1 = Tile(id: TileID(), pairKey: "momo.nap")
         let otherPose2 = Tile(id: TileID(), pairKey: "momo.nap")
         let config = GameConfiguration(mode: .exactPose, boardSize: .six)
-        let extra1 = Tile(id: TileID(), pairKey: "luna.signature")
-        let extra2 = Tile(id: TileID(), pairKey: "luna.signature")
+        let extra1 = Tile(id: TileID(), pairKey: "iris.signature")
+        let extra2 = Tile(id: TileID(), pairKey: "iris.signature")
         var state = RoundState(configuration: config, tiles: [samePose1, otherPose1, samePose2, otherPose2, extra1, extra2])
 
         _ = state.tap(samePose1.id)

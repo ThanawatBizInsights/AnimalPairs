@@ -3,7 +3,7 @@ import XCTest
 @testable import AnimalPairsCore
 
 enum Fixtures {
-    static let characterIDs: [CharacterID] = ["momo", "luna", "nori", "sprout", "mochi",
+    static let characterIDs: [CharacterID] = ["momo", "iris", "nori", "sprout", "mochi",
                                               "sunny", "maple", "clover", "rusty", "pebble"]
     static let poses: [PoseID] = ["signature", "play", "nap"]
 

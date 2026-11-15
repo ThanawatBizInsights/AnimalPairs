@@ -112,7 +112,7 @@ struct SetupView: View {
         let t = model.localizer
         ModeOption(mode: .classic, title: t["mode.classic"], detail: t["mode.classic.detail"],
                    selected: mode == .classic, locked: !policy.isAvailable(.classic),
-                   artworks: (["momo.signature", "luna.signature"] as [AssetID]).compactMap { model.catalog.artwork($0) }) {
+                   artworks: (["momo.signature", "iris.signature"] as [AssetID]).compactMap { model.catalog.artwork($0) }) {
             select(mode: .classic, policy: policy)
         }
         ModeOption(mode: .exactPose, title: t["mode.exactPose"], detail: t["mode.exactPose.detail"],

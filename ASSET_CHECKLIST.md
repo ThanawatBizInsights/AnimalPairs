@@ -1,6 +1,6 @@
 # Asset checklist
 
-Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.0`) and other shipped media. **The app is not release-ready while any row below is marked _placeholder_ or _development_.** `ManifestTests.testBundledManifestHonestlyReportsPlaceholders` and the backend's production publish check both fail closed on placeholders.
+Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.1`) and other shipped media. **The app is not release-ready while any row below is marked _placeholder_ or _development_.** `ManifestTests.testBundledManifestHonestlyReportsPlaceholders` and the backend's production publish check both fail closed on placeholders.
 
 ## How to deliver final artwork
 
@@ -18,7 +18,7 @@ These came from the supplied character sheet as individual files. `build_artwork
 | Asset ID | Character | Pose | Source | Status |
 | --- | --- | --- | --- | --- |
 | `momo.signature` | Momo (golden-and-cream puppy) | signature | `Design/Reference/Supplied/momo_signature.png` | final art supplied — sign-off pending |
-| `luna.signature` | Luna (lilac kitten with white chest) | signature | `Design/Reference/Supplied/luna_signature.png` | final art supplied — sign-off pending |
+| `iris.signature` | Iris (lilac kitten with white chest) | signature | `Design/Reference/Supplied/iris_signature.png` | final art supplied — sign-off pending |
 | `nori.signature` | Nori (pale-blue elephant) | signature | `Design/Reference/Supplied/nori_signature.png` | final art supplied — sign-off pending |
 | `sprout.signature` | Sprout (sage-green dinosaur) | signature | `Design/Reference/Supplied/sprout_signature.png` | final art supplied — sign-off pending |
 | `mochi.signature` | Mochi (peach rabbit) | signature | `Design/Reference/Supplied/mochi_signature.png` | final art supplied — sign-off pending |
@@ -36,8 +36,8 @@ Currently shipped as **development placeholders**: the character's signature art
 | --- | --- | --- | --- | --- |
 | `momo.play` | Momo (golden-and-cream puppy) | play | sitting in a play bow with tail up, tongue out | **placeholder — final art missing** |
 | `momo.nap` | Momo (golden-and-cream puppy) | nap | curled up asleep, ears draped, paws tucked | **placeholder — final art missing** |
-| `luna.play` | Luna (lilac kitten with white chest) | play | batting at a soft ball of yarn | **placeholder — final art missing** |
-| `luna.nap` | Luna (lilac kitten with white chest) | nap | curled in a ball, tail wrapped around, eyes closed | **placeholder — final art missing** |
+| `iris.play` | Iris (lilac kitten with white chest) | play | batting at a soft ball of yarn | **placeholder — final art missing** |
+| `iris.nap` | Iris (lilac kitten with white chest) | nap | curled in a ball, tail wrapped around, eyes closed | **placeholder — final art missing** |
 | `nori.play` | Nori (pale-blue elephant) | play | splashing a little arc of water bubbles from the trunk | **placeholder — final art missing** |
 | `nori.nap` | Nori (pale-blue elephant) | nap | lying down, trunk curled, eyes closed | **placeholder — final art missing** |
 | `sprout.play` | Sprout (sage-green dinosaur) | play | mid-hop with arms up, mouth open in a laugh | **placeholder — final art missing** |

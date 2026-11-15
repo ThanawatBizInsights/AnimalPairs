@@ -120,53 +120,53 @@
         }
       }
     },
-    "art.luna.nap": {
+    "art.iris.nap": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna the kitten, napping"
+            "value": "Iris the kitten, napping"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ลูน่าลูกแมว กำลังงีบหลับ"
+            "value": "Iris ลูกแมว กำลังงีบหลับ"
           }
         }
       }
     },
-    "art.luna.play": {
+    "art.iris.play": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna the kitten, playing"
+            "value": "Iris the kitten, playing"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ลูน่าลูกแมว กำลังเล่น"
+            "value": "Iris ลูกแมว กำลังเล่น"
           }
         }
       }
     },
-    "art.luna.signature": {
+    "art.iris.signature": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna the kitten, sitting with a curled tail"
+            "value": "Iris the kitten, sitting with a curled tail"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ลูน่าลูกแมว นั่งหางม้วน"
+            "value": "Iris ลูกแมว นั่งหางม้วน"
           }
         }
       }
@@ -851,24 +851,24 @@
         }
       }
     },
-    "character.luna.name": {
+    "character.iris.name": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Luna"
+            "value": "Iris"
           }
         },
         "th": {
           "stringUnit": {
             "state": "translated",
-            "value": "ลูน่า"
+            "value": "Iris"
           }
         }
       }
     },
-    "character.luna.species": {
+    "character.iris.species": {
       "extractionState": "manual",
       "localizations": {
         "en": {

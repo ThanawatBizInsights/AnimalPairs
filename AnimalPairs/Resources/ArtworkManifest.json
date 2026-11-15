@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "manifestVersion": "2026.11.0",
+  "manifestVersion": "2026.11.1",
   "characters": [
     {
       "id": "momo",
@@ -9,9 +9,9 @@
       "defaultPoseID": "signature"
     },
     {
-      "id": "luna",
-      "nameKey": "character.luna.name",
-      "speciesKey": "character.luna.species",
+      "id": "iris",
+      "nameKey": "character.iris.name",
+      "speciesKey": "character.iris.species",
       "defaultPoseID": "signature"
     },
     {
@@ -95,32 +95,32 @@
       "status": "placeholder"
     },
     {
-      "assetID": "luna.signature",
-      "characterID": "luna",
+      "assetID": "iris.signature",
+      "characterID": "iris",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_luna_signature",
-      "accessibilityKey": "art.luna.signature",
+      "resourceName": "art_iris_signature",
+      "accessibilityKey": "art.iris.signature",
       "tier": "free",
       "status": "final"
     },
     {
-      "assetID": "luna.play",
-      "characterID": "luna",
+      "assetID": "iris.play",
+      "characterID": "iris",
       "poseID": "play",
       "version": 1,
-      "resourceName": "art_luna_play",
-      "accessibilityKey": "art.luna.play",
+      "resourceName": "art_iris_play",
+      "accessibilityKey": "art.iris.play",
       "tier": "premium",
       "status": "placeholder"
     },
     {
-      "assetID": "luna.nap",
-      "characterID": "luna",
+      "assetID": "iris.nap",
+      "characterID": "iris",
       "poseID": "nap",
       "version": 1,
-      "resourceName": "art_luna_nap",
-      "accessibilityKey": "art.luna.nap",
+      "resourceName": "art_iris_nap",
+      "accessibilityKey": "art.iris.nap",
       "tier": "premium",
       "status": "placeholder"
     },
