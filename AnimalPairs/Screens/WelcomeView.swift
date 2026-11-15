@@ -9,11 +9,6 @@ struct WelcomeView: View {
         GeometryReader { proxy in
             ScrollView {
                 VStack(spacing: 18) {
-                    HStack {
-                        LanguageMenu()
-                        Spacer()
-                    }
-
                     Wordmark()
                         .frame(maxWidth: 560, maxHeight: min(150, proxy.size.height * 0.16))
 

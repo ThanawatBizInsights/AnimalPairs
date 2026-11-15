@@ -8,7 +8,6 @@ struct HomeView: View {
         let t = model.localizer
         VStack(spacing: 0) {
             HStack(alignment: .top) {
-                LanguageMenu()
                 Spacer()
                 Button {
                     model.openParentGate()
@@ -69,34 +68,5 @@ struct HomeView: View {
             Spacer(minLength: 24)
         }
         .background { FloralCorners() }
-    }
-}
-
-struct LanguageMenu: View {
-    @Environment(AppModel.self) private var model
-
-    var body: some View {
-        let t = model.localizer
-        Menu {
-            ForEach(AppLanguage.allCases) { option in
-                Button {
-                    model.setLanguage(option)
-                } label: {
-                    if option == model.settings.language {
-                        Label(t.displayName(for: option), systemImage: "checkmark")
-                    } else {
-                        Text(t.displayName(for: option))
-                    }
-                }
-            }
-        } label: {
-            Label(t["home.language"], systemImage: "globe")
-                .font(.rounded(.headline, weight: .semibold))
-                .padding(.horizontal, 18)
-                .frame(minHeight: Metrics.touchTarget)
-                .background(Capsule().fill(Palette.cream).shadow(color: Palette.shadow, radius: 4, y: 2))
-        }
-        .accessibilityLabel(Text(t["home.language"]))
-        .accessibilityValue(Text(t.displayName(for: model.settings.language)))
     }
 }

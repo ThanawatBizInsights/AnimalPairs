@@ -114,12 +114,15 @@ final class AppFlowTests: XCTestCase {
         }
     }
 
-    func testThaiAndEnglishLookups() {
-        let localizer = Localizer(language: .thai)
-        XCTAssertEqual(localizer["home.play"], "เล่นเลย")
-        XCTAssertEqual(localizer("board.progress", 2, 6), "พบแล้ว 2 จาก 6 คู่")
-        localizer.setLanguage(.english)
+    func testTextIsEnglish() {
+        let localizer = Localizer()
         XCTAssertEqual(localizer["home.play"], "Play")
         XCTAssertEqual(localizer("board.progress", 2, 6), "2 of 6 pairs")
+        XCTAssertEqual(localizer["character.iris.name"], "Iris")
+        XCTAssertEqual(localizer.locale.language.languageCode, .english)
+    }
+
+    func testBundleShipsEnglishOnly() {
+        XCTAssertEqual(Bundle.main.localizations.filter { $0 != "Base" }, ["en"])
     }
 }

@@ -9,12 +9,6 @@
             "state": "translated",
             "value": "Animal Pairs"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "จับคู่สัตว์น้อย"
-          }
         }
       }
     },
@@ -25,12 +19,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Animal Pairs"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "จับคู่สัตว์น้อย"
           }
         }
       }

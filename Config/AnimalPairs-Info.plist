@@ -12,7 +12,6 @@
 	<key>CFBundleLocalizations</key>
 	<array>
 		<string>en</string>
-		<string>th</string>
 	</array>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>

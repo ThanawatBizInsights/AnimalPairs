@@ -9,12 +9,6 @@
             "state": "translated",
             "value": "Look for the glowing cards."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลองดูการ์ดที่มีแสงเรืองนะ"
-          }
         }
       }
     },
@@ -25,12 +19,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "It's a match! %@"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ถูกต้อง เป็นคู่กัน! %@"
           }
         }
       }
@@ -43,12 +31,6 @@
             "state": "translated",
             "value": "Not a pair. The cards turned back over."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยังไม่ใช่คู่กัน การ์ดพลิกกลับแล้ว"
-          }
         }
       }
     },
@@ -59,12 +41,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Animal Pairs"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "จับคู่สัตว์น้อย"
           }
         }
       }
@@ -77,12 +53,6 @@
             "state": "translated",
             "value": "Clover the turtle, napping"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โคลเวอร์เต่าน้อย กำลังงีบหลับ"
-          }
         }
       }
     },
@@ -93,12 +63,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Clover the turtle, playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โคลเวอร์เต่าน้อย กำลังเล่น"
           }
         }
       }
@@ -111,12 +75,6 @@
             "state": "translated",
             "value": "Clover the turtle, walking with its head up"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โคลเวอร์เต่าน้อย เดินเงยหน้า"
-          }
         }
       }
     },
@@ -127,12 +85,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iris the kitten, napping"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iris ลูกแมว กำลังงีบหลับ"
           }
         }
       }
@@ -145,12 +97,6 @@
             "state": "translated",
             "value": "Iris the kitten, playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iris ลูกแมว กำลังเล่น"
-          }
         }
       }
     },
@@ -161,12 +107,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iris the kitten, sitting with a curled tail"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iris ลูกแมว นั่งหางม้วน"
           }
         }
       }
@@ -179,12 +119,6 @@
             "state": "translated",
             "value": "Maple the bear cub, napping"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เมเปิลลูกหมี กำลังงีบหลับ"
-          }
         }
       }
     },
@@ -195,12 +129,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maple the bear cub, playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เมเปิลลูกหมี กำลังเล่น"
           }
         }
       }
@@ -213,12 +141,6 @@
             "state": "translated",
             "value": "Maple the bear cub, sitting with its feet out"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เมเปิลลูกหมี นั่งเหยียดขา"
-          }
         }
       }
     },
@@ -229,12 +151,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mochi the bunny, napping"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมจิกระต่ายน้อย กำลังงีบหลับ"
           }
         }
       }
@@ -247,12 +163,6 @@
             "state": "translated",
             "value": "Mochi the bunny, playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมจิกระต่ายน้อย กำลังเล่น"
-          }
         }
       }
     },
@@ -263,12 +173,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mochi the bunny, holding its paws together"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมจิกระต่ายน้อย ประกบมือ"
           }
         }
       }
@@ -281,12 +185,6 @@
             "state": "translated",
             "value": "Momo the puppy, napping"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมโม่ลูกสุนัข กำลังงีบหลับ"
-          }
         }
       }
     },
@@ -297,12 +195,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Momo the puppy, playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมโม่ลูกสุนัข กำลังเล่น"
           }
         }
       }
@@ -315,12 +207,6 @@
             "state": "translated",
             "value": "Momo the puppy, waving a paw"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมโม่ลูกสุนัข กำลังโบกอุ้งเท้า"
-          }
         }
       }
     },
@@ -331,12 +217,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nori the elephant, napping"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โนริลูกช้าง กำลังงีบหลับ"
           }
         }
       }
@@ -349,12 +229,6 @@
             "state": "translated",
             "value": "Nori the elephant, playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โนริลูกช้าง กำลังเล่น"
-          }
         }
       }
     },
@@ -365,12 +239,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nori the elephant, lifting its trunk high"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โนริลูกช้าง ชูงวงสูง"
           }
         }
       }
@@ -383,12 +251,6 @@
             "state": "translated",
             "value": "Pebble the penguin, napping"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพบเบิลเพนกวินน้อย กำลังงีบหลับ"
-          }
         }
       }
     },
@@ -399,12 +261,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pebble the penguin, playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพบเบิลเพนกวินน้อย กำลังเล่น"
           }
         }
       }
@@ -417,12 +273,6 @@
             "state": "translated",
             "value": "Pebble the penguin, waving a flipper"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพบเบิลเพนกวินน้อย กำลังโบกครีบ"
-          }
         }
       }
     },
@@ -433,12 +283,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rusty the red panda, napping"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รัสตี้แพนด้าแดง กำลังงีบหลับ"
           }
         }
       }
@@ -451,12 +295,6 @@
             "state": "translated",
             "value": "Rusty the red panda, playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รัสตี้แพนด้าแดง กำลังเล่น"
-          }
         }
       }
     },
@@ -467,12 +305,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rusty the red panda, stretching with a big smile"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รัสตี้แพนด้าแดง บิดขี้เกียจยิ้มกว้าง"
           }
         }
       }
@@ -485,12 +317,6 @@
             "state": "translated",
             "value": "Sprout the dinosaur, napping"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สเปราต์ไดโนเสาร์น้อย กำลังงีบหลับ"
-          }
         }
       }
     },
@@ -501,12 +327,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sprout the dinosaur, playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สเปราต์ไดโนเสาร์น้อย กำลังเล่น"
           }
         }
       }
@@ -519,12 +339,6 @@
             "state": "translated",
             "value": "Sprout the dinosaur, standing with paws on its tummy"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สเปราต์ไดโนเสาร์น้อย ยืนเอามือแตะพุง"
-          }
         }
       }
     },
@@ -535,12 +349,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sunny the duckling, napping"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซันนี่ลูกเป็ด กำลังงีบหลับ"
           }
         }
       }
@@ -553,12 +361,6 @@
             "state": "translated",
             "value": "Sunny the duckling, playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซันนี่ลูกเป็ด กำลังเล่น"
-          }
         }
       }
     },
@@ -569,12 +371,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sunny the duckling, opening its wings wide"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซันนี่ลูกเป็ด กางปีกกว้าง"
           }
         }
       }
@@ -587,12 +383,6 @@
             "state": "translated",
             "value": "Cards"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "การ์ด"
-          }
         }
       }
     },
@@ -603,12 +393,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Hint"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คำใบ้"
           }
         }
       }
@@ -621,12 +405,6 @@
             "state": "translated",
             "value": "Gently shows where a pair is."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ช่วยบอกตำแหน่งของการ์ดที่เป็นคู่กัน"
-          }
         }
       }
     },
@@ -637,12 +415,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pause"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "หยุดพัก"
           }
         }
       }
@@ -655,12 +427,6 @@
             "state": "translated",
             "value": "%lld of %lld pairs"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "พบแล้ว %lld จาก %lld คู่"
-          }
         }
       }
     },
@@ -671,12 +437,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Turns sounds on or off."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เปิดหรือปิดเสียง"
           }
         }
       }
@@ -689,12 +449,6 @@
             "state": "translated",
             "value": "Sound off"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ปิดเสียงอยู่"
-          }
         }
       }
     },
@@ -705,12 +459,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sound on"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เปิดเสียงอยู่"
           }
         }
       }
@@ -723,12 +471,6 @@
             "state": "translated",
             "value": "face down"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คว่ำอยู่"
-          }
         }
       }
     },
@@ -739,12 +481,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Double-tap to turn over."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "แตะสองครั้งเพื่อพลิกการ์ด"
           }
         }
       }
@@ -757,12 +493,6 @@
             "state": "translated",
             "value": "hint"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คำใบ้"
-          }
         }
       }
     },
@@ -773,12 +503,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Matched: %@"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "จับคู่แล้ว: %@"
           }
         }
       }
@@ -791,12 +515,6 @@
             "state": "translated",
             "value": "Card %lld, row %lld, column %lld"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "การ์ดใบที่ %lld แถว %lld คอลัมน์ %lld"
-          }
         }
       }
     },
@@ -807,12 +525,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Picture"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รูปภาพ"
           }
         }
       }
@@ -825,12 +537,6 @@
             "state": "translated",
             "value": "Clover"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โคลเวอร์"
-          }
         }
       }
     },
@@ -842,12 +548,6 @@
             "state": "translated",
             "value": "turtle"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เต่าน้อย"
-          }
         }
       }
     },
@@ -855,12 +555,6 @@
       "extractionState": "manual",
       "localizations": {
         "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iris"
-          }
-        },
-        "th": {
           "stringUnit": {
             "state": "translated",
             "value": "Iris"
@@ -876,12 +570,6 @@
             "state": "translated",
             "value": "kitten"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลูกแมว"
-          }
         }
       }
     },
@@ -892,12 +580,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maple"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เมเปิล"
           }
         }
       }
@@ -910,12 +592,6 @@
             "state": "translated",
             "value": "bear cub"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลูกหมี"
-          }
         }
       }
     },
@@ -926,12 +602,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mochi"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมจิ"
           }
         }
       }
@@ -944,12 +614,6 @@
             "state": "translated",
             "value": "bunny"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กระต่ายน้อย"
-          }
         }
       }
     },
@@ -960,12 +624,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Momo"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โมโม่"
           }
         }
       }
@@ -978,12 +636,6 @@
             "state": "translated",
             "value": "puppy"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลูกสุนัข"
-          }
         }
       }
     },
@@ -994,12 +646,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nori"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "โนริ"
           }
         }
       }
@@ -1012,12 +658,6 @@
             "state": "translated",
             "value": "elephant"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลูกช้าง"
-          }
         }
       }
     },
@@ -1028,12 +668,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pebble"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพบเบิล"
           }
         }
       }
@@ -1046,12 +680,6 @@
             "state": "translated",
             "value": "penguin"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพนกวินน้อย"
-          }
         }
       }
     },
@@ -1062,12 +690,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rusty"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "รัสตี้"
           }
         }
       }
@@ -1080,12 +702,6 @@
             "state": "translated",
             "value": "red panda"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "แพนด้าแดง"
-          }
         }
       }
     },
@@ -1096,12 +712,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sprout"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สเปราต์"
           }
         }
       }
@@ -1114,12 +724,6 @@
             "state": "translated",
             "value": "dinosaur"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไดโนเสาร์น้อย"
-          }
         }
       }
     },
@@ -1130,12 +734,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sunny"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซันนี่"
           }
         }
       }
@@ -1148,12 +746,6 @@
             "state": "translated",
             "value": "duckling"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลูกเป็ด"
-          }
         }
       }
     },
@@ -1164,12 +756,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Cancel"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยกเลิก"
           }
         }
       }
@@ -1182,12 +768,6 @@
             "state": "translated",
             "value": "Home"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "หน้าแรก"
-          }
         }
       }
     },
@@ -1198,12 +778,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Answer"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คำตอบ"
           }
         }
       }
@@ -1216,12 +790,6 @@
             "state": "translated",
             "value": "Back to the game"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กลับไปที่เกม"
-          }
         }
       }
     },
@@ -1232,12 +800,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Delete"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลบ"
           }
         }
       }
@@ -1250,12 +812,6 @@
             "state": "translated",
             "value": "This check helps keep young children out of settings. It is not age verification or consent."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "การตรวจนี้ช่วยกันเด็กเล็กไม่ให้เข้าการตั้งค่า ไม่ใช่การยืนยันอายุหรือการให้ความยินยอม"
-          }
         }
       }
     },
@@ -1266,12 +822,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Please answer to open settings and purchases."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กรุณาตอบคำถามเพื่อเปิดการตั้งค่าและการซื้อ"
           }
         }
       }
@@ -1284,12 +834,6 @@
             "state": "translated",
             "value": "That's not right. %lld tries left."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยังไม่ถูกนะ เหลืออีก %lld ครั้ง"
-          }
         }
       }
     },
@@ -1300,12 +844,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Here is a new question."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "นี่คือคำถามใหม่"
           }
         }
       }
@@ -1318,12 +856,6 @@
             "state": "translated",
             "value": "What is %@ times %@?"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ คูณ %@ ได้เท่าไร?"
-          }
         }
       }
     },
@@ -1334,12 +866,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Check"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ตรวจคำตอบ"
           }
         }
       }
@@ -1352,12 +878,6 @@
             "state": "translated",
             "value": "For grown-ups"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สำหรับผู้ใหญ่"
-          }
         }
       }
     },
@@ -1368,12 +888,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Use the keyboard instead"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ใช้แป้นพิมพ์แทน"
           }
         }
       }
@@ -1386,12 +900,6 @@
             "state": "translated",
             "value": "Use the number pad instead"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ใช้ปุ่มตัวเลขแทน"
-          }
         }
       }
     },
@@ -1402,29 +910,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Game pictures could not be loaded (%@)."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไม่สามารถโหลดรูปภาพในเกมได้ (%@)"
-          }
-        }
-      }
-    },
-    "home.language": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Language"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ภาษา"
           }
         }
       }
@@ -1437,12 +922,6 @@
             "state": "translated",
             "value": "Parents"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้ปกครอง"
-          }
         }
       }
     },
@@ -1453,12 +932,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "For grown-ups. A short check comes first."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สำหรับผู้ใหญ่ จะมีคำถามสั้น ๆ ก่อน"
           }
         }
       }
@@ -1471,12 +944,6 @@
             "state": "translated",
             "value": "Play"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เล่นเลย"
-          }
         }
       }
     },
@@ -1487,12 +954,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Keep playing"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เล่นต่อ"
           }
         }
       }
@@ -1505,12 +966,6 @@
             "state": "translated",
             "value": "Continues your unfinished game."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เล่นเกมที่ยังเล่นไม่จบต่อ"
-          }
         }
       }
     },
@@ -1521,29 +976,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Find the friends that look exactly the same!"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "หาเพื่อนสัตว์ที่หน้าตาเหมือนกันเป๊ะ!"
-          }
-        }
-      }
-    },
-    "language.system": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Device language"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ตามภาษาของเครื่อง"
           }
         }
       }
@@ -1556,12 +988,6 @@
             "state": "translated",
             "value": "Classic"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คลาสสิก"
-          }
         }
       }
     },
@@ -1572,12 +998,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Match two of the same animal."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "จับคู่สัตว์ตัวเดียวกัน"
           }
         }
       }
@@ -1590,12 +1010,6 @@
             "state": "translated",
             "value": "Exact Pose"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ท่าเดียวกัน"
-          }
         }
       }
     },
@@ -1606,12 +1020,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Same animal and same pose make a pair."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ต้องเป็นสัตว์ตัวเดียวกันและท่าเดียวกันจึงจะเป็นคู่"
           }
         }
       }
@@ -1624,12 +1032,6 @@
             "state": "translated",
             "value": "zero"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ศูนย์"
-          }
         }
       }
     },
@@ -1640,12 +1042,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "one"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "หนึ่ง"
           }
         }
       }
@@ -1658,12 +1054,6 @@
             "state": "translated",
             "value": "ten"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สิบ"
-          }
         }
       }
     },
@@ -1674,12 +1064,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "two"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สอง"
           }
         }
       }
@@ -1692,12 +1076,6 @@
             "state": "translated",
             "value": "three"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สาม"
-          }
         }
       }
     },
@@ -1708,12 +1086,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "four"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "สี่"
           }
         }
       }
@@ -1726,12 +1098,6 @@
             "state": "translated",
             "value": "five"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ห้า"
-          }
         }
       }
     },
@@ -1742,12 +1108,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "six"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "หก"
           }
         }
       }
@@ -1760,12 +1120,6 @@
             "state": "translated",
             "value": "seven"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เจ็ด"
-          }
         }
       }
     },
@@ -1776,12 +1130,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "eight"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "แปด"
           }
         }
       }
@@ -1794,12 +1142,6 @@
             "state": "translated",
             "value": "nine"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เก้า"
-          }
         }
       }
     },
@@ -1810,12 +1152,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Content version"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เวอร์ชันเนื้อหา"
           }
         }
       }
@@ -1828,12 +1164,6 @@
             "state": "translated",
             "value": "Done"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เสร็จสิ้น"
-          }
         }
       }
     },
@@ -1844,12 +1174,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not configured yet. Set %@ in the app's build settings before release."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยังไม่ได้ตั้งค่า ตั้งค่า %@ ในการตั้งค่าบิลด์ของแอปก่อนเผยแพร่"
           }
         }
       }
@@ -1862,12 +1186,6 @@
             "state": "translated",
             "value": "Privacy"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ความเป็นส่วนตัว"
-          }
         }
       }
     },
@@ -1878,12 +1196,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Privacy policy"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "นโยบายความเป็นส่วนตัว"
           }
         }
       }
@@ -1896,12 +1208,6 @@
             "state": "translated",
             "value": "Animal Pairs works offline. It does not collect names, birthdays, email addresses, photos, location or advertising identifiers. There are no accounts, chat, ads or third-party analytics, and game progress stays on this iPad."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs เล่นได้แบบออฟไลน์ ไม่เก็บชื่อ วันเกิด อีเมล รูปภาพ ตำแหน่ง หรือรหัสโฆษณา ไม่มีบัญชีผู้ใช้ แชท โฆษณา หรือการวิเคราะห์จากบุคคลที่สาม และความคืบหน้าของเกมอยู่ใน iPad เครื่องนี้เท่านั้น"
-          }
         }
       }
     },
@@ -1912,12 +1218,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Progress on this iPad"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ความคืบหน้าใน iPad เครื่องนี้"
           }
         }
       }
@@ -1930,12 +1230,6 @@
             "state": "translated",
             "value": "No finished games yet."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยังไม่มีเกมที่เล่นจบ"
-          }
         }
       }
     },
@@ -1946,12 +1240,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Stored only on this iPad. The latest 100 games are listed; totals include every game."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เก็บไว้ใน iPad เครื่องนี้เท่านั้น แสดง 100 เกมล่าสุด ส่วนยอดรวมนับทุกเกม"
           }
         }
       }
@@ -1964,12 +1252,6 @@
             "state": "translated",
             "value": "Hints used"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คำใบ้ที่ใช้"
-          }
         }
       }
     },
@@ -1980,12 +1262,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pairs found"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "คู่ที่หาเจอ"
           }
         }
       }
@@ -1998,12 +1274,6 @@
             "state": "translated",
             "value": "Recent games (%lld)"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เกมล่าสุด (%lld)"
-          }
         }
       }
     },
@@ -2014,12 +1284,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Games finished"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เกมที่เล่นจบ"
           }
         }
       }
@@ -2032,12 +1296,6 @@
             "state": "translated",
             "value": "Saved history could not be opened, so this session uses temporary storage. The saved file was kept. (%@)"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เปิดประวัติที่บันทึกไว้ไม่ได้ เซสชันนี้จึงใช้ที่เก็บชั่วคราว ไฟล์เดิมยังเก็บไว้ (%@)"
-          }
         }
       }
     },
@@ -2048,12 +1306,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Reset progress"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ล้างความคืบหน้า"
           }
         }
       }
@@ -2066,12 +1318,6 @@
             "state": "translated",
             "value": "Reset progress"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ล้างความคืบหน้า"
-          }
         }
       }
     },
@@ -2082,12 +1328,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Game history and the unfinished game will be removed from this iPad. The full-game purchase stays unlocked."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ประวัติเกมและเกมที่ยังเล่นไม่จบจะถูกลบออกจาก iPad เครื่องนี้ การซื้อเกมฉบับเต็มยังคงปลดล็อกอยู่"
           }
         }
       }
@@ -2100,12 +1340,6 @@
             "state": "translated",
             "value": "Reset all progress?"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ล้างความคืบหน้าทั้งหมดหรือไม่?"
-          }
         }
       }
     },
@@ -2116,12 +1350,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Removes game history and any unfinished game. Purchases are not affected."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลบประวัติเกมและเกมที่ยังเล่นไม่จบ ไม่กระทบการซื้อ"
           }
         }
       }
@@ -2134,12 +1362,6 @@
             "state": "translated",
             "value": "Restore purchases"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กู้คืนการซื้อ"
-          }
         }
       }
     },
@@ -2150,12 +1372,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Settings"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "การตั้งค่า"
           }
         }
       }
@@ -2168,12 +1384,6 @@
             "state": "translated",
             "value": "Sounds"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เสียง"
-          }
         }
       }
     },
@@ -2184,12 +1394,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Support"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ความช่วยเหลือ"
           }
         }
       }
@@ -2202,12 +1406,6 @@
             "state": "translated",
             "value": "Help and contact"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ความช่วยเหลือและติดต่อ"
-          }
         }
       }
     },
@@ -2218,12 +1416,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Parents"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ผู้ปกครอง"
           }
         }
       }
@@ -2236,12 +1428,6 @@
             "state": "translated",
             "value": "Unlock for %@"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ปลดล็อกในราคา %@"
-          }
         }
       }
     },
@@ -2252,12 +1438,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "One-time purchase. Adds Exact Pose mode, 16- and 20-card boards, and all 30 animal pictures. No ads and no subscriptions."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซื้อครั้งเดียว เพิ่มโหมดท่าเดียวกัน กระดาน 16 และ 20 ใบ และรูปสัตว์ทั้ง 30 รูป ไม่มีโฆษณาและไม่มีการสมัครสมาชิก"
           }
         }
       }
@@ -2270,12 +1450,6 @@
             "state": "translated",
             "value": "Loading price…"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กำลังโหลดราคา…"
-          }
         }
       }
     },
@@ -2286,12 +1460,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Full game unlocked. Thank you!"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ปลดล็อกเกมฉบับเต็มแล้ว ขอบคุณ!"
           }
         }
       }
@@ -2304,12 +1472,6 @@
             "state": "translated",
             "value": "Development build: the example product ID is in use. Set AP_FULL_UNLOCK_PRODUCT_ID before release."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "บิลด์สำหรับพัฒนา: กำลังใช้รหัสสินค้าตัวอย่าง ตั้งค่า AP_FULL_UNLOCK_PRODUCT_ID ก่อนเผยแพร่"
-          }
         }
       }
     },
@@ -2320,12 +1482,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Try again"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลองอีกครั้ง"
           }
         }
       }
@@ -2338,12 +1494,6 @@
             "state": "translated",
             "value": "Full game"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เกมฉบับเต็ม"
-          }
         }
       }
     },
@@ -2354,12 +1504,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "The App Store did not return product “%@”. It must exist in App Store Connect, or select Products.storekit in the Xcode scheme for local testing."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App Store ไม่พบสินค้า “%@” ต้องสร้างสินค้านี้ใน App Store Connect หรือเลือก Products.storekit ใน Xcode scheme สำหรับการทดสอบในเครื่อง"
           }
         }
       }
@@ -2372,12 +1516,6 @@
             "state": "translated",
             "value": "App version"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เวอร์ชันแอป"
-          }
         }
       }
     },
@@ -2388,12 +1526,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Start over"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เริ่มใหม่"
           }
         }
       }
@@ -2406,12 +1538,6 @@
             "state": "translated",
             "value": "Keep playing"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เล่นต่อ"
-          }
         }
       }
     },
@@ -2422,12 +1548,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Taking a break"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "พักก่อนนะ"
           }
         }
       }
@@ -2440,12 +1560,6 @@
             "state": "translated",
             "value": "Purchase cancelled. Nothing was charged."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ยกเลิกการซื้อแล้ว ไม่มีการเรียกเก็บเงิน"
-          }
         }
       }
     },
@@ -2456,12 +1570,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Something went wrong (%@). Please try again."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เกิดข้อผิดพลาด (%@) กรุณาลองอีกครั้ง"
           }
         }
       }
@@ -2474,12 +1582,6 @@
             "state": "translated",
             "value": "Waiting for approval. The game unlocks automatically once it is approved."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กำลังรอการอนุมัติ เกมจะปลดล็อกโดยอัตโนมัติเมื่อได้รับอนุมัติ"
-          }
         }
       }
     },
@@ -2490,12 +1592,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Waiting for the App Store…"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กำลังรอ App Store…"
           }
         }
       }
@@ -2508,12 +1604,6 @@
             "state": "translated",
             "value": "No earlier purchase was found for this Apple Account."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไม่พบการซื้อก่อนหน้าสำหรับบัญชี Apple นี้"
-          }
         }
       }
     },
@@ -2524,12 +1614,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Purchases restored."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กู้คืนการซื้อแล้ว"
           }
         }
       }
@@ -2542,12 +1626,6 @@
             "state": "translated",
             "value": "Checking your purchases…"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "กำลังตรวจสอบการซื้อ…"
-          }
         }
       }
     },
@@ -2558,12 +1636,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Purchase complete. Everything is unlocked."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ซื้อเรียบร้อย ปลดล็อกทุกอย่างแล้ว"
           }
         }
       }
@@ -2576,12 +1648,6 @@
             "state": "translated",
             "value": "The App Store could not verify this purchase, so nothing was unlocked. Please try Restore purchases later."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "App Store ยืนยันการซื้อนี้ไม่ได้ จึงยังไม่ปลดล็อก กรุณาลองกู้คืนการซื้อภายหลัง"
-          }
         }
       }
     },
@@ -2592,12 +1658,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Choose another board"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เลือกกระดานอื่น"
           }
         }
       }
@@ -2610,12 +1670,6 @@
             "state": "translated",
             "value": "Hints: %lld"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ใช้คำใบ้ %lld ครั้ง"
-          }
         }
       }
     },
@@ -2626,12 +1680,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Play again"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เล่นอีกครั้ง"
           }
         }
       }
@@ -2644,12 +1692,6 @@
             "state": "translated",
             "value": "Well done!"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เก่งมาก!"
-          }
         }
       }
     },
@@ -2660,12 +1702,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "All %lld pairs are together again."
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ทั้ง %lld คู่ได้อยู่ด้วยกันแล้ว"
           }
         }
       }
@@ -2678,12 +1714,6 @@
             "state": "translated",
             "value": "Hooray! You found every pair!"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เย้! หาคู่ครบทุกคู่แล้ว!"
-          }
         }
       }
     },
@@ -2694,12 +1724,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Tries: %lld"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลองไป %lld ครั้ง"
           }
         }
       }
@@ -2712,12 +1736,6 @@
             "state": "translated",
             "value": "Animal friends"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพื่อนสัตว์"
-          }
         }
       }
     },
@@ -2728,12 +1746,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld pictures to play with"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "มีรูปให้เล่น %lld รูป"
           }
         }
       }
@@ -2746,12 +1758,6 @@
             "state": "translated",
             "value": "How many cards?"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ใช้การ์ดกี่ใบ?"
-          }
         }
       }
     },
@@ -2762,12 +1768,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "%lld cards"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld ใบ"
           }
         }
       }
@@ -2780,12 +1780,6 @@
             "state": "translated",
             "value": "This board can't be made with the pictures on this iPad."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไม่สามารถสร้างกระดานนี้จากรูปภาพที่มีใน iPad เครื่องนี้"
-          }
         }
       }
     },
@@ -2796,12 +1790,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Ask a grown-up"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ถามผู้ใหญ่"
           }
         }
       }
@@ -2814,12 +1802,6 @@
             "state": "translated",
             "value": "Ask a grown-up. They can unlock more cards and Exact Pose in the Parents area."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ลองถามผู้ใหญ่ดูนะ ผู้ใหญ่ปลดล็อกการ์ดเพิ่มและโหมดท่าเดียวกันได้ในส่วนผู้ปกครอง"
-          }
         }
       }
     },
@@ -2830,12 +1812,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Part of the full game"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "อยู่ในเกมฉบับเต็ม"
           }
         }
       }
@@ -2848,12 +1824,6 @@
             "state": "translated",
             "value": "%@, locked"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ (ล็อกอยู่)"
-          }
         }
       }
     },
@@ -2864,12 +1834,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "How to play"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "วิธีเล่น"
           }
         }
       }
@@ -2882,12 +1846,6 @@
             "state": "translated",
             "value": "Start"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เริ่มเลย"
-          }
         }
       }
     },
@@ -2898,12 +1856,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Let's set up!"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เตรียมเล่นกัน!"
           }
         }
       }
@@ -2916,12 +1868,6 @@
             "state": "translated",
             "value": "Ten friends are hiding under the cards. Turn them over and find the pictures that match."
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "เพื่อนสัตว์สิบตัวซ่อนอยู่ใต้การ์ด พลิกการ์ดแล้วหารูปที่เหมือนกันนะ"
-          }
         }
       }
     },
@@ -2933,12 +1879,6 @@
             "state": "translated",
             "value": "Let's play!"
           }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "ไปเล่นกันเลย!"
-          }
         }
       }
     },
@@ -2949,12 +1889,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Meet your animal friends!"
-          }
-        },
-        "th": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "มาทำความรู้จักเพื่อนสัตว์กันเถอะ!"
           }
         }
       }

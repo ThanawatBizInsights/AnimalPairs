@@ -1,43 +1,32 @@
 {
-  "identifier" : "5E1A8C2B",
-  "nonRenewingSubscriptions" : [
-
-  ],
-  "products" : [
+  "identifier": "5E1A8C2B",
+  "nonRenewingSubscriptions": [],
+  "products": [
     {
-      "displayPrice" : "2.99",
-      "familyShareable" : true,
-      "internalID" : "6740000001",
-      "localizations" : [
+      "displayPrice": "2.99",
+      "familyShareable": true,
+      "internalID": "6740000001",
+      "localizations": [
         {
-          "description" : "Adds Exact Pose, 16- and 20-card boards and all 30 animal pictures.",
-          "displayName" : "Full Game",
-          "locale" : "en_US"
-        },
-        {
-          "description" : "เพิ่มโหมดท่าเดียวกัน กระดาน 16 และ 20 ใบ และรูปสัตว์ทั้ง 30 รูป",
-          "displayName" : "เกมฉบับเต็ม",
-          "locale" : "th"
+          "description": "Adds Exact Pose, 16- and 20-card boards and all 30 animal pictures.",
+          "displayName": "Full Game",
+          "locale": "en_US"
         }
       ],
-      "productID" : "com.example.animalpairs.fullgame",
-      "referenceName" : "Full Game Unlock",
-      "type" : "NonConsumable"
+      "productID": "com.example.animalpairs.fullgame",
+      "referenceName": "Full Game Unlock",
+      "type": "NonConsumable"
     }
   ],
-  "settings" : {
-    "_failTransactionsEnabled" : false,
-    "_locale" : "en_US",
-    "_storefront" : "USA",
-    "_storeKitErrors" : [
-
-    ]
+  "settings": {
+    "_failTransactionsEnabled": false,
+    "_locale": "en_US",
+    "_storefront": "USA",
+    "_storeKitErrors": []
   },
-  "subscriptionGroups" : [
-
-  ],
-  "version" : {
-    "major" : 4,
-    "minor" : 0
+  "subscriptionGroups": [],
+  "version": {
+    "major": 4,
+    "minor": 0
   }
 }

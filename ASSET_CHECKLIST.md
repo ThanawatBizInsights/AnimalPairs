@@ -8,7 +8,7 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 2. Save the source as `Design/Reference/Supplied/<characterID>_<poseID>.png`.
 3. In the manifest, set that artwork's `status` to `final` and increase `version`.
 4. Run `python3 Tools/artwork/build_artwork.py` (regenerates the asset catalog image set) and `python3 Tools/localization/check_strings.py`.
-5. Update the pose description strings `art.<character>.<pose>` in `Localizable.xcstrings` (English and Thai) if the final pose differs from the brief.
+5. Update the pose description strings `art.<character>.<pose>` in `Localizable.xcstrings` if the final pose differs from the brief.
 6. Never mirror, recolour or redraw one illustration to make another pose, and never ship a pose sheet as a single card image. Both cards of a pair always use the same single file.
 
 ## Supplied illustrations (10 — signature poses, free tier)
@@ -60,12 +60,11 @@ Currently shipped as **development placeholders**: the character's signature art
 | Item | Location | Status |
 | --- | --- | --- |
 | App icon (1024 px) | `AppIcon.appiconset` ← `Design/Reference/Supplied/ui_app_icon.png` | final art supplied. Delivered with white pre-rounded corners; `build_ui_graphics.py` fills them from the surrounding art (iPadOS applies its own mask). Sign-off pending — ideally request a square, unrounded master from the designer |
-| “Animal Pairs” wordmark | `UI/brand_wordmark` ← `ui_wordmark.png` | final art supplied — background haze removed; English only (Thai name shown as text beneath it in Thai) |
+| “Animal Pairs” wordmark | `UI/brand_wordmark` ← `ui_wordmark.png` | final art supplied — background haze removed |
 | Group illustration (all ten) | `UI/home_group_animals` ← `ui_group_animals.png` | final art supplied — used on Welcome and Home only, never as a card image |
 | Trophy badge | `UI/results_trophy` ← `ui_trophy_badge.png` | final art supplied — localized “Well done!” is drawn on the ribbon by the app |
 | Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
 | Sound effects (flip, match, mismatch, hint, complete, tap) | `AnimalPairs/Resources/Sounds` | synthesized original tones (`Tools/audio/build_sounds.py`); usable, review with sound designer |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |
-| App Store screenshots, preview video, marketing text (EN/TH) | — | **missing** |
+| App Store screenshots, preview video, marketing text | — | **missing** |
 | Privacy policy and support pages (URLs) | build settings `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **missing** — the Parents screen explains this until set |
-| Thai translations | `Localizable.xcstrings`, `InfoPlist.xcstrings` | written by the developer — **native-speaker review needed** |

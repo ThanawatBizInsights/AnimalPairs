@@ -117,11 +117,6 @@ struct ParentsView: View {
             Toggle(t["parents.sound"], isOn: Binding(get: { model.settings.soundEnabled },
                                                        set: { model.setSoundEnabled($0) }))
                 .frame(minHeight: 44)
-            Picker(t["home.language"], selection: Binding(get: { model.settings.language },
-                                                         set: { model.setLanguage($0) })) {
-                ForEach(AppLanguage.allCases) { Text(t.displayName(for: $0)).tag($0) }
-            }
-            .frame(minHeight: 44)
         }
     }
 

@@ -17,17 +17,16 @@ public struct ParentalGateChallenge: Equatable, Sendable {
         ParentalGateChallenge(lhs: Int.random(in: 3...9, using: &generator), rhs: Int.random(in: 6...9, using: &generator))
     }
 
-    /// Accepts ASCII and Thai digits, ignoring surrounding whitespace.
+    /// Accepts digits, ignoring surrounding whitespace.
     public func accepts(_ input: String) -> Bool {
         guard let value = Self.parse(input) else { return false }
         return value == answer
     }
 
     public static func parse(_ input: String) -> Int? {
-        let thaiDigits: [Character: Character] = ["๐": "0", "๑": "1", "๒": "2", "๓": "3", "๔": "4",
-                                                  "๕": "5", "๖": "6", "๗": "7", "๘": "8", "๙": "9"]
-        let normalized = String(input.trimmingCharacters(in: .whitespacesAndNewlines).map { thaiDigits[$0] ?? $0 })
-        guard !normalized.isEmpty, normalized.count <= 3, normalized.allSatisfy(\.isASCII) else { return nil }
+        let normalized = input.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalized.isEmpty, normalized.count <= 3,
+              normalized.allSatisfy({ $0.isASCII && $0.isNumber }) else { return nil }
         return Int(normalized)
     }
 }

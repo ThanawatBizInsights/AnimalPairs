@@ -93,11 +93,12 @@ final class EntitlementResolverTests: XCTestCase {
 }
 
 final class ParentalGateTests: XCTestCase {
-    func testCorrectAnswerGrantsIncludingThaiDigits() {
+    func testCorrectAnswerGrants() {
         var rng = SeededGenerator(seed: 1)
         var gate = ParentalGate(challenge: ParentalGateChallenge(lhs: 7, rhs: 8))
         XCTAssertEqual(gate.submit(" 56 ", using: &rng), .granted)
-        XCTAssertTrue(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("๕๖"))
+        XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("๕๖"), "only 0–9 digits")
+        XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("-56"))
         XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("5 6"))
         XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts(""))
     }

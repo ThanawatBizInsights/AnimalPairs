@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Verify the String Catalog covers every key the app uses, in every language.
+"""Verify the String Catalog covers every key the app uses (English only).
 
 Run from the repository root: ``python3 Tools/localization/check_strings.py``
 
@@ -7,8 +7,8 @@ Checks:
 * every literal key passed to the Localizer (``t["key"]``, ``t("key", …)``,
   ``localizer[...]``) exists in Localizable.xcstrings;
 * every manifest character/artwork key exists;
-* every entry has a translated ``en`` and ``th`` value;
-* format specifiers (%@, %lld, …) match between languages.
+* every entry has a translated ``en`` value;
+* format specifiers (%@, %lld, …) are consistent.
 Exits non-zero on any problem.
 """
 from __future__ import annotations
@@ -21,7 +21,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 CATALOG = ROOT / "AnimalPairs/Resources/Localizable.xcstrings"
 MANIFEST = ROOT / "AnimalPairs/Resources/ArtworkManifest.json"
-LANGUAGES = ("en", "th")
+LANGUAGES = ("en",)
 KEY_PATTERN = re.compile(r'(?:\bt|localizer|self)(?:\[|\()"([a-z][A-Za-z0-9_.]*)"')
 SPEC_PATTERN = re.compile(r"%(?:\d+\$)?(?:lld|ld|d|@|f|\.\d+f)")
 

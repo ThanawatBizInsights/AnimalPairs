@@ -9,7 +9,7 @@ failure screens, no ads, no accounts, and it works fully offline.
 * **Exact Pose** (full game): the board mixes several poses of the same
   animal; a pair must be the same animal *and* the same pose.
 * Boards: 6 (3×2), 12 (4×3), 16 (4×4) and 20 (5×4) cards.
-* Unlimited gentle hints, English and Thai, VoiceOver, Dynamic Type and
+* Unlimited gentle hints, VoiceOver, Dynamic Type and
   Reduce Motion support.
 
 > **Artwork status:** the ten supplied signature illustrations are bundled.
@@ -46,9 +46,9 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 | Suite | Where | How |
 | --- | --- | --- |
 | `AnimalPairsCoreTests` (64 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
-| `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, Thai/English lookups, **StoreKitTest** purchase states (success, Ask to Buy pending, failure, refund/revocation, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
+| `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** purchase states (success, Ask to Buy pending, failure, refund/revocation, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
 | Backend (17 tests) | `backend/` | see [backend/README.md](backend/README.md) |
-| String Catalog coverage (en + th, format specifiers) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
+| String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
 
 ## Testing on a physical iPad (needs your Apple account)
 
@@ -93,7 +93,7 @@ AnimalPairs/                  SwiftUI app (synchronized folder)
   Persistence/                SwiftData history (versioned schema), settings
   Purchases/                  StoreKit 2 PurchaseManager
   Content/                    Bundled manifest loader, artwork image view
-  Localization/               In-app language switching over the String Catalog
+  Localization/               English text lookup over the String Catalog
   Design/                     Palette, button styles, background, brand graphic views
   Resources/                  ArtworkManifest.json, Localizable.xcstrings, sounds, privacy manifest
   Assets.xcassets/            30 artwork image sets, UI graphics, app icon, colours

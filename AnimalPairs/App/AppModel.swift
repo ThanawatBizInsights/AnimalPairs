@@ -49,7 +49,7 @@ final class AppModel {
         self.settings = settings
         self.configuration = configuration
         route = settings.hasSeenWelcome ? .home : .welcome
-        localizer = Localizer(language: settings.language)
+        localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
         sounds = SoundPlayer(isEnabled: settings.soundEnabled)
 
@@ -83,11 +83,6 @@ final class AppModel {
     }
 
     // MARK: Settings
-
-    func setLanguage(_ language: AppLanguage) {
-        settings.language = language
-        localizer.setLanguage(language)
-    }
 
     func setSoundEnabled(_ enabled: Bool) {
         settings.soundEnabled = enabled

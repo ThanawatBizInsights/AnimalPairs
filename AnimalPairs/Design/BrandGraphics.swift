@@ -11,28 +11,17 @@ enum BrandGraphic {
     static var all: [String] { [wordmark, groupAnimals, trophy] + corners }
 }
 
-/// The "Animal Pairs" wordmark. It is a brand graphic in English, so the
-/// localized name is spoken by VoiceOver and, in Thai, also shown beneath it.
+/// The "Animal Pairs" wordmark; VoiceOver reads the app name as a heading.
 struct Wordmark: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let t = model.localizer
-        VStack(spacing: 6) {
-            Image(BrandGraphic.wordmark)
-                .resizable()
-                .interpolation(.high)
-                .scaledToFit()
-                .accessibilityHidden(true)
-            if t.resolvedCode != "en" {
-                Text(t["app.title"])
-                    .font(.rounded(.title2, weight: .bold))
-                    .accessibilityHidden(true)
-            }
-        }
-        .accessibilityElement(children: .ignore)
-        .accessibilityLabel(Text(t["app.title"]))
-        .accessibilityAddTraits(.isHeader)
+        Image(BrandGraphic.wordmark)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .accessibilityLabel(Text(model.localizer["app.title"]))
+            .accessibilityAddTraits(.isHeader)
     }
 }
 
