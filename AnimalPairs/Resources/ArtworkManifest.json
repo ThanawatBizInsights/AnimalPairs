@@ -1,0 +1,368 @@
+{
+  "schemaVersion": 1,
+  "manifestVersion": "2026.11.0",
+  "characters": [
+    {
+      "id": "momo",
+      "nameKey": "character.momo.name",
+      "speciesKey": "character.momo.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "luna",
+      "nameKey": "character.luna.name",
+      "speciesKey": "character.luna.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "nori",
+      "nameKey": "character.nori.name",
+      "speciesKey": "character.nori.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "sprout",
+      "nameKey": "character.sprout.name",
+      "speciesKey": "character.sprout.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "mochi",
+      "nameKey": "character.mochi.name",
+      "speciesKey": "character.mochi.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "sunny",
+      "nameKey": "character.sunny.name",
+      "speciesKey": "character.sunny.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "maple",
+      "nameKey": "character.maple.name",
+      "speciesKey": "character.maple.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "clover",
+      "nameKey": "character.clover.name",
+      "speciesKey": "character.clover.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "rusty",
+      "nameKey": "character.rusty.name",
+      "speciesKey": "character.rusty.species",
+      "defaultPoseID": "signature"
+    },
+    {
+      "id": "pebble",
+      "nameKey": "character.pebble.name",
+      "speciesKey": "character.pebble.species",
+      "defaultPoseID": "signature"
+    }
+  ],
+  "artworks": [
+    {
+      "assetID": "momo.signature",
+      "characterID": "momo",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_momo_signature",
+      "accessibilityKey": "art.momo.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.play",
+      "characterID": "momo",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_momo_play",
+      "accessibilityKey": "art.momo.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "momo.nap",
+      "characterID": "momo",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_momo_nap",
+      "accessibilityKey": "art.momo.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "luna.signature",
+      "characterID": "luna",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_luna_signature",
+      "accessibilityKey": "art.luna.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "luna.play",
+      "characterID": "luna",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_luna_play",
+      "accessibilityKey": "art.luna.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "luna.nap",
+      "characterID": "luna",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_luna_nap",
+      "accessibilityKey": "art.luna.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "nori.signature",
+      "characterID": "nori",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_nori_signature",
+      "accessibilityKey": "art.nori.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.play",
+      "characterID": "nori",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_nori_play",
+      "accessibilityKey": "art.nori.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "nori.nap",
+      "characterID": "nori",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_nori_nap",
+      "accessibilityKey": "art.nori.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "sprout.signature",
+      "characterID": "sprout",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_sprout_signature",
+      "accessibilityKey": "art.sprout.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.play",
+      "characterID": "sprout",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_sprout_play",
+      "accessibilityKey": "art.sprout.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "sprout.nap",
+      "characterID": "sprout",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_sprout_nap",
+      "accessibilityKey": "art.sprout.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "mochi.signature",
+      "characterID": "mochi",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_mochi_signature",
+      "accessibilityKey": "art.mochi.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.play",
+      "characterID": "mochi",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_mochi_play",
+      "accessibilityKey": "art.mochi.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "mochi.nap",
+      "characterID": "mochi",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_mochi_nap",
+      "accessibilityKey": "art.mochi.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "sunny.signature",
+      "characterID": "sunny",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_sunny_signature",
+      "accessibilityKey": "art.sunny.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.play",
+      "characterID": "sunny",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_sunny_play",
+      "accessibilityKey": "art.sunny.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "sunny.nap",
+      "characterID": "sunny",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_sunny_nap",
+      "accessibilityKey": "art.sunny.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "maple.signature",
+      "characterID": "maple",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_maple_signature",
+      "accessibilityKey": "art.maple.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.play",
+      "characterID": "maple",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_maple_play",
+      "accessibilityKey": "art.maple.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "maple.nap",
+      "characterID": "maple",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_maple_nap",
+      "accessibilityKey": "art.maple.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "clover.signature",
+      "characterID": "clover",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_clover_signature",
+      "accessibilityKey": "art.clover.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.play",
+      "characterID": "clover",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_clover_play",
+      "accessibilityKey": "art.clover.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "clover.nap",
+      "characterID": "clover",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_clover_nap",
+      "accessibilityKey": "art.clover.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "rusty.signature",
+      "characterID": "rusty",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_rusty_signature",
+      "accessibilityKey": "art.rusty.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.play",
+      "characterID": "rusty",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_rusty_play",
+      "accessibilityKey": "art.rusty.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "rusty.nap",
+      "characterID": "rusty",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_rusty_nap",
+      "accessibilityKey": "art.rusty.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "pebble.signature",
+      "characterID": "pebble",
+      "poseID": "signature",
+      "version": 1,
+      "resourceName": "art_pebble_signature",
+      "accessibilityKey": "art.pebble.signature",
+      "tier": "free",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.play",
+      "characterID": "pebble",
+      "poseID": "play",
+      "version": 1,
+      "resourceName": "art_pebble_play",
+      "accessibilityKey": "art.pebble.play",
+      "tier": "premium",
+      "status": "placeholder"
+    },
+    {
+      "assetID": "pebble.nap",
+      "characterID": "pebble",
+      "poseID": "nap",
+      "version": 1,
+      "resourceName": "art_pebble_nap",
+      "accessibilityKey": "art.pebble.nap",
+      "tier": "premium",
+      "status": "placeholder"
+    }
+  ]
+}
