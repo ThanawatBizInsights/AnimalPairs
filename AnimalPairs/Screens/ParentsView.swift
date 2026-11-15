@@ -137,9 +137,9 @@ struct ParentsView: View {
                 DisclosureGroup(t("parents.progress.recent", records.count)) {
                     ForEach(records) { record in
                         VStack(alignment: .leading, spacing: 2) {
-                            Text("\(modeName(record.mode)) · \(t("setup.cards", record.boardSize.cardCount))")
+                            Text(verbatim: "\(modeName(record.mode)) · \(t("setup.cards", record.boardSize.cardCount))")
                                 .font(.rounded(.headline))
-                            Text("\(record.completedAt.formatted(.dateTime.locale(t.locale))) · \(t("results.tries", record.attempts)) · \(t("results.hints", record.hintsUsed))")
+                            Text(verbatim: "\(record.completedAt.formatted(.dateTime.locale(t.locale))) · \(t("results.tries", record.attempts)) · \(t("results.hints", record.hintsUsed))")
                                 .font(.rounded(.subheadline))
                                 .foregroundStyle(Palette.brownSoft)
                         }
@@ -192,14 +192,14 @@ struct ParentsView: View {
         @Bindable var purchases = model.purchases
         let placeholders = model.catalog.manifest.placeholderArtworks.count
         return Section {
-            Toggle("Simulate full unlock (mock)", isOn: $purchases.debugMockUnlocked)
-            Text("DEBUG builds only. Release builds do not contain this switch. Prefer the Products.storekit configuration for purchase testing.")
+            Toggle(isOn: $purchases.debugMockUnlocked) { Text(verbatim: "Simulate full unlock (mock)") }
+            Text(verbatim: "DEBUG builds only. Release builds do not contain this switch. Prefer the Products.storekit configuration for purchase testing.")
                 .font(.footnote)
-            Text("Artwork: \(placeholders) of \(model.catalog.manifest.artworks.count) are development placeholders. Missing resources: \(model.catalog.missingArtworks.count).")
+            Text(verbatim: "Artwork: \(placeholders) of \(model.catalog.manifest.artworks.count) are development placeholders. Missing resources: \(model.catalog.missingArtworks.count).")
                 .font(.footnote)
-            if let notice = model.snapshotNotice { Text("Last snapshot notice: \(notice)").font(.footnote) }
+            if let notice = model.snapshotNotice { Text(verbatim: "Last snapshot notice: \(notice)").font(.footnote) }
         } header: {
-            Text("Developer")
+            Text(verbatim: "Developer (debug builds only)")
         }
     }
     #endif

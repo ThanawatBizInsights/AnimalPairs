@@ -1,0 +1,9 @@
+[project]
+name = "animalpairs-backend"
+version = "1.0.0"
+description = "Optional content and purchase-verification service for Animal Pairs"
+requires-python = ">=3.11"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
