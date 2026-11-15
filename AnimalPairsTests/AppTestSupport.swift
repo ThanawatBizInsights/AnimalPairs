@@ -19,8 +19,9 @@ enum AppTestSupport {
 
     /// An AppModel wired to temporary, isolated storage.
     static func makeModel(snapshotDirectory: URL? = nil,
-                          history: CompletionHistoryStore? = nil) -> AppModel {
-        AppModel(settings: SettingsStore(defaults: isolatedDefaults()),
+                          history: CompletionHistoryStore? = nil,
+                          defaults: UserDefaults? = nil) -> AppModel {
+        AppModel(settings: SettingsStore(defaults: defaults ?? isolatedDefaults()),
                  configuration: AppConfiguration(fullUnlockProductID: AppConfiguration.placeholderProductID,
                                                  privacyPolicyURL: nil, supportURL: nil),
                  history: history ?? SwiftDataCompletionStore.inMemory(),

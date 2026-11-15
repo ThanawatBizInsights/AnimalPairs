@@ -57,22 +57,27 @@ def font(size: int) -> ImageFont.ImageFont:
     return ImageFont.load_default(size=size)
 
 
-def clean(source: Path) -> Image.Image:
-    """Remove background specks and normalise alpha of a supplied illustration."""
-    image = Image.open(source).convert("RGBA")
-    rgba = np.array(image)
+def clean_rgba(image: Image.Image, min_fraction: float = 0.02, min_pixels: int = 0,
+               fill_holes: bool = True) -> Image.Image:
+    """Remove stray near-transparent specks and edge haze from a cut-out.
+
+    Keeps connected opaque regions of at least ``max(min_pixels,
+    min_fraction × largest region)`` pixels plus a 4 px anti-aliased fringe,
+    drops everything else, and makes the ~99 % opaque body fully opaque.
+    The canvas size is unchanged.
+    """
+    rgba = np.array(image.convert("RGBA"))
     alpha = rgba[..., 3].astype(np.int32)
 
     body = alpha > 128
     labels, count = ndimage.label(body)
     if count == 0:
-        raise SystemExit(f"{source} has no opaque subject")
+        raise SystemExit("image has no opaque subject")
     sizes = ndimage.sum(body, labels, index=range(1, count + 1))
-    largest = float(np.max(sizes))
-    keep_ids = [i + 1 for i, s in enumerate(sizes) if s >= 0.02 * largest]
-    keep = np.isin(labels, keep_ids)
-    # Fill internal holes and allow a soft anti-aliased edge around the body.
-    keep = ndimage.binary_fill_holes(keep)
+    threshold = max(float(min_pixels), min_fraction * float(np.max(sizes)))
+    keep = np.isin(labels, [i + 1 for i, s in enumerate(sizes) if s >= threshold])
+    if fill_holes:
+        keep = ndimage.binary_fill_holes(keep)
     near = ndimage.binary_dilation(keep, iterations=4)
 
     alpha = np.where(near, alpha, 0)
@@ -80,10 +85,13 @@ def clean(source: Path) -> Image.Image:
     alpha = np.where(keep & (alpha >= 200), 255, alpha)
     rgba[..., 3] = alpha.astype(np.uint8)
     rgba[alpha == 0, :3] = 0
+    return Image.fromarray(rgba, "RGBA")
 
-    cleaned = Image.fromarray(rgba, "RGBA")
-    bbox = cleaned.getchannel("A").getbbox()
-    cleaned = cleaned.crop(bbox)
+
+def clean(source: Path) -> Image.Image:
+    """Clean a supplied character illustration and centre it on a square canvas."""
+    cleaned = clean_rgba(Image.open(source))
+    cleaned = cleaned.crop(cleaned.getchannel("A").getbbox())
     return square(cleaned, padding=0.05)
 
 

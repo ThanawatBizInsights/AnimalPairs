@@ -4,6 +4,8 @@ import Observation
 import SwiftUI
 
 enum Route: Equatable {
+    /// First launch only.
+    case welcome
     case home
     case setup
     case game
@@ -46,6 +48,7 @@ final class AppModel {
          contentBundle: Bundle = .main) {
         self.settings = settings
         self.configuration = configuration
+        route = settings.hasSeenWelcome ? .home : .welcome
         localizer = Localizer(language: settings.language)
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
         sounds = SoundPlayer(isEnabled: settings.soundEnabled)
@@ -97,6 +100,12 @@ final class AppModel {
     func goHome() {
         leaveGameIfNeeded()
         parentAccess.revoke()
+        route = .home
+        refreshResumableRound()
+    }
+
+    func finishWelcome() {
+        settings.hasSeenWelcome = true
         route = .home
         refreshResumableRound()
     }

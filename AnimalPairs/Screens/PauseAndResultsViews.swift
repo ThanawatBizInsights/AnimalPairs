@@ -53,10 +53,13 @@ struct ResultsView: View {
     var body: some View {
         let t = model.localizer
         ZStack {
+            FloralCorners()
             Confetti()
             ScrollView {
                 VStack(spacing: 22) {
                     Spacer(minLength: 24)
+                    TrophyBadge(ribbonText: t["results.ribbon"])
+                        .frame(maxWidth: 420, maxHeight: 360)
                     Text(t["results.title"])
                         .font(.rounded(.largeTitle, weight: .heavy))
                         .multilineTextAlignment(.center)
@@ -65,14 +68,6 @@ struct ResultsView: View {
                         .font(.rounded(.title3, weight: .medium))
                         .foregroundStyle(Palette.brownSoft)
                         .multilineTextAlignment(.center)
-
-                    HStack(spacing: -10) {
-                        ForEach(["momo", "luna", "nori", "sunny", "pebble"], id: \.self) { id in
-                            ArtworkImage(artwork: model.catalog.artwork(AssetID(rawValue: "\(id).signature")))
-                                .frame(width: 110, height: 110)
-                        }
-                    }
-                    .accessibilityHidden(true)
 
                     HStack(spacing: 16) {
                         StatBubble(systemImage: "hand.tap.fill", text: t("results.tries", summary.attempts))

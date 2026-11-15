@@ -11,12 +11,14 @@ final class SettingsStore {
         static let language = "settings.language"
         static let mode = "settings.lastMode"
         static let board = "settings.lastBoard"
+        static let welcome = "settings.hasSeenWelcome"
     }
 
     private let defaults: UserDefaults
 
     var soundEnabled: Bool { didSet { defaults.set(soundEnabled, forKey: Key.sound) } }
     var language: AppLanguage { didSet { defaults.set(language.rawValue, forKey: Key.language) } }
+    var hasSeenWelcome: Bool { didSet { defaults.set(hasSeenWelcome, forKey: Key.welcome) } }
     var lastConfiguration: GameConfiguration {
         didSet {
             defaults.set(lastConfiguration.mode.rawValue, forKey: Key.mode)
@@ -31,5 +33,6 @@ final class SettingsStore {
         let mode = defaults.string(forKey: Key.mode).flatMap(GameMode.init(rawValue:)) ?? .classic
         let board = BoardSize(rawValue: defaults.integer(forKey: Key.board)) ?? .six
         lastConfiguration = GameConfiguration(mode: mode, boardSize: board)
+        hasSeenWelcome = defaults.bool(forKey: Key.welcome)
     }
 }

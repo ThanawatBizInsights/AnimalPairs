@@ -2636,6 +2636,23 @@
         }
       }
     },
+    "results.ribbon": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Well done!"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เก่งมาก!"
+          }
+        }
+      }
+    },
     "results.subtitle": {
       "extractionState": "manual",
       "localizations": {
@@ -2887,6 +2904,57 @@
           "stringUnit": {
             "state": "translated",
             "value": "เตรียมเล่นกัน!"
+          }
+        }
+      }
+    },
+    "welcome.body": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Ten friends are hiding under the cards. Turn them over and find the pictures that match."
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "เพื่อนสัตว์สิบตัวซ่อนอยู่ใต้การ์ด พลิกการ์ดแล้วหารูปที่เหมือนกันนะ"
+          }
+        }
+      }
+    },
+    "welcome.start": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Let's play!"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ไปเล่นกันเลย!"
+          }
+        }
+      }
+    },
+    "welcome.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Meet your animal friends!"
+          }
+        },
+        "th": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "มาทำความรู้จักเพื่อนสัตว์กันเถอะ!"
           }
         }
       }

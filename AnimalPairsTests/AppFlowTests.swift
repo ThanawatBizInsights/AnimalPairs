@@ -1,5 +1,6 @@
 import AnimalPairsCore
 import SwiftUI
+import UIKit
 import XCTest
 @testable import AnimalPairs
 
@@ -10,6 +11,22 @@ final class AppFlowTests: XCTestCase {
         XCTAssertNil(model.contentError)
         XCTAssertEqual(model.catalog.manifest.artworks.count, 30)
         XCTAssertTrue(model.catalog.missingArtworks.isEmpty, "every manifest resource is in the asset catalog")
+    }
+
+    func testInterfaceGraphicsAndIconAreBundled() {
+        for name in BrandGraphic.all {
+            XCTAssertNotNil(UIImage(named: name), "missing UI graphic \(name)")
+        }
+    }
+
+    func testWelcomeShowsOnFirstLaunchOnly() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        let first = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertEqual(first.route, .welcome)
+        first.finishWelcome()
+        XCTAssertEqual(first.route, .home)
+        let second = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertEqual(second.route, .home)
     }
 
     func testStarterCanStartFreeBoardsButNotPremium() throws {

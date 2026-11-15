@@ -88,19 +88,19 @@ a link or product works.
 AnimalPairs.xcodeproj         Xcode 16 project; shared scheme with StoreKit config
 AnimalPairs/                  SwiftUI app (synchronized folder)
   App/                        App entry, AppModel (routing, lifecycle), configuration
-  Screens/                    Home, Setup, Game board, Pause/Results, Parental gate, Parents
+  Screens/                    Welcome, Home, Setup, Game board, Pause/Results, Parental gate, Parents
   Game/                       GameSession (wraps the engine), sounds
   Persistence/                SwiftData history (versioned schema), settings
   Purchases/                  StoreKit 2 PurchaseManager
   Content/                    Bundled manifest loader, artwork image view
   Localization/               In-app language switching over the String Catalog
-  Design/                     Palette, button styles, background (all SwiftUI)
+  Design/                     Palette, button styles, background, brand graphic views
   Resources/                  ArtworkManifest.json, Localizable.xcstrings, sounds, privacy manifest
-  Assets.xcassets/            30 artwork image sets, app icon, colours
+  Assets.xcassets/            30 artwork image sets, UI graphics, app icon, colours
 AnimalPairsTests/             App-hosted XCTest suite
 Packages/AnimalPairsKit/      Pure Swift engine (Foundation only) + tests
 Config/                       Info.plist, Products.storekit
-Design/Reference/Supplied/    The supplied illustrations, untouched
+Design/Reference/Supplied/    The supplied illustrations and UI graphics, untouched
 Tools/                        Artwork, sound and localization scripts
 backend/                      Optional FastAPI service (not used by the app)
 ```
@@ -153,7 +153,7 @@ API used (UserDefaults).
 ```bash
 python3 -m pip install -r Tools/requirements.txt
 python3 Tools/artwork/build_artwork.py     # clean supplied art, regenerate image sets and placeholders
-python3 Tools/artwork/build_app_icon.py    # development app icon
+python3 Tools/artwork/build_ui_graphics.py # app icon, wordmark, group art, trophy, floral corners
 python3 Tools/audio/build_sounds.py        # regenerate the soft sound effects
 python3 Tools/localization/check_strings.py
 ```
