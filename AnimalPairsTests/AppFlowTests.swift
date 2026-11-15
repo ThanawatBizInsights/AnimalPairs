@@ -1,0 +1,108 @@
+import AnimalPairsCore
+import SwiftUI
+import XCTest
+@testable import AnimalPairs
+
+@MainActor
+final class AppFlowTests: XCTestCase {
+    func testBundledContentIsCompleteAndLoaded() {
+        let model = AppTestSupport.makeModel()
+        XCTAssertNil(model.contentError)
+        XCTAssertEqual(model.catalog.manifest.artworks.count, 30)
+        XCTAssertTrue(model.catalog.missingArtworks.isEmpty, "every manifest resource is in the asset catalog")
+    }
+
+    func testStarterCanStartFreeBoardsButNotPremium() throws {
+        let model = AppTestSupport.makeModel()
+        guard !model.purchases.isUnlocked else { throw XCTSkip("simulator already holds the unlock") }
+        XCTAssertNoThrow(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .twelve)))
+        XCTAssertEqual(model.route, .game)
+        XCTAssertEqual(model.session?.state.tiles.count, 12)
+        XCTAssertThrowsError(try model.startNewGame(GameConfiguration(mode: .exactPose, boardSize: .six)))
+        XCTAssertThrowsError(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .twenty)))
+    }
+
+    func testBackgroundPausesSavesAndResumesWithoutReshuffle() throws {
+        let directory = AppTestSupport.temporaryDirectory()
+        let model = AppTestSupport.makeModel(snapshotDirectory: directory)
+        try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six))
+        let session = try XCTUnwrap(model.session)
+        let firstTile = session.state.tiles[0].id
+        session.tap(firstTile)
+
+        model.scenePhaseChanged(.background)
+        XCTAssertTrue(session.state.isPaused)
+        XCTAssertTrue(session.isPauseMenuVisible)
+
+        // A fresh launch restores the same round, same order, same open card.
+        let relaunched = AppTestSupport.makeModel(snapshotDirectory: directory)
+        relaunched.refreshResumableRound()
+        let restored = try XCTUnwrap(relaunched.resumableRound)
+        XCTAssertEqual(restored.roundID, session.state.roundID)
+        XCTAssertEqual(restored.tiles.map(\.id), session.state.tiles.map(\.id))
+        XCTAssertEqual(restored.phase, .oneRevealed(firstTile))
+        relaunched.resumeSavedGame()
+        XCTAssertEqual(relaunched.route, .game)
+        XCTAssertEqual(relaunched.session?.state.tiles.map(\.pairKey), session.state.tiles.map(\.pairKey))
+    }
+
+    func testCorruptSnapshotDoesNotTouchHistory() throws {
+        let directory = AppTestSupport.temporaryDirectory()
+        let history = SwiftDataCompletionStore.inMemory()
+        try history.record(AppTestSupport.summary(1))
+        try Data("garbage".utf8).write(to: directory.appendingPathComponent(RoundSnapshotStore.fileName))
+        let model = AppTestSupport.makeModel(snapshotDirectory: directory, history: history)
+        model.refreshResumableRound()
+        XCTAssertNil(model.resumableRound)
+        XCTAssertNotNil(model.snapshotNotice)
+        XCTAssertEqual(try history.recentRecords().count, 1, "completed history is never deleted")
+    }
+
+    func testResetProgressKeepsPurchases() throws {
+        let model = AppTestSupport.makeModel()
+        try model.history.record(AppTestSupport.summary(1))
+        let before = model.purchases.accessLevel
+        model.resetProgress()
+        XCTAssertTrue(try model.history.recentRecords().isEmpty)
+        XCTAssertEqual(model.purchases.accessLevel, before)
+    }
+
+    func testParentAccessExpiresWhenLeavingOrBackgrounding() {
+        let model = AppTestSupport.makeModel()
+        model.openParentGate()
+        XCTAssertEqual(model.route, .parentGate)
+        model.parentGatePassed()
+        XCTAssertEqual(model.route, .parents)
+        model.scenePhaseChanged(.background)
+        XCTAssertEqual(model.route, .home)
+        model.parentGatePassed()
+        model.leaveParents()
+        model.validateParentAccess()
+        XCTAssertEqual(model.route, .home)
+    }
+
+    func testCoveredCardLabelsNeverRevealTheAnimal() throws {
+        let model = AppTestSupport.makeModel()
+        let names = model.catalog.manifest.characters.map { model.localizer["character.\($0.id.rawValue).name"] }
+        let poseWords = ["playing", "napping", "waving"]
+        for art in model.catalog.manifest.artworks {
+            let covered = CardAccessibility.label(face: .covered, artwork: art, position: CardPosition(index: 0, row: 0, column: 0),
+                                                  highlighted: true, localizer: model.localizer)
+            XCTAssertFalse(names.contains { covered.contains($0) }, covered)
+            XCTAssertFalse(poseWords.contains { covered.contains($0) }, covered)
+
+            let revealed = CardAccessibility.label(face: .revealed, artwork: art, position: CardPosition(index: 0, row: 0, column: 0),
+                                                   highlighted: false, localizer: model.localizer)
+            XCTAssertTrue(revealed.contains(model.localizer[art.accessibilityKey]), "revealed names animal and pose")
+        }
+    }
+
+    func testThaiAndEnglishLookups() {
+        let localizer = Localizer(language: .thai)
+        XCTAssertEqual(localizer["home.play"], "เล่นเลย")
+        XCTAssertEqual(localizer("board.progress", 2, 6), "พบแล้ว 2 จาก 6 คู่")
+        localizer.setLanguage(.english)
+        XCTAssertEqual(localizer["home.play"], "Play")
+        XCTAssertEqual(localizer("board.progress", 2, 6), "2 of 6 pairs")
+    }
+}

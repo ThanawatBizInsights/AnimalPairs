@@ -69,17 +69,36 @@ public protocol CompletionHistoryStore: AnyObject {
     func resetProgress() throws
 }
 
-/// Pure ledger logic shared by every store implementation.
-public struct CompletionLedger: Codable, Equatable, Sendable {
-    public private(set) var records: [CompletionRecord] = []
-    public private(set) var totals = ProgressTotals()
-    /// Ordered oldest → newest, bounded.
+/// Aggregates plus a bounded memory of recorded round IDs. Persisted as one
+/// blob by store implementations so totals survive trimming of records.
+public struct HistoryMetadata: Codable, Equatable, Sendable {
+    public var totals = ProgressTotals()
+    /// Ordered oldest → newest, bounded by `HistoryPolicy.maxRememberedRoundIDs`.
     public private(set) var rememberedRoundIDs: [UUID] = []
 
     public init() {}
 
+    public func knows(_ roundID: UUID) -> Bool { rememberedRoundIDs.contains(roundID) }
+
+    public mutating func register(_ record: CompletionRecord) {
+        totals.add(record)
+        rememberedRoundIDs.append(record.roundID)
+        if rememberedRoundIDs.count > HistoryPolicy.maxRememberedRoundIDs {
+            rememberedRoundIDs.removeFirst(rememberedRoundIDs.count - HistoryPolicy.maxRememberedRoundIDs)
+        }
+    }
+}
+
+/// Pure ledger logic; the reference for every store implementation.
+public struct CompletionLedger: Codable, Equatable, Sendable {
+    public private(set) var records: [CompletionRecord] = []
+    public private(set) var metadata = HistoryMetadata()
+    public var totals: ProgressTotals { metadata.totals }
+
+    public init() {}
+
     public func contains(_ roundID: UUID) -> Bool {
-        records.contains { $0.roundID == roundID } || rememberedRoundIDs.contains(roundID)
+        records.contains { $0.roundID == roundID } || metadata.knows(roundID)
     }
 
     /// Returns the record IDs that were trimmed, or nil if the round was a duplicate.
@@ -88,11 +107,7 @@ public struct CompletionLedger: Codable, Equatable, Sendable {
         guard !contains(summary.roundID) else { return nil }
         let record = CompletionRecord(summary: summary)
         records.append(record)
-        totals.add(record)
-        rememberedRoundIDs.append(record.roundID)
-        if rememberedRoundIDs.count > HistoryPolicy.maxRememberedRoundIDs {
-            rememberedRoundIDs.removeFirst(rememberedRoundIDs.count - HistoryPolicy.maxRememberedRoundIDs)
-        }
+        metadata.register(record)
         records.sort { $0.completedAt > $1.completedAt }
         guard records.count > HistoryPolicy.maxRecentRecords else { return [] }
         let trimmed = records[HistoryPolicy.maxRecentRecords...].map(\.roundID)

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<!-- Configure these through the target's Build Settings (AP_* user-defined settings). -->
+	<key>APFullUnlockProductID</key>
+	<string>$(AP_FULL_UNLOCK_PRODUCT_ID)</string>
+	<key>APPrivacyPolicyURL</key>
+	<string>$(AP_PRIVACY_POLICY_URL)</string>
+	<key>APSupportURL</key>
+	<string>$(AP_SUPPORT_URL)</string>
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>en</string>
+		<string>th</string>
+	</array>
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>LaunchBackground</string>
+	</dict>
+	<key>UIUserInterfaceStyle</key>
+	<string>Light</string>
+</dict>
+</plist>
