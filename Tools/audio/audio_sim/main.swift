@@ -6,7 +6,10 @@
 //  * every completed pair starts exactly one clip, of the matched animal;
 //  * at most one animal clip plays at a time;
 //  * with Sound off nothing starts at all;
-//  * Home taps: greeting/curious of that animal, cooldown for rapid taps.
+//  * background music: one track per scene, crossfades, never more than the
+//    two decks, ducking under animal clips, independent Music / Sound
+//    Effects switches, background/active, interruptions, headphones removed,
+//    other apps' audio, results delay, exact (trimmed) loop length.
 import AnimalPairsCore
 import AVFoundation
 import Foundation
@@ -34,10 +37,12 @@ final class Clock { var now = 100.0 }
     // A flat bundle like the app's: every bundled sound, clip and the clip index.
     let bundleDir = URL(fileURLWithPath: NSTemporaryDirectory()).appendingPathComponent("sim-\(UUID().uuidString)")
     try! FileManager.default.createDirectory(at: bundleDir, withIntermediateDirectories: true)
-    let sounds = URL(fileURLWithPath: root).appendingPathComponent("AnimalPairs/Resources/Sounds")
-    for case let file as URL in FileManager.default.enumerator(at: sounds, includingPropertiesForKeys: nil)!
-    where ["wav", "m4a", "json"].contains(file.pathExtension) {
-        try! FileManager.default.copyItem(at: file, to: bundleDir.appendingPathComponent(file.lastPathComponent))
+    for folder in ["Sounds", "Music"] {
+        let dir = URL(fileURLWithPath: root).appendingPathComponent("AnimalPairs/Resources/\(folder)")
+        for case let file as URL in FileManager.default.enumerator(at: dir, includingPropertiesForKeys: nil)!
+        where ["wav", "m4a", "json"].contains(file.pathExtension) {
+            try! FileManager.default.copyItem(at: file, to: bundleDir.appendingPathComponent(file.lastPathComponent))
+        }
     }
     let bundle = Bundle(url: bundleDir)!
     let manifestData = try! Data(contentsOf: URL(fileURLWithPath: root).appendingPathComponent("AnimalPairs/Resources/ArtworkManifest.json"))
@@ -130,26 +135,134 @@ final class Clock { var now = 100.0 }
     check(clipPlayers().allSatisfy { !$0.isPlaying }, "a clip kept playing with sound off")
     audio.isEnabled = true
 
-    // Home: taps, rapid taps and switching animals.
-    var accepted = 0, ignored = 0
-    for i in 0..<300 {
-        let animal = withClips[i % withClips.count]
-        clock.now += (i % 5 == 0) ? 1.0 : 0.1          // bursts of rapid taps
-        startedLog.removeAll()
-        if let clip = audio.playHomeClip(for: animal) {
-            accepted += 1
-            check(clip.character == animal && [.greeting, .curious].contains(clip.variant), "home tap played \(clip.name)")
-            check(startedLog == [clip.name], "home tap started \(startedLog)")
-        } else {
-            ignored += 1
-            check(startedLog.isEmpty, "ignored tap started \(startedLog)")
-        }
-        check(clipPlayers().filter(\.isPlaying).count <= 1, "overlapping home clips")
+    // Home animals no longer have a tap sound: there is no API for it any more.
+
+    // MARK: Background music
+    audio.isEnabled = true
+    let music = audio.music
+    music.loadsInBackground = false
+    let base = MusicPlayer.baseVolume
+    func advance(_ seconds: Double, step: Double = 0.05) {
+        var t = 0.0
+        while t < seconds - 1e-9 { clock.now += step; t += step; music.tick(at: clock.now) }
     }
-    print("home: 300 taps, \(accepted) played, \(ignored) ignored by the cooldown")
-    check(accepted == 60, "one accepted tap per burst expected, got \(accepted)")
+    func audibleTracks() -> [MusicTrack] { music.deckVolumes.filter { $0.playing && $0.volume > 0.001 }.compactMap(\.track) }
+    check(music.availableTracks == Set(MusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
+    check(allPlayerNodes.count == 2, "two music decks, got \(allPlayerNodes.count)")
+
+    // Off by default in this AudioManager (tests); switching on starts the menu loop.
+    music.setScene(.menus)
+    advance(1)
+    check(audibleTracks().isEmpty, "music plays while the Music switch is off")
+    audio.musicEnabled = true
+    advance(0.5)
+    check(music.currentTrack == .playground, "home starts music_playground")
+    advance(1.5)
+    check(audibleTracks() == [.playground], "only the home loop: \(audibleTracks())")
+    let homeVolume = music.deckVolumes.first { $0.track == .playground }!.volume
+    check(abs(homeVolume - base) < 0.001, "home loop at the base level, got \(homeVolume)")
+    let node = allPlayerNodes.first { $0.isPlaying }!
+    check(node.loops, "scheduled to loop")
+    check(Int(node.scheduled!.frameLength) == 1_949_696, "loop trimmed to its exact length: \(node.scheduled!.frameLength)")
+    check(node.scheduled!.floatChannelData![0][0] == 1, "trim starts at the first real sample")
+
+    // Into a round: a soft crossfade to music_focus, never more than two decks.
+    music.setScene(.game)
+    var maxTogether = 0
+    for _ in 0..<40 { advance(0.05); maxTogether = max(maxTogether, audibleTracks().count) }
+    check(maxTogether <= 2, "more than two tracks at once")
+    check(audibleTracks() == [.focus], "gameplay uses music_focus: \(audibleTracks())")
+    let focusNode = allPlayerNodes.first { $0.isPlaying }!
+    let playsBefore = focusNode.playCount
+    music.setScene(.game)                                 // restarted round
+    advance(1)
+    check(focusNode.playCount == playsBefore && audibleTracks() == [.focus], "restart re-created the music")
+
+    // Ducking under an animal clip, then a smooth return.
+    let animal = withClips[0]
+    _ = audio.playMatchClip(for: animal)
+    advance(0.2)
+    let ducked = music.deckVolumes.first { $0.track == .focus }!.volume
+    check(ducked < base * 0.4, "music dips under the animal clip: \(ducked)")
+    advance(4)
+    let restored = music.deckVolumes.first { $0.track == .focus }!.volume
+    check(abs(restored - base) < 0.001, "music restored after the clip: \(restored)")
+
+    // Independent switches.
     audio.isEnabled = false
-    check(audio.playHomeClip(for: withClips[0]) == nil && !audio.isAnimalClipPlaying, "home tap with sound off")
+    advance(0.5)
+    check(audibleTracks() == [.focus], "Sound Effects off must not stop the music")
+    check(audio.playMatchClip(for: animal) == nil, "Sound Effects off silences animal clips")
+    audio.isEnabled = true
+    audio.musicEnabled = false
+    advance(0.5)
+    check(audibleTracks().isEmpty, "Music off fades the music out")
+    startedLog.removeAll()
+    audio.play(.cardFlip)
+    check(startedLog == ["card_flip"], "Music off keeps sound effects: \(startedLog)")
+    audio.musicEnabled = true
+    advance(2)
+    check(audibleTracks() == [.focus], "Music back on")
+
+    // Results: the jingle first, music_celebration after 3 s.
+    music.setScene(.results)
+    advance(2)
+    check(music.currentTrack == nil && !audibleTracks().contains(.celebration), "celebration waits for the jingle")
+    advance(3)
+    check(audibleTracks() == [.celebration], "results use music_celebration: \(audibleTracks())")
+
+    // Background / active keeps one track and its position.
+    music.setScene(.menus); advance(3)
+    let homeNode = allPlayerNodes.first { $0.isPlaying && $0.volume > 0 }!
+    let homePlays = homeNode.playCount
+    music.appDidEnterBackground()
+    music.appDidBecomeActive(); advance(1)
+    check(audibleTracks() == [.playground] && homeNode.playCount == homePlays, "resumed without a new player")
+
+    // Interruption (a phone call): stops, then resumes the scene's track.
+    music.interruptionBegan()
+    check(audibleTracks().isEmpty, "silent during an interruption")
+    music.setScene(.game)                                  // navigation during the call
+    advance(1)
+    check(audibleTracks().isEmpty, "no music while interrupted")
+    music.interruptionEnded(); advance(2)
+    check(audibleTracks() == [.focus], "resumes with the current scene's track")
+
+    // Headphones unplugged: quiet until the next screen.
+    music.outputDeviceRemoved(); advance(1)
+    check(audibleTracks().isEmpty, "music held after headphones were removed")
+    music.setScene(.menus); advance(2)
+    check(audibleTracks() == [.playground], "music returns on the next screen")
+
+    // Another app playing audio: no music on top of it, and theirs is never stopped.
+    music.otherAudioChanged(playing: true); advance(1.5)
+    check(audibleTracks().isEmpty, "music stays silent while another app plays")
+    music.otherAudioChanged(playing: false); advance(2)
+    check(audibleTracks() == [.playground], "music back when the other app stops")
+
+    // Opening video: silent.
+    music.setScene(.silent); advance(1.5)
+    check(audibleTracks().isEmpty, "no music during the opening video")
+
+    // Stress: 500 random navigations and toggles never exceed two decks or leave strays.
+    var rng = SeededGenerator(seed: 99)
+    let scenes: [MusicScene] = [.menus, .game, .results, .parents, .silent]
+    for i in 0..<500 {
+        switch Int.random(in: 0..<10, using: &rng) {
+        case 0: audio.musicEnabled.toggle()
+        case 1: music.appDidEnterBackground(); music.appDidBecomeActive()
+        case 2: _ = audio.playMatchClip(for: withClips[i % withClips.count])
+        default: music.setScene(scenes.randomElement(using: &rng)!)
+        }
+        advance(Double(Int.random(in: 1...30, using: &rng)) * 0.05)
+        check(audibleTracks().count <= 2, "step \(i): \(audibleTracks())")
+    }
+    audio.musicEnabled = true
+    music.setScene(.game); advance(5)
+    check(audibleTracks() == [.focus] && allPlayerNodes.filter(\.isPlaying).count == 1,
+          "settles on exactly one track: \(audibleTracks())")
+    check(allPlayerNodes.count == 2, "still only two decks after the stress run")
+    print("music: \(Set(decodedFiles).sorted().joined(separator: ", ")) decoded; navigation, ducking, switches, lifecycle checked")
 
     print(failures == 0 ? "SIMULATION OK" : "SIMULATION FAILED: \(failures)")
     return failures == 0 ? 0 : 1

@@ -1,0 +1,21 @@
+{
+  "about": "Background loops bundled with the app. frames: exact loop length at sampleRate.",
+  "tracks": {
+    "music_celebration": {
+      "frames": 1740800,
+      "sampleRate": 48000
+    },
+    "music_focus": {
+      "frames": 1916928,
+      "sampleRate": 48000
+    },
+    "music_meadow": {
+      "frames": 1921024,
+      "sampleRate": 48000
+    },
+    "music_playground": {
+      "frames": 1949696,
+      "sampleRate": 48000
+    }
+  }
+}

@@ -152,24 +152,31 @@ struct ParentsView: View {
 
     private var settingsSection: some View {
         let t = model.localizer
-        return Section(t["parents.settings"]) {
-            Toggle(t["parents.sound"], isOn: Binding(get: { model.settings.soundEnabled },
-                                                       set: { model.setSoundEnabled($0) }))
-                .frame(minHeight: 44)
-            Toggle(t["parents.voice"], isOn: Binding(get: { model.settings.voiceEnabled },
-                                                       set: { model.setVoiceEnabled($0) }))
-                .frame(minHeight: 44)
-            Toggle(isOn: Binding(get: { model.settings.musicEnabled && model.hasMusic },
+        return Section {
+            Toggle(isOn: Binding(get: { model.settings.musicEnabled },
                                  set: { model.setMusicEnabled($0) })) {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(t["parents.music"])
-                    if !model.hasMusic {
-                        Text(t["parents.music.none"]).font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
-                    }
+                    Text(t[model.hasMusic ? "parents.music.detail" : "parents.music.none"])
+                        .font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
                 }
             }
-            .disabled(!model.hasMusic)
             .frame(minHeight: 44)
+            Toggle(isOn: Binding(get: { model.settings.soundEnabled },
+                                 set: { model.setSoundEnabled($0) })) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t["parents.sound"])
+                    Text(t["parents.sound.detail"]).font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
+                }
+            }
+            .frame(minHeight: 44)
+            Toggle(t["parents.voice"], isOn: Binding(get: { model.settings.voiceEnabled },
+                                                       set: { model.setVoiceEnabled($0) }))
+                .frame(minHeight: 44)
+        } header: {
+            Text(t["parents.settings"])
+        } footer: {
+            Text(t["parents.settings.footer"])
         }
     }
 

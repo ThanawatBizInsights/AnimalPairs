@@ -254,7 +254,8 @@ transaction in each of those cases.
 All audio is local: the app plays bundled files from `AnimalPairs/Resources/Sounds/`
 and **never contacts ElevenLabs** (or any server). `AudioManager`
 (`AnimalPairs/Audio/AudioManager.swift`) preloads one player per sound, uses the
-ambient audio session (respects the silent switch, never interrupts music) and
+ambient audio session with `.mixWithOthers` (respects the Ring/Silent switch and
+never stops other apps' audio) and
 applies two unit-tested policies from the engine package:
 
 * `SoundPlaybackPolicy` — the same sound restarts instead of layering, rapid
@@ -264,10 +265,16 @@ applies two unit-tested policies from the engine package:
   misses in a row, "find a pair" only after two quiet minutes. Effects dip while
   a line plays. The same policy paces the `try_again` cue.
 
-**Sound effects**, **Music** and **Voice** are separate saved switches (Parents →
-Settings; the board's speaker button controls sound effects). No licensed music
-is bundled, so Music stays off; no approved English voice recordings exist, so
-narration is silent until some are added.
+**Music**, **Sound Effects** and **Voice** are separate switches in Parents →
+Settings, each remembered between launches:
+
+* **Music** — the background loops only. **On** for a fresh install; a choice a
+  family already made is kept (the setting is only stored once someone sets it).
+* **Sound Effects** — card flips, match, mismatch, buttons and the animal clips.
+  The speaker button on the home screen and on the game board is a shortcut for
+  this switch only; the Settings footer says so. (The opening video plays its
+  soundtrack if either Music or Sound Effects is on.)
+* **Voice** — narration; no approved English recordings exist yet, so it is silent.
 
 ### Opening video
 
@@ -289,7 +296,7 @@ on Home.
 | Pair matched (not the last) | one random clip of **the matched animal** (any of its four), stopped with a 0.25 s fade at a natural pause about 1–2 s in; `pair_match` plays softer (60 %) under it. Without clips for that animal: `pair_match` at full level |
 | Last pair matched | the matched animal's clip as above, with `board_complete` (or `perfect_round` when there were no misses) softer under it; the clip fades out when the Results screen opens |
 | Second card is not a match (after 0.35 s) | `pair_miss` (always); no animal clip |
-| Tap an animal on Home | that animal's `greeting` or `curious` clip, in full (3–5 s); taps within 0.8 s of the last accepted one are ignored; the wobble animation never makes a sound |
+| Tap an animal on Home | a little hop, **no sound** (animal clips belong to confirmed matches only); the wobble animation never makes a sound |
 | Results screen | `completion_jingle`, soft `confetti` at 0.4 s |
 | **Play again** after a completed round | `try_again`, then the new round's `game_start` at 0.8 s |
 | Round starts, restarts or resumes | `game_start` |
@@ -320,7 +327,7 @@ by `python3 Tools/audio/generate_animal_clips.py`: every paid take is kept in
 longer than 0.7 s to 0.45 s, caps clips at 5 s, sets −21 LUFS with peaks at or
 below −3 dBFS (gentle limiter) and exports AAC mono 96 kbps `.m4a`.
 `--verify` decodes every bundled clip; `Tools/audio/audio_sim/run.sh` (Linux)
-plays thousands of simulated flips, matches and Home taps through the real
+plays thousands of simulated flips and matches, plus the music scenarios, through the real
 `GameSession` and `AudioManager`.
 
 Pending sounds are cancelled when a round is paused, restarted or left, and when
@@ -328,16 +335,44 @@ leaving the Results screen, so nothing spills into the next screen.
 `python3 Tools/audio/check_audio.py` verifies that only approved files are
 bundled, every file is in the app target, and no Thai remains.
 
-### Music (catalogued, not used)
+### Background music
 
-Four instrumental loops — `music_playground`, `music_meadow`, `music_focus`,
-`music_celebration` — were generated with `music_v2_5` (instrumental forced),
-cut to whole-bar 36–41 s loops with a one-beat crossfade, set to −24 LUFS
-(true peak ≤ −3 dBTP) and exported as AAC `.m4a` (48 kHz, 128 kbps) plus
-lossless 24-bit loop masters in `Design/Audio/Music/masters/` and the raw
-downloads in `Design/Audio/Music/raw/`. They are in review and **not bundled
-or played**; the app has no background music. Rebuild or re-verify with
-`python3 Tools/audio/generate_elevenlabs_music.py --process-only | --verify`.
+Why there was none before: the four loops had been generated but were left in
+review (`Design/Audio/Review/`), never bundled; the app had no music player
+(`hasMusic` was hard-coded false) and the Music switch defaulted to off and was
+disabled. Now:
+
+| Screen | Track (`AnimalPairs/Resources/Music/`) | Length |
+| --- | --- | --- |
+| Home, Welcome, choosing a board | `music_playground.m4a` | 40.62 s loop |
+| Matching cards (and the pause menu) | `music_focus.m4a` | 39.94 s loop |
+| Results | `music_celebration.m4a`, fading in 3 s after the jingle | 36.27 s loop |
+| Parents area and gate | `music_meadow.m4a` | 40.02 s loop |
+| Opening video | none (the video has its own soundtrack) | — |
+
+`MusicPlayer` (`AnimalPairs/Audio/MusicPlayer.swift`, owned by `AudioManager`):
+
+* **Gapless loops**: each track is decoded once into memory (off the main
+  thread — gameplay never waits) and looped sample-exactly by an
+  `AVAudioPlayerNode`; `music_tracks.json` holds each loop's exact frame count
+  and any AAC encoder delay a decoder keeps is trimmed (`LoopTrim`).
+* **One track at a time**: two decks only; a new screen fades the old track out
+  (1 s) while the new one fades in (1.5 s); returning to the same screen or
+  restarting a round keeps the music going without a new player.
+* **Quiet**: 0.3 of full scale (the loops are mastered at −24 LUFS), well under
+  the effects; it dips to 35 % within 0.15 s whenever an animal clip plays and
+  comes back over 0.8 s (`MusicDuck`).
+* **Lifecycle**: paused in the background and resumed (same position) when the
+  app is active again; stopped for interruptions (calls, alarms) and resumed
+  when they end; held after headphones are unplugged until the next screen or
+  the app becomes active; silent while another app is playing audio
+  (`secondaryAudioShouldBeSilencedHint`) and never stops that audio; restarted
+  cleanly after an audio engine configuration change.
+
+The masters (`Design/Audio/Music/masters/`) and raw downloads
+(`Design/Audio/Music/raw/`) are kept. `python3 Tools/audio/generate_elevenlabs_music.py
+--bundle` re-copies the reviewed loops into the app and rewrites
+`music_tracks.json`; `--verify` decodes them and measures the loop joins.
 
 ### Generating, reviewing and approving (developer machine only)
 

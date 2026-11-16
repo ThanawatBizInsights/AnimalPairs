@@ -56,13 +56,11 @@ private struct HomeStage: View {
     let spec: HomeLayoutSpec
     /// nil = still (Reduce Motion, hidden or inactive).
     let time: TimeInterval?
-    @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
     /// The animal giving a little hop after being tapped.
     @State private var hopping: String?
 
     var body: some View {
-        let t = model.localizer
         ZStack(alignment: .topLeading) {
             ForEach(geometry.drawOrder, id: \.self) { id in
                 if let frame = geometry.characterFrame(id) {
@@ -75,15 +73,11 @@ private struct HomeStage: View {
                         .scaleEffect(wobble.scale * (hopping == id ? 1.06 : 1), anchor: .bottom)
                         .rotationEffect(.degrees(wobble.rotation), anchor: .bottom)
                         .offset(y: -wobble.rise)
-                        // Tapping an animal plays one of its greeting clips. The
-                        // wobble itself never makes a sound.
+                        // A tap gives a little hop. Neither taps nor the wobble make
+                        // a sound: animal clips belong to confirmed matches only.
                         .contentShape(Rectangle())
-                        .onTapGesture { tap(id) }
-                        .accessibilityElement()
-                        .accessibilityLabel(Text(t["character.\(id).name"]))
-                        .accessibilityAddTraits(.isButton)
-                        .accessibilityHint(Text(t["home.animal.hint"]))
-                        .accessibilityAction { tap(id) }
+                        .onTapGesture { hop(id) }
+                        .accessibilityHidden(true)
                         .position(frame.center)
                 }
             }
@@ -98,8 +92,7 @@ private struct HomeStage: View {
         .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
     }
 
-    private func tap(_ id: String) {
-        model.tapHomeAnimal(id)
+    private func hop(_ id: String) {
         guard !reduceMotion else { return }
         withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { hopping = id }
         Task { @MainActor in

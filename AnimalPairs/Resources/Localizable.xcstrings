@@ -903,17 +903,6 @@
         }
       }
     },
-    "home.animal.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Plays a happy animal sound."
-          }
-        }
-      }
-    },
     "home.contentError": {
       "extractionState": "manual",
       "localizations": {
@@ -1211,13 +1200,24 @@
         }
       }
     },
+    "parents.music.detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gentle background music. It plays quietly and dips while the animals make their sounds."
+          }
+        }
+      }
+    },
     "parents.music.none": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No music is included in this version, so Music stays off."
+            "value": "The music files are missing from this build."
           }
         }
       }
@@ -1453,13 +1453,35 @@
         }
       }
     },
+    "parents.settings.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The speaker button on the home screen and on the game board turns Sound Effects on or off; Music has its own switch here. The Ring/Silent switch silences all of the game’s sounds."
+          }
+        }
+      }
+    },
     "parents.sound": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sound effects"
+            "value": "Sound Effects"
+          }
+        }
+      }
+    },
+    "parents.sound.detail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Card flips, matches, misses, buttons and the animal sounds after a match."
           }
         }
       }

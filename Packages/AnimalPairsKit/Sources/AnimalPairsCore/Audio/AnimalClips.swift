@@ -22,15 +22,13 @@ public struct AnimalClip: Hashable, Comparable, Sendable {
 
 /// When an animal clip may play, and which of the animal's clips fit.
 public enum AnimalClipMoment: Sendable {
-    /// A pair of this animal was just matched: any of its clips (played short).
+    /// A pair of this animal was just confirmed: any of its four clips (played
+    /// short). This is the only moment animal clips are heard.
     case matched
-    /// The child tapped this animal on Home: its greeting or playful clip.
-    case homeTap
 
     public var variants: Set<AnimalClipVariant> {
         switch self {
         case .matched: Set(AnimalClipVariant.allCases)
-        case .homeTap: [.greeting, .curious]
         }
     }
 }
@@ -89,20 +87,4 @@ public struct AnimalClipPicker: Sendable {
     }
 
     public mutating func reset() { last = [:] }
-}
-
-/// Ignores repeats that come sooner than `interval` after the last accepted one.
-public struct Cooldown: Sendable {
-    public let interval: TimeInterval
-    private var lastAccepted: TimeInterval?
-
-    public init(interval: TimeInterval) { self.interval = interval }
-
-    public mutating func accept(at now: TimeInterval) -> Bool {
-        if let lastAccepted, now - lastAccepted < interval { return false }
-        lastAccepted = now
-        return true
-    }
-
-    public mutating func reset() { lastAccepted = nil }
 }

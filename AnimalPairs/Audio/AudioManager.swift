@@ -109,10 +109,10 @@ enum NarrationEvent {
 /// Plays sound effects and narration from local files.
 ///
 /// * Animal clips: four per animal (`momo_greeting`, `momo_curious`, …).
-///   A matched pair plays one of that animal's clips, cut short at a natural
-///   pause (`matchEnd` in animal_clips.json); tapping an animal on Home plays
-///   its greeting or curious clip in full. One clip at a time: a new clip
-///   replaces the previous one. Home taps have a short cooldown.
+///   Only a confirmed matched pair plays one of that animal's clips, cut short
+///   at a natural pause (`matchEnd` in animal_clips.json). One clip at a time:
+///   a new clip replaces the previous one. The music dips under each clip.
+/// * Background music: `music` (`MusicPlayer`), with its own Music switch.
 ///
 /// * Sound effects: one preloaded player per effect; the same sound restarts
 ///   instead of layering, rapid repeats are dropped and at most three effects
@@ -120,7 +120,11 @@ enum NarrationEvent {
 /// * Voice: a separate channel with its own saved switch. One line at a time,
 ///   chosen sparingly by `NarrationPolicy`; effects play quieter while a
 ///   line is spoken.
-/// * Ambient audio session: respects the silent switch and the family's music.
+/// * Ambient audio session (`.mixWithOthers`): respects the Ring/Silent switch
+///   and never stops audio from other apps.
+/// * The Sound Effects switch (`isEnabled`) covers cards, match, mismatch,
+///   buttons and animal clips; the Music switch (`musicEnabled`) covers only
+///   the background tracks.
 /// * Delayed sounds are cancelled when a round is paused, restarted or left.
 @MainActor
 final class AudioManager {
@@ -165,8 +169,6 @@ final class AudioManager {
     static let defaultMatchLength: TimeInterval = 2.0
     /// Fade at the end of a shortened clip.
     static let clipFadeOut: TimeInterval = 0.25
-    /// Taps on Home animals sooner than this after the last one are ignored.
-    static let homeTapCooldown: TimeInterval = 0.8
     private static let clipExtensions = ["m4a", "wav", "caf"]
 
     private let bundle: Bundle
@@ -175,13 +177,21 @@ final class AudioManager {
     private(set) var clipLibrary = AnimalClipLibrary()
     private var clipPicker = AnimalClipPicker()
     private var clipRandom: SeededGenerator
-    private var homeTaps = Cooldown(interval: homeTapCooldown)
     private var clipPlayer: AVAudioPlayer?
     private var clipStopTask: Task<Void, Never>?
     /// The last animal clip that started, and for which moment (tests, debugging).
     private(set) var lastAnimalClip: (clip: AnimalClip, moment: AnimalClipMoment)?
 
-    init(isEnabled: Bool, voiceEnabled: Bool, bundle: Bundle = .main,
+    /// Background music, one track at a time.
+    let music: MusicPlayer
+
+    /// The Music switch: background tracks only.
+    var musicEnabled: Bool {
+        get { music.enabled }
+        set { music.enabled = newValue }
+    }
+
+    init(isEnabled: Bool, voiceEnabled: Bool, musicEnabled: Bool = false, bundle: Bundle = .main,
          clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
          randomSeed: UInt64 = UInt64.random(in: .min ... .max)) {
         self.isEnabled = isEnabled
@@ -190,6 +200,7 @@ final class AudioManager {
         self.bundle = bundle
         clipRandom = SeededGenerator(seed: randomSeed)
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
+        music = MusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock)
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
                   let player = try? AVAudioPlayer(contentsOf: url) else { continue }
@@ -273,7 +284,6 @@ final class AudioManager {
         clipLibrary = AnimalClipLibrary(clips: usable)
         matchEnds = Self.matchEnds(in: bundle)
         clipPicker.reset()
-        homeTaps.reset()
     }
 
     /// A matched pair: one of the matched animal's clips, chosen at random and
@@ -285,17 +295,6 @@ final class AudioManager {
               let clip = clipPicker.pick(for: character, moment: .matched, in: clipLibrary, using: &clipRandom)
         else { return nil }
         start(clip, moment: .matched, stopAfter: matchEnds[clip.name] ?? Self.defaultMatchLength)
-        return clip
-    }
-
-    /// A tap on a Home animal: its greeting or curious clip, played in full.
-    /// Taps within `homeTapCooldown` of the last accepted one are ignored.
-    @discardableResult
-    func playHomeClip(for character: CharacterID) -> AnimalClip? {
-        guard isEnabled, homeTaps.accept(at: clock()),
-              let clip = clipPicker.pick(for: character, moment: .homeTap, in: clipLibrary, using: &clipRandom)
-        else { return nil }
-        start(clip, moment: .homeTap, stopAfter: nil)
         return clip
     }
 
@@ -331,6 +330,8 @@ final class AudioManager {
         player.play()
         clipPlayer = player
         lastAnimalClip = (clip, moment)
+        // Let the animal be heard clearly: dip the music while it sounds.
+        music.duck(for: min(stopAfter ?? player.duration, player.duration))
         if let stopAfter, stopAfter < player.duration {
             let fade = min(Self.clipFadeOut, stopAfter / 2)
             clipStopTask = Task { @MainActor [weak self, weak player] in

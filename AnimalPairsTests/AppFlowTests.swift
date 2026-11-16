@@ -89,23 +89,38 @@ final class AppFlowTests: XCTestCase {
 
     func testOpeningVideoAudioFollowsSoundAndMusicSettings() {
         let model = AppTestSupport.makeModel()
-        XCTAssertFalse(model.settings.musicEnabled, "Music is off: no licensed music is bundled")
-        XCTAssertFalse(model.hasMusic)
-        XCTAssertTrue(model.openingVideoAudible, "Sound Effects on by default")
-        model.setSoundEnabled(false)
-        XCTAssertFalse(model.openingVideoAudible, "muted when both switches are off")
-        model.setMusicEnabled(true)
+        XCTAssertTrue(model.settings.musicEnabled, "Music is on for a fresh install")
+        XCTAssertTrue(model.hasMusic)
         XCTAssertTrue(model.openingVideoAudible)
+        model.setSoundEnabled(false)
+        XCTAssertTrue(model.openingVideoAudible, "Music is still on")
+        model.setMusicEnabled(false)
+        XCTAssertFalse(model.openingVideoAudible, "muted when both switches are off")
     }
 
-    func testMusicSwitchIsSavedSeparately() {
+    func testMusicAndSoundEffectsAreSavedIndependently() {
         let defaults = AppTestSupport.isolatedDefaults()
         let model = AppTestSupport.makeModel(defaults: defaults)
-        model.setMusicEnabled(true)
-        let relaunched = AppTestSupport.makeModel(defaults: defaults)
-        XCTAssertTrue(relaunched.settings.musicEnabled)
+        model.setMusicEnabled(false)
+        XCTAssertFalse(model.audio.musicEnabled)
+        XCTAssertTrue(model.audio.isEnabled, "Sound Effects unchanged")
+        var relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertFalse(relaunched.settings.musicEnabled)
+        XCTAssertFalse(relaunched.audio.musicEnabled)
         XCTAssertTrue(relaunched.settings.soundEnabled)
+        relaunched.setSoundEnabled(false)
+        relaunched.setMusicEnabled(true)
+        relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(relaunched.settings.musicEnabled)
+        XCTAssertFalse(relaunched.settings.soundEnabled)
         XCTAssertTrue(relaunched.settings.voiceEnabled)
+    }
+
+    func testAnExistingExplicitMusicChoiceIsKept() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        defaults.set(false, forKey: "settings.musicEnabled")      // chosen before this version
+        XCTAssertFalse(AppTestSupport.makeModel(defaults: defaults).settings.musicEnabled)
+        XCTAssertTrue(AppTestSupport.makeModel().settings.musicEnabled, "fresh install: on")
     }
 
     func testApprovedInterfaceAndRewardSoundsAreBundled() {

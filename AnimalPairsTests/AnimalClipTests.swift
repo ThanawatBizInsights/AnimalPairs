@@ -3,8 +3,8 @@ import XCTest
 @testable import AnimalPairs
 
 /// Animal clips: card flips stay generic, a match plays one clip of the
-/// matched animal, Home taps play a greeting clip with a cooldown, and the
-/// Sound switch silences everything.
+/// matched animal (and the music dips under it), and the Sound Effects
+/// switch silences every clip. Home animals make no sound.
 @MainActor
 final class AnimalClipAppTests: XCTestCase {
     private final class TestClock { var now: TimeInterval = 100 }
@@ -41,20 +41,6 @@ final class AnimalClipAppTests: XCTestCase {
         }
     }
 
-    func testHomeTapsPlayGreetingClipsWithACooldown() throws {
-        let clock = TestClock()
-        let audio = makeAudio(clock: clock)
-        let animal = try XCTUnwrap(AnimalClipLibraryNames.animals.first { audio.hasAnimalClips(for: $0) })
-        let first = try XCTUnwrap(audio.playHomeClip(for: animal))
-        XCTAssertTrue([.greeting, .curious].contains(first.variant))
-        for _ in 0..<10 {                    // rapid taps: ignored
-            clock.now += 0.05
-            XCTAssertNil(audio.playHomeClip(for: animal))
-        }
-        clock.now += 1
-        XCTAssertNotNil(audio.playHomeClip(for: animal), "accepted again after the cooldown")
-    }
-
     func testSoundOffSilencesAllAnimalClips() throws {
         let clock = TestClock()
         let audio = makeAudio(clock: clock)
@@ -65,7 +51,6 @@ final class AnimalClipAppTests: XCTestCase {
         for _ in 0..<20 {
             clock.now += 1
             XCTAssertNil(audio.playMatchClip(for: animal))
-            XCTAssertNil(audio.playHomeClip(for: animal))
             XCTAssertFalse(audio.isAnimalClipPlaying)
         }
     }

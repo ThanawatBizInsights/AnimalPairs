@@ -68,7 +68,7 @@ Currently shipped as **development placeholders**: the character's signature art
 | ElevenLabs batch 1 (8 core sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled |
 | ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn`, `badge_reveal`, `new_best` unused (no stars, badges or best scores) |
 | Reward sound revisions (`star_earn_v2`, `badge_reveal_v2`, `new_best_v2`, `try_again_v2`) | `Design/Audio/Review/` | **awaiting your review**; approving one replaces the bundled file of the same name |
-| Music loops (4) | `Design/Audio/Review/*.m4a`, masters in `Design/Audio/Music/` | **awaiting your review**; not bundled, not played |
+| Music loops (4): playground, focus, celebration, meadow | `AnimalPairs/Resources/Music/*.m4a` + `music_tracks.json`; masters in `Design/Audio/Music/` | **bundled**, played as background music (Home, gameplay, results, Parents) |
 | Animal clips, all 10 animals × greeting, curious, excited, calm (40) | `AnimalPairs/Resources/Sounds/Animals/<animal>_<variant>.m4a` + `animal_clips.json` | **bundled** (generated with ElevenLabs; masters, originals and every take in `Design/Audio/Animals/`); `mochi_excited` is 2.0 s, a little under the 3–5 s aim |
 | Voice recordings | — | none (English only; the planned Thai lines were removed) |
 | Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |

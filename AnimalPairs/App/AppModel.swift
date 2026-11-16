@@ -20,7 +20,15 @@ enum Route: Equatable {
 @MainActor
 @Observable
 final class AppModel {
-    private(set) var route: Route = .home
+    private(set) var route: Route = .home {
+        didSet {
+            // One background track per screen; the same screen again (e.g. a
+            // restarted round) keeps the music playing without a new player.
+            let scene = Self.musicScene(for: route)
+            if scene != Self.musicScene(for: oldValue) { audio.music.setScene(scene) }
+        }
+    }
+    @ObservationIgnored private var musicObservers: [NSObjectProtocol] = []
     let settings: SettingsStore
     let localizer: Localizer
     let purchases: PurchaseManager
@@ -63,7 +71,8 @@ final class AppModel {
         }
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
-        audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled)
+        audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled,
+                             musicEnabled: settings.musicEnabled)
 
         if let history {
             self.history = history
@@ -88,17 +97,24 @@ final class AppModel {
         audio.loadAnimalClips(for: catalog.manifest.characters.map(\.id))
     }
 
-    /// A Home animal was tapped: one of its greeting clips (with a short
-    /// cooldown, one clip at a time, silent when sound is off).
-    func tapHomeAnimal(_ id: String) {
-        audio.playHomeClip(for: CharacterID(rawValue: id))
-    }
-
     var policy: ContentAccessPolicy { ContentAccessPolicy(level: purchases.accessLevel) }
 
     func start() {
         purchases.start()
         refreshResumableRound()
+        if musicObservers.isEmpty { musicObservers = audio.music.observeAudioSession() }
+        audio.music.setScene(Self.musicScene(for: route))
+    }
+
+    /// Background music for each screen (`MusicPolicy` picks the track).
+    static func musicScene(for route: Route) -> MusicScene {
+        switch route {
+        case .opening: .silent                       // the video has its own soundtrack
+        case .welcome, .home, .setup: .menus
+        case .game: .game
+        case .results: .results
+        case .parentGate, .parents: .parents
+        }
     }
 
     // MARK: Settings
@@ -110,14 +126,14 @@ final class AppModel {
         if enabled { audio.play(.buttonTap) }
     }
 
-    /// The saved "Music" setting. No licensed music is bundled yet, so it
-    /// stays off and only gates the opening video's soundtrack.
+    /// The saved "Music" setting: background tracks only (persisted by SettingsStore).
     func setMusicEnabled(_ enabled: Bool) {
         settings.musicEnabled = enabled
+        audio.musicEnabled = enabled
     }
 
-    /// No music track is included in this version.
-    var hasMusic: Bool { false }
+    /// True when the background tracks are bundled.
+    var hasMusic: Bool { !audio.music.availableTracks.isEmpty }
 
     /// The opening video's audio plays only if Sound Effects or Music is on.
     var openingVideoAudible: Bool { settings.soundEnabled || settings.musicEnabled }
@@ -283,12 +299,14 @@ final class AppModel {
             parentAccess.revoke()
             if route == .parents || route == .parentGate { route = .home }
             if route == .opening { finishOpening() }   // never replay it on return
+            audio.music.appDidEnterBackground()
         case .inactive:
             if let session, !session.state.isCompleted { persist(session.controller.normalizedState()) }
         case .active:
             if route == .home { refreshResumableRound() }
             // Codes redeemed or purchases approved outside the app.
             purchases.appBecameActive()
+            audio.music.appDidBecomeActive()
         @unknown default:
             break
         }

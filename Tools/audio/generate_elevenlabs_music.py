@@ -3,13 +3,14 @@
 
 OFFLINE developer tool; the app never calls ElevenLabs. Tracks are catalogued
 in Tools/audio/audio_manifest.json (kind "music") and stay in review until
-approved. They are not played by the app yet.
+approved. Approved tracks are bundled with --bundle and played by MusicPlayer.
 
     export ELEVENLABS_API_KEY='sk_…'      # never stored or printed
     python3 Tools/audio/generate_elevenlabs_music.py --dry-run
     python3 Tools/audio/generate_elevenlabs_music.py [--only music_focus]
     python3 Tools/audio/generate_elevenlabs_music.py --process-only   # rebuild loops from raw masters
     python3 Tools/audio/generate_elevenlabs_music.py --verify         # decode every file, measure loop joins
+    python3 Tools/audio/generate_elevenlabs_music.py --bundle         # approve + copy into the app, write music_tracks.json
 
 For each track: POST /v1/music (model music_v2_5, instrumental forced) for a
 ~48 s piece; keep the raw download; detect the tempo; cut a whole-bar loop of
@@ -229,12 +230,53 @@ def verify_track(track: dict) -> dict:
     }
 
 
+USES = {
+    "music_playground": "Home, Welcome and choosing a board",
+    "music_focus": "During card matching (and the pause menu)",
+    "music_celebration": "Results screen, fading in 3 s after the jingle",
+    "music_meadow": "Parents area and its gate",
+}
+
+
+def bundle(manifest: dict, tracks: list[dict]) -> int:
+    """Approve the reviewed loops and bundle them with their exact loop
+    lengths (the app trims any AAC encoder delay a decoder keeps)."""
+    out = ROOT / "AnimalPairs/Resources/Music"
+    out.mkdir(parents=True, exist_ok=True)
+    index = {}
+    for t in tracks:
+        source = REVIEW / t["file"]
+        if t["status"] not in ("awaiting_review", "approved") or not source.exists():
+            print(f"MISSING {t['name']}: {source.relative_to(ROOT)} ({t['status']})")
+            continue
+        frames = int(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=duration_ts", "-of",
+                                     "csv=p=0", str(ROOT / t["master"])], capture_output=True, text=True,
+                                    check=True).stdout.strip())
+        target = out / t["file"]
+        target.write_bytes(source.read_bytes())
+        t["status"] = "approved"
+        t["approved_at"] = t.get("approved_at") or now_iso()
+        t["approval_note"] = "Bundled as background music at the user's request."
+        t["event"] = USES.get(t["name"], t.get("event", ""))
+        index[t["name"]] = {"frames": frames, "sampleRate": RATE}
+        print(f"bundled {t['name']}: {frames} frames ({frames / RATE:.2f} s) -> {target.relative_to(ROOT)}")
+    (out / "music_tracks.json").write_text(json.dumps(
+        {"about": "Background loops bundled with the app. frames: exact loop length at sampleRate.",
+         "tracks": dict(sorted(index.items()))}, indent=2) + "\n")
+    manifest["music"]["note"] = ("Four instrumental loops bundled as background music, one per scene; "
+                                 "played by MusicPlayer (AVAudioEngine, gapless).")
+    save_json(MANIFEST, manifest)
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--only", nargs="*")
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--process-only", action="store_true")
     parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--bundle", action="store_true",
+                        help="approve the reviewed tracks, copy them into the app and write music_tracks.json")
     args = parser.parse_args()
     manifest = load_json(MANIFEST, {})
     tracks = [s for s in manifest["sounds"] if s.get("kind") == "music" and (not args.only or s["name"] in args.only)]
@@ -246,6 +288,8 @@ def main() -> int:
                 print(f"{t['name']}: plays={t['mobile_plays']} {t['mobile_duration_seconds']}s join smooth={t['join']['smooth']}")
         save_json(MANIFEST, manifest)
         return 0
+    if args.bundle:
+        return bundle(manifest, tracks)
     if args.process_only:
         for t in tracks:
             if (RAW / f"{t['name']}.mp3").exists():

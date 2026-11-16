@@ -747,13 +747,13 @@
       "name": "music_playground",
       "batch": "batch6_music",
       "kind": "music",
-      "event": "Future: playful menus/boards (not played yet)",
+      "event": "Home, Welcome and choosing a board",
       "bpm_hint": 100,
       "prompt": "Light marimba melody with soft plucked strings and a gentle bouncy rhythm, playful and cheerful, major key, about 100 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
       "duration_seconds": 48.0,
       "file": "music_playground.m4a",
       "bundle_dir": "AnimalPairs/Resources/Music",
-      "status": "awaiting_review",
+      "status": "approved",
       "generations": 1,
       "model_id": "music_v2_5",
       "loop": {
@@ -787,19 +787,21 @@
       },
       "credits": {
         "account_reported": 600
-      }
+      },
+      "approved_at": "2026-11-16T11:15:13+00:00",
+      "approval_note": "Bundled as background music at the user's request."
     },
     {
       "name": "music_meadow",
       "batch": "batch6_music",
       "kind": "music",
-      "event": "Future: relaxed browsing (not played yet)",
+      "event": "Parents area and its gate",
       "bpm_hint": 84,
       "prompt": "Warm acoustic guitar and soft felt piano textures with tiny bells, relaxed exploration mood, major key, about 84 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
       "duration_seconds": 48.0,
       "file": "music_meadow.m4a",
       "bundle_dir": "AnimalPairs/Resources/Music",
-      "status": "awaiting_review",
+      "status": "approved",
       "generations": 1,
       "model_id": "music_v2_5",
       "loop": {
@@ -833,19 +835,21 @@
       },
       "credits": {
         "account_reported": 600
-      }
+      },
+      "approved_at": "2026-11-16T11:15:13+00:00",
+      "approval_note": "Bundled as background music at the user's request."
     },
     {
       "name": "music_focus",
       "batch": "batch6_music",
       "kind": "music",
-      "event": "Future: during card matching (not played yet)",
+      "event": "During card matching (and the pause menu)",
       "bpm_hint": 72,
       "prompt": "Sparse, calm notes on soft celesta and felt piano with ample silence between phrases, very gentle and unhurried, suitable for concentrating, about 72 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
       "duration_seconds": 48.0,
       "file": "music_focus.m4a",
       "bundle_dir": "AnimalPairs/Resources/Music",
-      "status": "awaiting_review",
+      "status": "approved",
       "generations": 1,
       "model_id": "music_v2_5",
       "loop": {
@@ -879,19 +883,21 @@
       },
       "credits": {
         "account_reported": 600
-      }
+      },
+      "approved_at": "2026-11-16T11:15:13+00:00",
+      "approval_note": "Bundled as background music at the user's request."
     },
     {
       "name": "music_celebration",
       "batch": "batch6_music",
       "kind": "music",
-      "event": "Future: a completed round (not played yet)",
+      "event": "Results screen, fading in 3 s after the jingle",
       "bpm_hint": 112,
       "prompt": "Upbeat but gentle celebration with bright glockenspiel and ukulele and a soft light rhythm, happy major key, about 112 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
       "duration_seconds": 48.0,
       "file": "music_celebration.m4a",
       "bundle_dir": "AnimalPairs/Resources/Music",
-      "status": "awaiting_review",
+      "status": "approved",
       "generations": 1,
       "model_id": "music_v2_5",
       "loop": {
@@ -925,7 +931,9 @@
       },
       "credits": {
         "account_reported": 600
-      }
+      },
+      "approved_at": "2026-11-16T11:15:13+00:00",
+      "approval_note": "Bundled as background music at the user's request."
     },
     {
       "name": "momo_greeting",
@@ -2182,7 +2190,7 @@
       "music_focus",
       "music_celebration"
     ],
-    "note": "Four instrumental loops (music_v2_5, instrumental forced) generated for future use. In review: not bundled, not played; the app has no background music, no music selector, and the sound settings are unchanged.",
+    "note": "Four instrumental loops bundled as background music, one per scene; played by MusicPlayer (AVAudioEngine, gapless).",
     "join_previews": "Design/Audio/Review/loop_joins/<name>_join_preview.m4a (last 5 s of the loop followed by its first 5 s)"
   },
   "video": [

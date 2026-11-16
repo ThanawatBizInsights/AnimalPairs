@@ -5,7 +5,8 @@ Run from the repository root: ``python3 Tools/audio/check_audio.py``
 
 * Only approved sounds and synthesized fallbacks are bundled in the app.
 * Nothing awaiting review, planned or rejected is bundled.
-* Every approved sound has its bundled file (Sounds/ and its subfolders).
+* Every approved sound has its bundled file (Sounds/, its subfolders, Music/).
+* Every MusicTrack the app knows has an approved file listed in music_tracks.json.
 * Approved animal clips match animal_clips.json and are named <animal>_<variant>.
 * Every ``SoundEffect`` in AudioManager.swift has a manifest entry; any
   bundled voice file has an approved English manifest entry.
@@ -37,7 +38,8 @@ def main() -> int:
     manifest = json.loads(MANIFEST.read_text())
     sounds = manifest["sounds"]
     problems: list[str] = []
-    bundled_paths = [p for p in BUNDLE.rglob("*") if p.suffix in {".wav", ".caf", ".m4a", ".mp3"}]
+    bundled_paths = [p for folder in (BUNDLE, RESOURCES / "Music") for p in folder.rglob("*")
+                     if p.suffix in {".wav", ".caf", ".m4a", ".mp3"}]
     bundled = {p.name for p in bundled_paths}
     if len(bundled) != len(bundled_paths):
         problems.append("two bundled audio files share a name (the app bundle is flat)")
@@ -66,6 +68,14 @@ def main() -> int:
         if s.get("kind") == "animal_clip" and s["status"] == "approved":
             if s["file"] != f"{s['character_id']}_{s['variant']}.m4a":
                 problems.append(f"animal clip {s['name']} must be named <animal>_<variant>.m4a")
+    music_index = RESOURCES / "Music/music_tracks.json"
+    approved_music = {s["name"] for s in sounds if s.get("kind") == "music" and s["status"] == "approved"}
+    indexed_music = set(json.loads(music_index.read_text())["tracks"]) if music_index.exists() else set()
+    for name in sorted(approved_music ^ indexed_music):
+        problems.append(f"music track {name} is not both approved and in music_tracks.json")
+    swift_music = (ROOT / "Packages/AnimalPairsKit/Sources/AnimalPairsCore/Audio/Music.swift").read_text()
+    for name in sorted(set(re.findall(r'= "(music_[a-z]+)"', swift_music)) - approved_music):
+        problems.append(f"MusicTrack {name} has no approved, bundled file")
     missing_clips = sorted(s["name"] for s in sounds if s.get("kind") == "animal_clip" and s["status"] != "approved")
 
     names = {s["name"] for s in sounds}
@@ -104,7 +114,8 @@ def main() -> int:
     for s in sounds:
         by_status[s["status"]] = by_status.get(s["status"], 0) + 1
     print(f"{len(sounds)} manifest entries {by_status}; {len(bundled)} bundled audio files; "
-          f"{len(effects)} app effects; {len(approved_clips)} animal clips; {len(videos)} video(s); "
+          f"{len(effects)} app effects; {len(approved_clips)} animal clips; {len(approved_music)} music tracks; "
+          f"{len(videos)} video(s); "
           f"target: synchronized AnimalPairs/ folder")
     if missing_clips:
         print(f"animal clips not generated yet ({len(missing_clips)}): {', '.join(missing_clips)}")

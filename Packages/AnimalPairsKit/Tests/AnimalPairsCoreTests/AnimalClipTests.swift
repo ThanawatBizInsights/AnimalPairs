@@ -21,7 +21,6 @@ final class AnimalClipLibraryTests: XCTestCase {
     func testMomentsChooseTheRightVariants() {
         let library = Self.fullLibrary
         XCTAssertEqual(Set(library.clips(for: "iris", moment: .matched).map(\.variant)), Set(AnimalClipVariant.allCases))
-        XCTAssertEqual(Set(library.clips(for: "iris", moment: .homeTap).map(\.variant)), [.greeting, .curious])
         XCTAssertTrue(library.clips(for: "iris", moment: .matched).allSatisfy { $0.character == "iris" })
     }
 }
@@ -48,40 +47,13 @@ final class AnimalClipPickerTests: XCTestCase {
         }
     }
 
-    func testHomeTapsUseGreetingOrCuriousOnly() {
-        let library = AnimalClipLibraryTests.fullLibrary
-        var picker = AnimalClipPicker()
-        var generator = SeededGenerator(seed: 5)
-        var variants: Set<AnimalClipVariant> = []
-        for _ in 0..<200 {
-            let clip = picker.pick(for: "pebble", moment: .homeTap, in: library, using: &generator)
-            XCTAssertEqual(clip?.character, "pebble")
-            variants.insert(clip!.variant)
-        }
-        XCTAssertEqual(variants, [.greeting, .curious])
-    }
-
     func testAnimalWithoutClipsGetsNothing() {
         var picker = AnimalClipPicker()
         var generator = SeededGenerator(seed: 1)
         let partial = AnimalClipLibrary(clips: [AnimalClip(character: "momo", variant: .calm)])
         XCTAssertNil(picker.pick(for: "iris", moment: .matched, in: partial, using: &generator))
-        XCTAssertNil(picker.pick(for: "momo", moment: .homeTap, in: partial, using: &generator))
         XCTAssertEqual(picker.pick(for: "momo", moment: .matched, in: partial, using: &generator)?.name, "momo_calm")
         XCTAssertEqual(picker.pick(for: "momo", moment: .matched, in: partial, using: &generator)?.name, "momo_calm",
                        "a single clip may repeat")
-    }
-}
-
-final class CooldownTests: XCTestCase {
-    func testRapidRepeatsAreIgnored() {
-        var cooldown = Cooldown(interval: 0.8)
-        XCTAssertTrue(cooldown.accept(at: 10))
-        XCTAssertFalse(cooldown.accept(at: 10.1))
-        XCTAssertFalse(cooldown.accept(at: 10.79))
-        XCTAssertTrue(cooldown.accept(at: 10.8))
-        XCTAssertFalse(cooldown.accept(at: 11.0), "measured from the last accepted tap")
-        cooldown.reset()
-        XCTAssertTrue(cooldown.accept(at: 11.0))
     }
 }
