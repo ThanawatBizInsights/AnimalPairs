@@ -4,7 +4,8 @@ import Observation
 import StoreKit
 // `PurchaseAction` (the value of `@Environment(\.purchase)`) lives in the
 // StoreKit–SwiftUI cross-import overlay, which is only visible when a file
-// imports both StoreKit and SwiftUI.
+// imports both StoreKit and SwiftUI. SwiftUI also declares `Transaction`
+// (for animations), so StoreKit transactions are written `StoreKit.Transaction`.
 import SwiftUI
 
 /// Persists the last access granted from a *verified* transaction.
@@ -32,7 +33,7 @@ struct EntitlementCacheStore {
 /// * Prices come from `Product.displayPrice` (localized by the App Store).
 /// * Access is delivered before a verified transaction is finished.
 /// * Unverified transactions never grant access.
-/// * Revocations (refunds) remove access; `Transaction.updates` is observed
+/// * Revocations (refunds) remove access; `StoreKit.Transaction.updates` is observed
 ///   for the lifetime of the app.
 /// * Resetting game progress never touches this state.
 @MainActor
@@ -82,7 +83,7 @@ final class PurchaseManager {
         guard updatesTask == nil else { return }
         let productID = productID
         updatesTask = Task.detached(priority: .background) { [weak self] in
-            for await update in Transaction.updates {
+            for await update in StoreKit.Transaction.updates {
                 await self?.handle(update: update, productID: productID)
             }
         }
@@ -109,7 +110,7 @@ final class PurchaseManager {
     /// Scans current entitlements and applies the pure resolver.
     func refreshEntitlements() async {
         var evidence: [EntitlementEvidence] = []
-        for await result in Transaction.currentEntitlements {
+        for await result in StoreKit.Transaction.currentEntitlements {
             switch result {
             case .verified(let transaction) where transaction.productID == productID:
                 evidence.append(transaction.revocationDate == nil
@@ -177,7 +178,7 @@ final class PurchaseManager {
 
     // MARK: Private
 
-    private func handle(update: VerificationResult<Transaction>, productID: String) async {
+    private func handle(update: VerificationResult<StoreKit.Transaction>, productID: String) async {
         guard case .verified(let transaction) = update, transaction.productID == productID else { return }
         if transaction.revocationDate != nil {
             apply(EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: transaction.id)],
@@ -189,7 +190,7 @@ final class PurchaseManager {
         await transaction.finish()
     }
 
-    private func deliver(_ transaction: Transaction) {
+    private func deliver(_ transaction: StoreKit.Transaction) {
         apply(EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: transaction.id)],
                                           scanCompleted: true, cached: cache))
     }
