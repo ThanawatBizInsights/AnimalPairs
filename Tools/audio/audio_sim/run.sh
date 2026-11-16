@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # Linux-only audio simulation (not part of the app). Compiles the app's real
-# AudioManager.swift, MusicPlayer.swift, GameSession.swift and Localizer.swift against small
+# AudioManager.swift, BackgroundMusicPlayer.swift, GameSession.swift and Localizer.swift against small
 # stand-ins for AVFoundation and SwiftUI, then plays many rounds and Home taps
 # with the bundled sounds and animal clips.
 # Run from the repository root after `swift build` in Packages/AnimalPairsKit.
@@ -16,7 +16,7 @@ sed -e '/^@Observable$/d' -e 's/@ObservationIgnored //' -e '/^import Observation
   "$ROOT/AnimalPairs/Game/GameSession.swift" > "$OUT/GameSession.swift"
 M=$(dirname "$(find "$ROOT/Packages/AnimalPairsKit/.build" -name AnimalPairsCore.swiftmodule -path '*Modules*' | head -1)")
 swiftc -swift-version 5 -I "$OUT" -L "$OUT" -lAVFoundation -lSwiftUI -I "$M" \
-  "$ROOT/AnimalPairs/Audio/AudioManager.swift" "$ROOT/AnimalPairs/Audio/MusicPlayer.swift" "$OUT/GameSession.swift" \
+  "$ROOT/AnimalPairs/Audio/AudioManager.swift" "$ROOT/AnimalPairs/Audio/BackgroundMusicPlayer.swift" "$OUT/GameSession.swift" \
   "$ROOT/AnimalPairs/Localization/Localizer.swift" "$HERE/main.swift" \
   $(find "$(dirname "$M")" -path '*AnimalPairsCore.build/*.o') -o "$OUT/sim"
 LD_LIBRARY_PATH="$OUT" "$OUT/sim" "$ROOT"

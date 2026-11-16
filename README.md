@@ -350,7 +350,7 @@ disabled. Now:
 | Parents area and gate | `music_meadow.m4a` | 40.02 s loop |
 | Opening video | none (the video has its own soundtrack) | — |
 
-`MusicPlayer` (`AnimalPairs/Audio/MusicPlayer.swift`, owned by `AudioManager`):
+`BackgroundMusicPlayer` (`AnimalPairs/Audio/BackgroundMusicPlayer.swift`, owned by `AudioManager`):
 
 * **Gapless loops**: each track is decoded once into memory (off the main
   thread — gameplay never waits) and looped sample-exactly by an

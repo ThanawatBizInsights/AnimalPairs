@@ -141,13 +141,13 @@ final class Clock { var now = 100.0 }
     audio.isEnabled = true
     let music = audio.music
     music.loadsInBackground = false
-    let base = MusicPlayer.baseVolume
+    let base = BackgroundMusicPlayer.baseVolume
     func advance(_ seconds: Double, step: Double = 0.05) {
         var t = 0.0
         while t < seconds - 1e-9 { clock.now += step; t += step; music.tick(at: clock.now) }
     }
-    func audibleTracks() -> [MusicTrack] { music.deckVolumes.filter { $0.playing && $0.volume > 0.001 }.compactMap(\.track) }
-    check(music.availableTracks == Set(MusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
+    func audibleTracks() -> [AnimalPairsMusicTrack] { music.deckVolumes.filter { $0.playing && $0.volume > 0.001 }.compactMap(\.track) }
+    check(music.availableTracks == Set(AnimalPairsMusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
     check(allPlayerNodes.count == 2, "two music decks, got \(allPlayerNodes.count)")
 
     // Off by default in this AudioManager (tests); switching on starts the menu loop.

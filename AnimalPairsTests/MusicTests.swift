@@ -11,8 +11,8 @@ final class MusicAppTests: XCTestCase {
         let indexURL = try XCTUnwrap(Bundle.main.url(forResource: "music_tracks", withExtension: "json"))
         let index = try JSONSerialization.jsonObject(with: Data(contentsOf: indexURL)) as? [String: Any]
         let tracks = try XCTUnwrap(index?["tracks"] as? [String: [String: Any]])
-        for track in MusicTrack.allCases {
-            let url = try XCTUnwrap(MusicPlayer.url(for: track, in: .main), "\(track.rawValue).m4a is not bundled")
+        for track in AnimalPairsMusicTrack.allCases {
+            let url = try XCTUnwrap(BackgroundMusicPlayer.url(for: track, in: .main), "\(track.rawValue).m4a is not bundled")
             let expected = try XCTUnwrap(tracks[track.rawValue]?["frames"] as? Int)
             let decoded = try MusicBuffer(url: url, expectedFrames: expected)
             XCTAssertEqual(Int(decoded.buffer.frameLength), expected, "\(track): a gap or click at the loop join")

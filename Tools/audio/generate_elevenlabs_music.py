@@ -3,7 +3,7 @@
 
 OFFLINE developer tool; the app never calls ElevenLabs. Tracks are catalogued
 in Tools/audio/audio_manifest.json (kind "music") and stay in review until
-approved. Approved tracks are bundled with --bundle and played by MusicPlayer.
+approved. Approved tracks are bundled with --bundle and played by BackgroundMusicPlayer.
 
     export ELEVENLABS_API_KEY='sk_…'      # never stored or printed
     python3 Tools/audio/generate_elevenlabs_music.py --dry-run
@@ -264,7 +264,7 @@ def bundle(manifest: dict, tracks: list[dict]) -> int:
         {"about": "Background loops bundled with the app. frames: exact loop length at sampleRate.",
          "tracks": dict(sorted(index.items()))}, indent=2) + "\n")
     manifest["music"]["note"] = ("Four instrumental loops bundled as background music, one per scene; "
-                                 "played by MusicPlayer (AVAudioEngine, gapless).")
+                                 "played by BackgroundMusicPlayer (AVAudioEngine, gapless).")
     save_json(MANIFEST, manifest)
     return 0
 

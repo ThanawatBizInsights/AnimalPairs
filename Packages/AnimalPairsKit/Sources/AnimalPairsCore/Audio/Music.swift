@@ -1,7 +1,7 @@
 import Foundation
 
 /// The four bundled background loops (`<rawValue>.m4a`).
-public enum MusicTrack: String, CaseIterable, Codable, Sendable {
+public enum AnimalPairsMusicTrack: String, CaseIterable, Codable, Sendable {
     case playground = "music_playground"
     case meadow = "music_meadow"
     case focus = "music_focus"
@@ -23,10 +23,10 @@ public enum MusicScene: Equatable, Sendable {
 }
 
 /// Which loop belongs where, and when music may be heard. Pure, so it is
-/// tested on its own; `MusicPlayer` (app) does the playing.
+/// tested on its own; `BackgroundMusicPlayer` (app) does the playing.
 public enum MusicPolicy {
     /// Track for each scene, following the purpose each loop was made for.
-    public static func track(for scene: MusicScene) -> MusicTrack? {
+    public static func track(for scene: MusicScene) -> AnimalPairsMusicTrack? {
         switch scene {
         case .menus: .playground
         case .game: .focus

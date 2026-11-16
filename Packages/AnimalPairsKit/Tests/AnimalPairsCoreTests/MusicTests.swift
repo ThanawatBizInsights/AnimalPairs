@@ -9,7 +9,7 @@ final class MusicPolicyTests: XCTestCase {
         XCTAssertEqual(MusicPolicy.track(for: .parents), .meadow)
         XCTAssertNil(MusicPolicy.track(for: .silent))
         XCTAssertEqual(Set([MusicScene.menus, .game, .results, .parents].compactMap(MusicPolicy.track)),
-                       Set(MusicTrack.allCases), "all four loops are used")
+                       Set(AnimalPairsMusicTrack.allCases), "all four loops are used")
         XCTAssertEqual(MusicPolicy.startDelay(for: .game), 0, "gameplay music never waits")
         XCTAssertGreaterThan(MusicPolicy.startDelay(for: .results), 0, "the results jingle plays first")
     }

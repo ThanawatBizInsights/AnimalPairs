@@ -6,7 +6,7 @@ Run from the repository root: ``python3 Tools/audio/check_audio.py``
 * Only approved sounds and synthesized fallbacks are bundled in the app.
 * Nothing awaiting review, planned or rejected is bundled.
 * Every approved sound has its bundled file (Sounds/, its subfolders, Music/).
-* Every MusicTrack the app knows has an approved file listed in music_tracks.json.
+* Every AnimalPairsMusicTrack the app knows has an approved file listed in music_tracks.json.
 * Approved animal clips match animal_clips.json and are named <animal>_<variant>.
 * Every ``SoundEffect`` in AudioManager.swift has a manifest entry; any
   bundled voice file has an approved English manifest entry.
@@ -75,7 +75,7 @@ def main() -> int:
         problems.append(f"music track {name} is not both approved and in music_tracks.json")
     swift_music = (ROOT / "Packages/AnimalPairsKit/Sources/AnimalPairsCore/Audio/Music.swift").read_text()
     for name in sorted(set(re.findall(r'= "(music_[a-z]+)"', swift_music)) - approved_music):
-        problems.append(f"MusicTrack {name} has no approved, bundled file")
+        problems.append(f"AnimalPairsMusicTrack {name} has no approved, bundled file")
     missing_clips = sorted(s["name"] for s in sounds if s.get("kind") == "animal_clip" and s["status"] != "approved")
 
     names = {s["name"] for s in sounds}

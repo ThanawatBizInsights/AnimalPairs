@@ -1,10 +1,10 @@
 import AVFoundation
 import Foundation
 
-/// Connects `MusicPlayer` to the system: audio interruptions (calls, alarms,
+/// Connects `BackgroundMusicPlayer` to the system: audio interruptions (calls, alarms,
 /// Siri), headphones being unplugged, other apps starting or stopping audio,
 /// and engine configuration changes. Observers run on the main queue.
-extension MusicPlayer {
+extension BackgroundMusicPlayer {
     func observeAudioSession() -> [NSObjectProtocol] {
         let center = NotificationCenter.default
         let session = AVAudioSession.sharedInstance()

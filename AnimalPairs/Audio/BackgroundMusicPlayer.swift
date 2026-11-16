@@ -15,13 +15,13 @@ import Foundation
 /// * Quiet by design (`baseVolume`), and dipped further by `MusicDuck` while
 ///   an animal clip plays.
 /// * Loading happens off the main thread; gameplay never waits for music.
-/// * Lifecycle (see MusicPlayer+Session.swift): paused in the background,
+/// * Lifecycle (see BackgroundMusicPlayer+Session.swift): paused in the background,
 ///   resumed when active, stopped for interruptions, held after headphones
 ///   are unplugged, silent while another app plays audio. The shared session
 ///   is `.ambient` + `.mixWithOthers`, so the Ring/Silent switch is respected
 ///   and other apps' audio is never stopped.
 @MainActor
-final class MusicPlayer {
+final class BackgroundMusicPlayer {
     /// Music level relative to full scale; well under the effects
     /// (master 0.8) so card sounds and animal clips stay clear.
     static let baseVolume: Float = 0.3
@@ -35,7 +35,7 @@ final class MusicPlayer {
 
     private final class Deck {
         let node = AVAudioPlayerNode()
-        var track: MusicTrack?
+        var track: AnimalPairsMusicTrack?
         var ramp = VolumeRamp.steady(0)
         var isScheduled = false
         var token = 0
@@ -48,10 +48,10 @@ final class MusicPlayer {
     private let clock: () -> TimeInterval
     private let bundle: Bundle
     private let index: [String: TrackInfo]
-    private var buffers: [MusicTrack: AVAudioPCMBuffer] = [:]
+    private var buffers: [AnimalPairsMusicTrack: AVAudioPCMBuffer] = [:]
     private var nextToken = 0
     private var ticker: Task<Void, Never>?
-    private var pendingStart: (track: MusicTrack, at: TimeInterval)?
+    private var pendingStart: (track: AnimalPairsMusicTrack, at: TimeInterval)?
 
     /// Decode tracks on a background thread (the app); tests decode inline.
     var loadsInBackground = true
@@ -75,8 +75,8 @@ final class MusicPlayer {
     // MARK: State
 
     /// Tracks actually bundled with the app.
-    var availableTracks: Set<MusicTrack> {
-        Set(MusicTrack.allCases.filter { Self.url(for: $0, in: bundle) != nil })
+    var availableTracks: Set<AnimalPairsMusicTrack> {
+        Set(AnimalPairsMusicTrack.allCases.filter { Self.url(for: $0, in: bundle) != nil })
     }
 
     var isAudible: Bool {
@@ -85,21 +85,21 @@ final class MusicPlayer {
     }
 
     /// The track that should be heard now, if any.
-    var wantedTrack: MusicTrack? {
+    var wantedTrack: AnimalPairsMusicTrack? {
         guard isAudible, let track = MusicPolicy.track(for: scene), availableTracks.contains(track) else { return nil }
         return track
     }
 
     /// The track currently fading in or playing (nil while silent).
-    var currentTrack: MusicTrack? { front?.track }
+    var currentTrack: AnimalPairsMusicTrack? { front?.track }
 
     /// Decks currently producing sound (at most one outside a crossfade).
-    var playingTracks: [MusicTrack] {
+    var playingTracks: [AnimalPairsMusicTrack] {
         decks.filter { $0.node.isPlaying && $0.ramp.to > 0 }.compactMap(\.track)
     }
 
     /// The decks' current volumes, for tests and the simulation.
-    var deckVolumes: [(track: MusicTrack?, volume: Float, playing: Bool)] {
+    var deckVolumes: [(track: AnimalPairsMusicTrack?, volume: Float, playing: Bool)] {
         decks.map { ($0.track, $0.node.volume, $0.node.isPlaying) }
     }
 
@@ -187,7 +187,7 @@ final class MusicPlayer {
         tick(at: now)
     }
 
-    private func start(_ track: MusicTrack, at now: TimeInterval) {
+    private func start(_ track: AnimalPairsMusicTrack, at now: TimeInterval) {
         // Reuse a deck still fading out with the same track (quick back-and-forth).
         if let same = decks.first(where: { $0.track == track && $0.isScheduled }) {
             same.ramp = same.ramp.retargeted(to: 1, at: now, duration: Self.fadeIn)
@@ -197,7 +197,7 @@ final class MusicPlayer {
             return
         }
         // Otherwise the quieter deck (silent, or furthest into its fade-out).
-        let deck = decks.min { $0.ramp.value(at: now) < $1.ramp.value(at: now) }!
+        guard let deck = decks.min(by: { $0.ramp.value(at: now) < $1.ramp.value(at: now) }) else { return }
         reset(deck)
         nextToken += 1
         deck.token = nextToken
@@ -237,7 +237,7 @@ final class MusicPlayer {
         ensureTicking()
     }
 
-    private func store(_ buffer: AVAudioPCMBuffer, for track: MusicTrack) {
+    private func store(_ buffer: AVAudioPCMBuffer, for track: AnimalPairsMusicTrack) {
         // Keep at most two decoded tracks (the ones on the decks).
         let onDecks = Set(decks.compactMap(\.track))
         buffers = buffers.filter { onDecks.contains($0.key) }
@@ -310,7 +310,7 @@ final class MusicPlayer {
 
     // MARK: Files
 
-    static func url(for track: MusicTrack, in bundle: Bundle) -> URL? {
+    static func url(for track: AnimalPairsMusicTrack, in bundle: Bundle) -> URL? {
         bundle.url(forResource: track.rawValue, withExtension: "m4a")
             ?? bundle.url(forResource: track.rawValue, withExtension: "m4a", subdirectory: "Music")
     }

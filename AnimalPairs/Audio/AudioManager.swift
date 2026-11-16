@@ -112,7 +112,7 @@ enum NarrationEvent {
 ///   Only a confirmed matched pair plays one of that animal's clips, cut short
 ///   at a natural pause (`matchEnd` in animal_clips.json). One clip at a time:
 ///   a new clip replaces the previous one. The music dips under each clip.
-/// * Background music: `music` (`MusicPlayer`), with its own Music switch.
+/// * Background music: `music` (`BackgroundMusicPlayer`), with its own Music switch.
 ///
 /// * Sound effects: one preloaded player per effect; the same sound restarts
 ///   instead of layering, rapid repeats are dropped and at most three effects
@@ -183,7 +183,7 @@ final class AudioManager {
     private(set) var lastAnimalClip: (clip: AnimalClip, moment: AnimalClipMoment)?
 
     /// Background music, one track at a time.
-    let music: MusicPlayer
+    let music: BackgroundMusicPlayer
 
     /// The Music switch: background tracks only.
     var musicEnabled: Bool {
@@ -200,7 +200,7 @@ final class AudioManager {
         self.bundle = bundle
         clipRandom = SeededGenerator(seed: randomSeed)
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
-        music = MusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock)
+        music = BackgroundMusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock)
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
                   let player = try? AVAudioPlayer(contentsOf: url) else { continue }

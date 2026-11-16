@@ -150,3 +150,11 @@ public final class AVAudioEngine {
     public func pause() { isRunning = false }
     public func stop() { isRunning = false }
 }
+
+// MARK: AudioToolbox names re-exported by AVFoundation
+// Apple's AVFoundation re-exports AudioToolbox, whose MIDI sequencer API
+// (MusicPlayer.h) declares these opaque types. They are mirrored here so the
+// simulation catches name clashes the real SDK would report.
+public typealias MusicPlayer = OpaquePointer
+public typealias MusicTrack = OpaquePointer
+public typealias MusicSequence = OpaquePointer
