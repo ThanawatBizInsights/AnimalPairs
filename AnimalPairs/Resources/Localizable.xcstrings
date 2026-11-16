@@ -1145,6 +1145,39 @@
         }
       }
     },
+    "opening.a11y": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opening animation: the ten animal friends gather."
+          }
+        }
+      }
+    },
+    "opening.skip": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Skip"
+          }
+        }
+      }
+    },
+    "opening.skip.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Goes straight to the home screen."
+          }
+        }
+      }
+    },
     "parents.contentVersion": {
       "extractionState": "manual",
       "localizations": {
@@ -1174,6 +1207,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "Not configured yet. Set %@ in the app's build settings before release."
+          }
+        }
+      }
+    },
+    "parents.music": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Music"
+          }
+        }
+      }
+    },
+    "parents.music.none": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No music is included in this version, so Music stays off."
           }
         }
       }

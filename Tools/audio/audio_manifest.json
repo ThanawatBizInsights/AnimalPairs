@@ -1,5 +1,5 @@
 {
-  "about": "Every Animal Pairs sound: what it is for, how it was made, what it cost and whether it is approved. Only 'approved' files (and synthesized fallbacks) are bundled in the app. Files awaiting review live in Design/Audio/Review/.",
+  "about": "Every Animal Pairs sound and video asset: purpose, prompt, duration, credits and approval status. Only 'approved' files and synthesized fallbacks are bundled. The app is English only.",
   "sfx_model_id": "eleven_text_to_sound_v3",
   "prompt_influence": 0.6,
   "credit_policy": {
@@ -197,7 +197,7 @@
       "prompt": "Soft, playful selection cue: a bouncy two-note wooden marimba blip going up, light and friendly, short and dry, child-friendly, no voice",
       "duration_seconds": 0.6,
       "file": "mode_select.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "SetupView mode/board choice",
       "generations": 1,
       "credits": {
@@ -207,7 +207,9 @@
       "final_duration_seconds": 0.406,
       "peak_dbfs": -11.2,
       "loudness_dbfs": -18.2,
-      "master": "Design/Audio/ElevenLabs/mode_select.mp3"
+      "master": "Design/Audio/ElevenLabs/mode_select.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "back",
@@ -217,7 +219,7 @@
       "prompt": "Gentle descending cue: two soft wooden xylophone notes stepping down, calm and friendly, short and dry, child-friendly, no voice",
       "duration_seconds": 0.7,
       "file": "back.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "AppModel.goHome / leaveParents",
       "generations": 1,
       "credits": {
@@ -227,7 +229,9 @@
       "final_duration_seconds": 0.68,
       "peak_dbfs": -10.8,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/back.mp3"
+      "master": "Design/Audio/ElevenLabs/back.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "pause",
@@ -237,7 +241,7 @@
       "prompt": "Calm two-note stop: two soft mellow music-box notes, the second one lower, settling and peaceful, short, child-friendly, no voice",
       "duration_seconds": 0.8,
       "file": "pause.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "GameSession.showPauseMenu",
       "generations": 1,
       "credits": {
@@ -247,7 +251,9 @@
       "final_duration_seconds": 0.8,
       "peak_dbfs": -12.5,
       "loudness_dbfs": -18.2,
-      "master": "Design/Audio/ElevenLabs/pause.mp3"
+      "master": "Design/Audio/ElevenLabs/pause.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "resume",
@@ -257,7 +263,7 @@
       "prompt": "Light two-note return: two soft bright music-box notes rising, gentle and cheerful, short, child-friendly, no voice",
       "duration_seconds": 0.8,
       "file": "resume.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "GameSession.resumeFromPauseMenu",
       "generations": 1,
       "credits": {
@@ -267,7 +273,9 @@
       "final_duration_seconds": 0.799,
       "peak_dbfs": -6.4,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/resume.mp3"
+      "master": "Design/Audio/ElevenLabs/resume.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "star_earn",
@@ -277,7 +285,7 @@
       "prompt": "Short sparkling chime: a single soft twinkling star sound with a tiny bell shimmer, gentle and magical, child-friendly, no voice",
       "duration_seconds": 0.9,
       "file": "star_earn.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": null,
       "generations": 1,
       "credits": {
@@ -287,7 +295,9 @@
       "final_duration_seconds": 0.861,
       "peak_dbfs": -8.4,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/star_earn.mp3"
+      "master": "Design/Audio/ElevenLabs/star_earn.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "badge_reveal",
@@ -297,7 +307,7 @@
       "prompt": "Warm magical reveal: soft rising chimes and a gentle harp sweep blooming into a warm glow, short, child-friendly, no voice",
       "duration_seconds": 1.6,
       "file": "badge_reveal.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": null,
       "generations": 1,
       "credits": {
@@ -307,7 +317,9 @@
       "final_duration_seconds": 1.497,
       "peak_dbfs": -9.8,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/badge_reveal.mp3"
+      "master": "Design/Audio/ElevenLabs/badge_reveal.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "perfect_round",
@@ -317,7 +329,7 @@
       "prompt": "Celebratory flourish a little bigger than a normal win: bright rising harp glissando with sparkling bells ending on a soft cheerful chord, child-friendly, no voice",
       "duration_seconds": 2.0,
       "file": "perfect_round.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "GameSession .completed when attempts == pairs (instead of board_complete)",
       "generations": 1,
       "credits": {
@@ -327,7 +339,9 @@
       "final_duration_seconds": 1.836,
       "peak_dbfs": -8.9,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/perfect_round.mp3"
+      "master": "Design/Audio/ElevenLabs/perfect_round.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "confetti",
@@ -337,7 +351,7 @@
       "prompt": "Soft paper confetti flutter with a subtle sparkle: a clearly audible light papery rustle of confetti falling, with a faint gentle twinkle, no music, child-friendly",
       "duration_seconds": 1.2,
       "file": "confetti.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "ResultsView, quietly after the jingle starts",
       "generations": 2,
       "credits": {
@@ -356,7 +370,9 @@
       "final_duration_seconds": 1.2,
       "peak_dbfs": -4.5,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/confetti.mp3"
+      "master": "Design/Audio/ElevenLabs/confetti.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "hint",
@@ -366,7 +382,7 @@
       "prompt": "Quiet, inviting cue: a soft gentle twinkle of two light chime notes, curious and encouraging, very gentle, child-friendly, no voice",
       "duration_seconds": 0.8,
       "file": "hint.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": "GameSession .hintShown (replaces the synthesized hint)",
       "generations": 1,
       "credits": {
@@ -376,7 +392,9 @@
       "final_duration_seconds": 0.478,
       "peak_dbfs": -8.5,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/hint.mp3"
+      "master": "Design/Audio/ElevenLabs/hint.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "try_again",
@@ -386,7 +404,7 @@
       "prompt": "Reassuring, encouraging cue: two soft warm marimba notes, gentle and kind, never an error sound, not a buzzer, child-friendly, no voice",
       "duration_seconds": 0.9,
       "file": "try_again.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": null,
       "generations": 1,
       "credits": {
@@ -396,7 +414,9 @@
       "final_duration_seconds": 0.753,
       "peak_dbfs": -10.6,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/try_again.mp3"
+      "master": "Design/Audio/ElevenLabs/try_again.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "new_best",
@@ -406,7 +426,7 @@
       "prompt": "Bright three-note achievement cue: three cheerful rising glockenspiel notes ending with a small sparkle, short, child-friendly, no voice",
       "duration_seconds": 1.2,
       "file": "new_best.wav",
-      "status": "awaiting_review",
+      "status": "approved",
       "game_hook": null,
       "generations": 1,
       "credits": {
@@ -416,7 +436,9 @@
       "final_duration_seconds": 1.144,
       "peak_dbfs": -7.2,
       "loudness_dbfs": -18.0,
-      "master": "Design/Audio/ElevenLabs/new_best.mp3"
+      "master": "Design/Audio/ElevenLabs/new_best.mp3",
+      "approved_at": "2026-11-16T05:41:32+00:00",
+      "approval_note": "Approved by the user (all created sound assets approved)."
     },
     {
       "name": "animal_momo",
@@ -428,7 +450,8 @@
       "file": "animal_momo.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "momo"
+      "character_id": "momo",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_iris",
@@ -440,7 +463,8 @@
       "file": "animal_iris.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "iris"
+      "character_id": "iris",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_nori",
@@ -452,7 +476,8 @@
       "file": "animal_nori.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "nori"
+      "character_id": "nori",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_sprout",
@@ -464,7 +489,8 @@
       "file": "animal_sprout.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "sprout"
+      "character_id": "sprout",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_mochi",
@@ -476,7 +502,8 @@
       "file": "animal_mochi.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "mochi"
+      "character_id": "mochi",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_sunny",
@@ -488,7 +515,8 @@
       "file": "animal_sunny.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "sunny"
+      "character_id": "sunny",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_maple",
@@ -500,7 +528,8 @@
       "file": "animal_maple.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "maple"
+      "character_id": "maple",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_clover",
@@ -512,7 +541,8 @@
       "file": "animal_clover.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "clover"
+      "character_id": "clover",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_rusty",
@@ -524,7 +554,8 @@
       "file": "animal_rusty.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "rusty"
+      "character_id": "rusty",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "animal_pebble",
@@ -536,51 +567,8 @@
       "file": "animal_pebble.wav",
       "status": "planned",
       "game_hook": "GameSession .matched, after pair_match",
-      "character_id": "pebble"
-    },
-    {
-      "name": "voice_find_pair",
-      "batch": "batch4_voice",
-      "kind": "voice",
-      "event": "Occasional nudge at the start of a round",
-      "text": "ลองหาคู่ที่เหมือนกันนะ",
-      "language": "th",
-      "file": "voice_find_pair.wav",
-      "status": "planned",
-      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
-    },
-    {
-      "name": "voice_great_match",
-      "batch": "batch4_voice",
-      "kind": "voice",
-      "event": "Occasional praise after a match",
-      "text": "เก่งมาก! เจอคู่แล้ว",
-      "language": "th",
-      "file": "voice_great_match.wav",
-      "status": "planned",
-      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
-    },
-    {
-      "name": "voice_try_again_voice",
-      "batch": "batch4_voice",
-      "kind": "voice",
-      "event": "Occasional encouragement after repeated misses",
-      "text": "ไม่เป็นไร ลองอีกครั้งนะ",
-      "language": "th",
-      "file": "voice_try_again_voice.wav",
-      "status": "planned",
-      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
-    },
-    {
-      "name": "voice_all_done",
-      "batch": "batch4_voice",
-      "kind": "voice",
-      "event": "When the board is complete",
-      "text": "เยี่ยมเลย จับคู่ครบแล้ว!",
-      "language": "th",
-      "file": "voice_all_done.wav",
-      "status": "planned",
-      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
+      "character_id": "pebble",
+      "note": "Not generated yet; the game plays nothing for this animal until a file is created and approved."
     },
     {
       "name": "synth_flip",
@@ -635,6 +623,26 @@
       "status": "fallback",
       "event": "hint fallback until the generated hint is approved",
       "source": "Tools/audio/build_sounds.py"
+    }
+  ],
+  "voice": {
+    "language": "en",
+    "lines": [],
+    "note": "No approved English voice recordings exist. The Voice switch is ready; lines are added only after the user asks for them."
+  },
+  "music": {
+    "tracks": [],
+    "note": "No licensed music file. The Music setting stays off."
+  },
+  "video": [
+    {
+      "name": "opening_video",
+      "file": "AnimalPairs/Resources/Video/opening_video.mp4",
+      "source": "Supplied by the user (Animals_gathering_for_memory_game.mp4)",
+      "status": "approved",
+      "format": "H.264 High 720x1280 (9:16 portrait), 24 fps, AAC stereo 48 kHz, 8.04 s",
+      "audio_loudness": "-22.4 LUFS integrated, peak -8.1 dBFS",
+      "use": "Plays once per app launch before Home"
     }
   ]
 }

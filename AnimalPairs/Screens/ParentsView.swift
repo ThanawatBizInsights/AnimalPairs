@@ -120,6 +120,17 @@ struct ParentsView: View {
             Toggle(t["parents.voice"], isOn: Binding(get: { model.settings.voiceEnabled },
                                                        set: { model.setVoiceEnabled($0) }))
                 .frame(minHeight: 44)
+            Toggle(isOn: Binding(get: { model.settings.musicEnabled && model.hasMusic },
+                                 set: { model.setMusicEnabled($0) })) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t["parents.music"])
+                    if !model.hasMusic {
+                        Text(t["parents.music.none"]).font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
+                    }
+                }
+            }
+            .disabled(!model.hasMusic)
+            .frame(minHeight: 44)
         }
     }
 

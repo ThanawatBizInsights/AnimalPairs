@@ -65,10 +65,12 @@ Currently shipped as **development placeholders**: the character's signature art
 | Trophy badge | `UI/results_trophy` ← `ui_trophy_badge.png` | final art supplied — localized “Well done!” is drawn on the ribbon by the app |
 | Card back | `UI/card_back` ← `ui_card_back.webp` | final art supplied — used on every card; the board uses its 0.735 width:height ratio so it is never stretched |
 | Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
-| ElevenLabs batch 1 (8 core sounds) | `AnimalPairs/Resources/Sounds/` | **approved** and bundled |
-| ElevenLabs batch 2 (11 interface & reward sounds) | `Design/Audio/Review/` | **awaiting your review** — not bundled. `star_earn`, `badge_reveal`, `new_best` have no game feature to attach to; `try_again` overlaps `pair_miss` |
-| ElevenLabs batch 3 (10 animal cues) | — | planned, after batch 2 review |
-| Thai voice lines (4) | — | planned; **needs a decision** (the app is English-only) |
+| ElevenLabs batch 1 (8 core sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled |
+| ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn` has no game event (no star system) |
+| Animal cues (10) | — | **not generated** — approved in principle, but no files exist; matches play only `pair_match` until they are created |
+| Voice recordings | — | none (English only; the planned Thai lines were removed) |
+| Music | — | none licensed; Music setting stays off |
+| Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |
 | Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint_synth`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | fallbacks only |
 | Full sound list, prompts, credits and status | `Tools/audio/audio_manifest.json` | source of truth |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |

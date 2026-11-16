@@ -24,6 +24,8 @@ struct RootView: View {
         ZStack {
             WarmBackground()
             switch model.route {
+            case .opening:
+                OpeningVideoView().transition(.opacity)
             case .welcome:
                 WelcomeView().transition(.opacity)
             case .home:

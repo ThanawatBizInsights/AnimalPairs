@@ -67,6 +67,67 @@ final class AppFlowTests: XCTestCase {
     }
 
 
+    func testOpeningVideoIsBundledAndPlaysOncePerLaunch() throws {
+        let url = try XCTUnwrap(OpeningVideo.url(), "opening_video.mp4 must be in the app target")
+        XCTAssertGreaterThan(try url.resourceValues(forKeys: [.fileSizeKey]).fileSize ?? 0, 1_000_000)
+
+        let defaults = AppTestSupport.isolatedDefaults()
+        let model = AppTestSupport.makeModel(defaults: defaults, playsOpeningVideo: true)
+        XCTAssertEqual(model.route, .opening)
+        model.finishOpening()
+        XCTAssertEqual(model.route, .welcome, "first launch continues to Welcome")
+        model.finishOpening()
+        XCTAssertEqual(model.route, .welcome, "finishing twice is harmless")
+
+        model.finishWelcome()
+        try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six))
+        model.goHome()
+        XCTAssertEqual(model.route, .home, "returning from a board never replays the video")
+
+        let nextLaunch = AppTestSupport.makeModel(defaults: defaults, playsOpeningVideo: true)
+        XCTAssertEqual(nextLaunch.route, .opening)
+        nextLaunch.finishOpening()
+        XCTAssertEqual(nextLaunch.route, .home, "later launches go to Home after the video")
+    }
+
+    func testBackgroundingDuringTheVideoContinuesToHome() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        defaults.set(true, forKey: "settings.hasSeenWelcome")
+        let model = AppTestSupport.makeModel(defaults: defaults, playsOpeningVideo: true)
+        model.scenePhaseChanged(.background)
+        XCTAssertEqual(model.route, .home)
+    }
+
+    func testOpeningVideoAudioFollowsSoundAndMusicSettings() {
+        let model = AppTestSupport.makeModel()
+        XCTAssertFalse(model.settings.musicEnabled, "Music is off: no licensed music is bundled")
+        XCTAssertFalse(model.hasMusic)
+        XCTAssertTrue(model.openingVideoAudible, "Sound Effects on by default")
+        model.setSoundEnabled(false)
+        XCTAssertFalse(model.openingVideoAudible, "muted when both switches are off")
+        model.setMusicEnabled(true)
+        XCTAssertTrue(model.openingVideoAudible)
+    }
+
+    func testMusicSwitchIsSavedSeparately() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        let model = AppTestSupport.makeModel(defaults: defaults)
+        model.setMusicEnabled(true)
+        let relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(relaunched.settings.musicEnabled)
+        XCTAssertTrue(relaunched.settings.soundEnabled)
+        XCTAssertTrue(relaunched.settings.voiceEnabled)
+    }
+
+    func testApprovedInterfaceAndRewardSoundsAreBundled() {
+        let audio = AudioManager(isEnabled: false, voiceEnabled: false)
+        for effect: SoundEffect in [.modeSelect, .back, .pause, .resume, .starEarn, .badgeReveal,
+                                    .perfectRound, .confetti, .hint, .tryAgain, .newBest] {
+            XCTAssertEqual(audio.resolvedFiles[effect], "\(effect.rawValue).wav", "\(effect) should play its own file")
+        }
+        XCTAssertTrue(audio.loadedVoiceLines.isEmpty, "no voice recordings are bundled")
+    }
+
     func testWelcomeShowsOnFirstLaunchOnly() {
         let defaults = AppTestSupport.isolatedDefaults()
         let first = AppTestSupport.makeModel(defaults: defaults)

@@ -97,7 +97,7 @@ final class ParentalGateTests: XCTestCase {
         var rng = SeededGenerator(seed: 1)
         var gate = ParentalGate(challenge: ParentalGateChallenge(lhs: 7, rhs: 8))
         XCTAssertEqual(gate.submit(" 56 ", using: &rng), .granted)
-        XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("๕๖"), "only 0–9 digits")
+        XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("５６"), "only ASCII 0–9 digits")
         XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("-56"))
         XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts("5 6"))
         XCTAssertFalse(ParentalGateChallenge(lhs: 7, rhs: 8).accepts(""))
@@ -133,5 +133,35 @@ final class ParentalGateTests: XCTestCase {
         session.grant(now: t0)
         session.revoke()
         XCTAssertFalse(session.isActive(now: t0))
+    }
+}
+
+final class PersonalBestTests: XCTestCase {
+    private func summary(_ attempts: Int, _ mode: GameMode = .classic, _ board: BoardSize = .twelve) -> RoundSummary {
+        RoundSummary(roundID: UUID(), configuration: GameConfiguration(mode: mode, boardSize: board), attempts: attempts,
+                     hintsUsed: 0, pairCount: board.pairCount, startedAt: Date(), completedAt: Date())
+    }
+
+    func testFirstResultIsNotANewBest() {
+        XCTAssertFalse(PersonalBest.isNewBest(summary(10), comparedTo: []))
+    }
+
+    func testFewerTriesThanEveryEarlierResultOnTheSameBoard() {
+        let history = [CompletionRecord(summary: summary(12)), CompletionRecord(summary: summary(9))]
+        XCTAssertTrue(PersonalBest.isNewBest(summary(8), comparedTo: history))
+        XCTAssertFalse(PersonalBest.isNewBest(summary(9), comparedTo: history), "a tie is not a new best")
+        XCTAssertFalse(PersonalBest.isNewBest(summary(11), comparedTo: history))
+    }
+
+    func testOtherModesAndBoardsDoNotCount() {
+        let history = [CompletionRecord(summary: summary(20, .exactPose, .twelve)),
+                       CompletionRecord(summary: summary(4, .classic, .six))]
+        XCTAssertFalse(PersonalBest.isNewBest(summary(15, .classic, .twelve), comparedTo: history))
+        XCTAssertTrue(PersonalBest.isNewBest(summary(15, .exactPose, .twelve), comparedTo: history))
+    }
+
+    func testTheSameRoundIsIgnored() {
+        let s = summary(5)
+        XCTAssertFalse(PersonalBest.isNewBest(s, comparedTo: [CompletionRecord(summary: s)]))
     }
 }

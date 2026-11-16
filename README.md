@@ -158,34 +158,49 @@ applies two unit-tested policies from the engine package:
 
 * `SoundPlaybackPolicy` — the same sound restarts instead of layering, rapid
   repeats are dropped, at most three different sounds overlap.
-* `NarrationPolicy` — spoken lines stay occasional: never two within 20 s,
-  praise on every third match, encouragement after three misses in a row,
-  "find a pair" only after two quiet minutes. Effects dip while a line plays.
+* `NarrationPolicy` — spoken lines (when recordings exist) stay occasional:
+  never two within 20 s, praise on every third match, encouragement after three
+  misses in a row, "find a pair" only after two quiet minutes. Effects dip while
+  a line plays. The same policy paces the `try_again` cue.
 
-**Sound effects** and **Voice** are separate saved switches (Parents → Settings;
-the board's speaker button controls sound effects).
+**Sound effects**, **Music** and **Voice** are separate saved switches (Parents →
+Settings; the board's speaker button controls sound effects). No licensed music
+is bundled, so Music stays off; no approved English voice recordings exist, so
+narration is silent until some are added.
+
+### Opening video
+
+`AnimalPairs/Resources/Video/opening_video.mp4` (720×1280 portrait, 8 s, H.264 +
+AAC) plays **once per app launch**, before Welcome (first launch) or Home. It
+never replays when returning from a board. It is aspect-fit on a matching
+backdrop so no animal is cropped, has a native **Skip** button, and moves on by
+itself when it ends, fails to load, runs longer than 15 s, or the app goes to
+the background. Its audio plays only if Sound Effects or Music is on, and all
+other audio is stopped while it plays. The title and Play button stay native UI
+on Home.
 
 ### Event map
 
-| Moment | Sound | Status |
-| --- | --- | --- |
-| Card turns face up | `card_flip` | approved |
-| Second card is not a match (after 0.35 s) | `pair_miss` — or, occasionally, voice `try_again_voice` | approved / voice planned |
-| Mismatched pair turns back | `card_close` | approved |
-| Pair matched (not the last) | `pair_match`, then the animal's cue `animal_<id>` at 0.75 s — or, occasionally, voice `great_match` instead | approved / animals planned |
-| Last pair matched | `board_complete`, or `perfect_round` when there were no misses | approved / in review |
-| Results screen | `completion_jingle`, soft `confetti` at 0.4 s, voice `all_done` after the jingle | approved / in review / planned |
-| Round starts, restarts or resumes | `game_start`, occasionally voice `find_pair` at 1.3 s | approved / planned |
-| Mode or board choice | `mode_select` | in review (plays `button_tap` meanwhile) |
-| Back / Home / leaving Parents | `back` | in review (plays `button_tap` meanwhile) |
-| Pause / resume | `pause` / `resume` | in review (plays `button_tap` meanwhile) |
-| Hint | `hint` | in review (plays the synthesized `hint_synth` meanwhile) |
-| Other buttons | `button_tap` | approved |
-| — | `star_earn`, `badge_reveal`, `new_best`, `try_again` | in review; **no game event yet** (see the asset checklist) |
+| Moment | Sound |
+| --- | --- |
+| Card turns face up | `card_flip` |
+| Second card is not a match (after 0.35 s) | `pair_miss`; after three misses in a row (at most every 20 s) the reassuring `try_again` instead |
+| Mismatched pair turns back | `card_close` |
+| Pair matched (not the last) | `pair_match`, then the animal's cue at 0.75 s (same cue for its default, play and nap art) — **animal cues not generated yet, so silent** |
+| Last pair matched | `board_complete`, or `perfect_round` when there were no misses |
+| Results screen | `badge_reveal` with the trophy, soft `confetti` at 0.4 s, then `completion_jingle` at 1.5 s — or `new_best` when this board was finished in fewer tries than ever before |
+| Round starts, restarts or resumes | `game_start` |
+| Mode or board choice | `mode_select` |
+| Back / Home / leaving Parents | `back` |
+| Pause / resume | `pause` / `resume` |
+| Hint | `hint` |
+| Other buttons | `button_tap` |
+| — | `star_earn`: bundled but **unused** (the game has no star system) |
 
-Until a sound is approved its event plays the fallback listed above, or stays
-silent; nothing in review is ever bundled. `python3 Tools/audio/check_audio.py`
-verifies that.
+Pending sounds are cancelled when a round is paused, restarted or left, and when
+leaving the Results screen, so nothing spills into the next screen.
+`python3 Tools/audio/check_audio.py` verifies that only approved files are
+bundled, every file is in the app target, and no Thai remains.
 
 ### Generating, reviewing and approving (developer machine only)
 

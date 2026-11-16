@@ -6,7 +6,11 @@ Run from the repository root: ``python3 Tools/audio/check_audio.py``
 * Only approved sounds and synthesized fallbacks are bundled in the app.
 * Nothing awaiting review, planned or rejected is bundled.
 * Every approved sound has its bundled file.
-* Every ``SoundEffect`` / voice line in AudioManager.swift has a manifest entry.
+* Every ``SoundEffect`` in AudioManager.swift has a manifest entry; any
+  bundled voice file has an approved English manifest entry.
+* No Thai script in the app resources or the manifest (the app is English only).
+* Every bundled audio/video file is inside the synchronized ``AnimalPairs/``
+  folder with no target-membership exceptions, i.e. in the Xcode app target.
 Exits non-zero on any problem.
 """
 from __future__ import annotations
@@ -20,7 +24,12 @@ ROOT = Path(__file__).resolve().parents[2]
 MANIFEST = ROOT / "Tools/audio/audio_manifest.json"
 BUNDLE = ROOT / "AnimalPairs/Resources/Sounds"
 SWIFT = ROOT / "AnimalPairs/Audio/AudioManager.swift"
-CORE = ROOT / "Packages/AnimalPairsKit/Sources/AnimalPairsCore/Audio/NarrationPolicy.swift"
+PROJECT = ROOT / "AnimalPairs.xcodeproj/project.pbxproj"
+RESOURCES = ROOT / "AnimalPairs/Resources"
+
+
+def has_thai(text: str) -> bool:
+    return any("\u0e00" <= ch <= "\u0e7f" for ch in text)
 
 
 def main() -> int:
@@ -49,15 +58,35 @@ def main() -> int:
         effects.add(raw or case)
     for effect in sorted(effects - names):
         problems.append(f"SoundEffect '{effect}' has no manifest entry")
-    for cue in re.findall(r'case \w+ = "([a-z_]+)"', CORE.read_text()):
-        if f"voice_{cue}" not in names:
-            problems.append(f"voice line '{cue}' has no manifest entry")
+    approved_voice = {s["file"] for s in sounds if s.get("kind") == "voice" and s["status"] == "approved"
+                      and s.get("language", "en") == "en"}
+    for name in sorted(n for n in bundled if n.startswith("voice_") and n not in approved_voice):
+        problems.append(f"voice file without an approved English manifest entry: {name}")
+
+    if has_thai(MANIFEST.read_text()):
+        problems.append("the audio manifest contains Thai text")
+    for path in RESOURCES.rglob("*"):
+        if path.suffix in {".xcstrings", ".json", ".strings", ".plist"} and has_thai(path.read_text(errors="ignore")):
+            problems.append(f"Thai text in app resource {path.relative_to(ROOT)}")
+
+    project = PROJECT.read_text()
+    if "path = AnimalPairs;" not in project or "PBXFileSystemSynchronizedRootGroup" not in project:
+        problems.append("AnimalPairs/ is not a synchronized group of the app target")
+    if "membershipExceptions" in project:
+        problems.append("the project excludes some files from the target; check membershipExceptions")
+    videos = manifest.get("video", [])
+    for video in videos:
+        path = ROOT / video["file"]
+        if not path.exists():
+            problems.append(f"video missing: {video['file']}")
+        elif not path.resolve().is_relative_to((ROOT / "AnimalPairs").resolve()):
+            problems.append(f"video outside the app target folder: {video['file']}")
 
     by_status: dict[str, int] = {}
     for s in sounds:
         by_status[s["status"]] = by_status.get(s["status"], 0) + 1
-    print(f"{len(sounds)} manifest entries {by_status}; {len(bundled)} bundled files; "
-          f"{len(effects)} app effects")
+    print(f"{len(sounds)} manifest entries {by_status}; {len(bundled)} bundled audio files; "
+          f"{len(effects)} app effects; {len(videos)} video(s); target: synchronized AnimalPairs/ folder")
     if problems:
         print("\n".join(problems))
         return 1

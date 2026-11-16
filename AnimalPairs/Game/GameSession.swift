@@ -98,9 +98,10 @@ final class GameSession {
             audio.play(.cardFlip)
             if let pending = controller.state.pendingResolution, !pending.isMatch,
                !audio.narrate(.missed, after: Self.missCueDelay) {
-                audio.play(.pairMiss, after: Self.missCueDelay)
+                audio.play(audio.missCue(), after: Self.missCueDelay)
             }
         case .matched(let key):
+            audio.noteMatch()
             // The final pair gets board_complete instead, never both at once.
             if !quiet && !controller.state.isCompleted {
                 audio.play(.pairMatch)

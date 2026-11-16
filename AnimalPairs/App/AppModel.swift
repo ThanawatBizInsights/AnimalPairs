@@ -4,6 +4,8 @@ import Observation
 import SwiftUI
 
 enum Route: Equatable {
+    /// The opening video, once per app launch.
+    case opening
     /// First launch only.
     case welcome
     case home
@@ -39,6 +41,8 @@ final class AppModel {
     private(set) var historyRevision = 0
     private var parentAccess = ParentAccessSession()
     @ObservationIgnored private var resultsTask: Task<Void, Never>?
+    /// Whether the round just finished beat this board's earlier best (sound only).
+    private(set) var lastResultIsNewBest = false
 
     /// `settings` defaults to `nil` and is created inside this @MainActor body
     /// (SettingsStore is main-actor isolated; see GameSession.init).
@@ -47,11 +51,18 @@ final class AppModel {
          history: CompletionHistoryStore? = nil,
          historyWarning: String? = nil,
          snapshots: RoundSnapshotStore? = nil,
-         contentBundle: Bundle = .main) {
+         contentBundle: Bundle = .main,
+         playsOpeningVideo: Bool = true) {
         let settings = settings ?? SettingsStore()
         self.settings = settings
         self.configuration = configuration
-        route = settings.hasSeenWelcome ? .home : .welcome
+        // The opening video plays once per launch (never when returning from a
+        // board); without the file, the app goes straight on.
+        if playsOpeningVideo && OpeningVideo.url(in: contentBundle) != nil {
+            route = .opening
+        } else {
+            route = settings.hasSeenWelcome ? .home : .welcome
+        }
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
         audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled)
@@ -94,6 +105,25 @@ final class AppModel {
         if enabled { audio.play(.buttonTap) }
     }
 
+    /// The saved "Music" setting. No licensed music is bundled yet, so it
+    /// stays off and only gates the opening video's soundtrack.
+    func setMusicEnabled(_ enabled: Bool) {
+        settings.musicEnabled = enabled
+    }
+
+    /// No music track is included in this version.
+    var hasMusic: Bool { false }
+
+    /// The opening video's audio plays only if Sound Effects or Music is on.
+    var openingVideoAudible: Bool { settings.soundEnabled || settings.musicEnabled }
+
+    /// Leaves the opening video for Home (or Welcome on first launch).
+    func finishOpening() {
+        guard route == .opening else { return }
+        route = settings.hasSeenWelcome ? .home : .welcome
+        refreshResumableRound()
+    }
+
     /// The saved "Voice" setting, independent of sound effects.
     func setVoiceEnabled(_ enabled: Bool) {
         settings.voiceEnabled = enabled
@@ -103,6 +133,7 @@ final class AppModel {
     // MARK: Navigation
 
     func goHome() {
+        audio.cancelPending()
         audio.play(.back)
         leaveGameIfNeeded()
         parentAccess.revoke()
@@ -118,6 +149,7 @@ final class AppModel {
     }
 
     func goToSetup() {
+        audio.cancelPending()
         audio.play(.buttonTap)
         leaveGameIfNeeded()
         route = .setup
@@ -129,6 +161,7 @@ final class AppModel {
 
     func startNewGame(_ configuration: GameConfiguration) throws {
         guard policy.isAvailable(configuration) else { throw StartError.locked }
+        audio.cancelPending()   // e.g. the Results jingle when tapping Play again
         var generator = SystemRandomNumberGenerator()
         let tiles: [Tile]
         do {
@@ -183,6 +216,7 @@ final class AppModel {
     }
 
     private func complete(_ summary: RoundSummary, from finished: GameSession) {
+        lastResultIsNewBest = PersonalBest.isNewBest(summary, comparedTo: (try? history.recentRecords()) ?? [])
         do {
             try history.record(summary)
         } catch {
@@ -233,6 +267,7 @@ final class AppModel {
             }
             parentAccess.revoke()
             if route == .parents || route == .parentGate { route = .home }
+            if route == .opening { finishOpening() }   // never replay it on return
         case .inactive:
             if let session, !session.state.isCompleted { persist(session.controller.normalizedState()) }
         case .active:

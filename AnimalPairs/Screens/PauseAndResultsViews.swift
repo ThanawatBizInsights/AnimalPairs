@@ -101,9 +101,12 @@ struct ResultsView: View {
             }
         }
         .onAppear {
-            model.audio.play(.completionJingle)
-            model.audio.play(.confetti, after: 0.4)          // soft, under the jingle
-            model.audio.narrate(.completed, after: 3.1)      // after the jingle ends
+            // Sequenced so nothing loud overlaps: the trophy's reveal, soft
+            // confetti, then the ending jingle (or the new-best cue).
+            model.audio.play(.badgeReveal)
+            model.audio.play(.confetti, after: 0.4)
+            model.audio.play(model.lastResultIsNewBest ? .newBest : .completionJingle, after: 1.5)
+            model.audio.narrate(.completed, after: 4.6)
         }
     }
 }
