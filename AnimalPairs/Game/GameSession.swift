@@ -45,13 +45,13 @@ final class GameSession {
         audio.cancelPending()
         controller.pause()
         isPauseMenuVisible = true
-        audio.play(.buttonTap)
+        audio.play(.pause)
     }
 
     func resumeFromPauseMenu() {
         isPauseMenuVisible = false
         controller.resume()
-        audio.play(.buttonTap)
+        audio.play(.resume)
     }
 
     /// Backgrounding: pause + normalize; the pause menu greets the child on return.
@@ -84,6 +84,10 @@ final class GameSession {
     /// Delay before the gentle "not a pair" cue, so the second card's flip is
     /// heard first. Cancelled if the round is paused, restarted or left.
     static let missCueDelay: TimeInterval = 0.35
+    /// The animal's own cue (or an occasional spoken line) starts as the
+    /// pair-match chime fades, so the two never sound at full level together.
+    /// Tune once the animal cues have been reviewed.
+    static let followUpDelay: TimeInterval = 0.75
 
     /// Event → sound mapping (see README "Sound effects").
     private func handle(_ event: RoundEvent) {
@@ -92,12 +96,22 @@ final class GameSession {
         switch event {
         case .revealed:
             audio.play(.cardFlip)
-            if let pending = controller.state.pendingResolution, !pending.isMatch {
+            if let pending = controller.state.pendingResolution, !pending.isMatch,
+               !audio.narrate(.missed, after: Self.missCueDelay) {
                 audio.play(.pairMiss, after: Self.missCueDelay)
             }
         case .matched(let key):
             // The final pair gets board_complete instead, never both at once.
-            if !quiet && !controller.state.isCompleted { audio.play(.pairMatch) }
+            if !quiet && !controller.state.isCompleted {
+                audio.play(.pairMatch)
+                // Then the animal's cue (same for its default, play and nap
+                // art), unless an occasional spoken line takes this moment.
+                if !audio.narrate(.matched, after: Self.followUpDelay),
+                   let character = catalog.artwork(key)?.characterID,
+                   let cue = SoundEffect.animal(character) {
+                    audio.play(cue, after: Self.followUpDelay)
+                }
+            }
             if let art = catalog.artwork(key) {
                 announce(localizer("a11y.announce.match", ArtworkText.description(art, localizer)))
             }
@@ -110,7 +124,8 @@ final class GameSession {
         case .tapIgnored:
             break
         case .completed(let summary):
-            audio.play(.boardComplete)
+            // A round with no misses gets the slightly bigger celebration.
+            audio.play(summary.attempts == summary.pairCount ? .perfectRound : .boardComplete)
             onCompleted?(summary)
         }
     }

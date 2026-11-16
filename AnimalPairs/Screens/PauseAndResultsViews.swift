@@ -100,7 +100,11 @@ struct ResultsView: View {
                 .frame(maxWidth: .infinity)
             }
         }
-        .onAppear { model.audio.play(.completionJingle) }
+        .onAppear {
+            model.audio.play(.completionJingle)
+            model.audio.play(.confetti, after: 0.4)          // soft, under the jingle
+            model.audio.narrate(.completed, after: 3.1)      // after the jingle ends
+        }
     }
 }
 

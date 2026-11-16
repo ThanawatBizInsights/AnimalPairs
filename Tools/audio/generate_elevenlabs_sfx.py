@@ -1,27 +1,31 @@
 #!/usr/bin/env python3
-"""Generate Animal Pairs sound effects with the ElevenLabs Sound Effects API.
+"""Generate, review and approve Animal Pairs sounds (ElevenLabs Sound Effects API).
 
-This is an OFFLINE developer tool. The iPad app never calls ElevenLabs; it
-only plays the processed WAV files this script writes into
-``AnimalPairs/Resources/Sounds/``.
+OFFLINE developer tool. The iPad app never calls ElevenLabs: it only plays
+files bundled in ``AnimalPairs/Resources/Sounds/``, and only *approved* files
+are copied there.
 
-The API key is read from the ``ELEVENLABS_API_KEY`` environment variable only.
-It is never printed, logged or written to disk. Set it for one shell session:
+Source of truth: ``Tools/audio/audio_manifest.json`` (prompts, durations,
+credits, approval status). Every API attempt is also appended to
+``Tools/audio/elevenlabs_credit_log.json``.
 
-    export ELEVENLABS_API_KEY='…'        # macOS/Linux (zsh/bash)
+The API key is read only from ``ELEVENLABS_API_KEY``; it is never printed,
+logged or written to disk:
+
+    export ELEVENLABS_API_KEY='sk_…'
 
 Usage (from the repository root):
 
-    python3 Tools/audio/generate_elevenlabs_sfx.py --dry-run     # plan + cost, no API calls
-    python3 Tools/audio/generate_elevenlabs_sfx.py               # generate missing sounds
-    python3 Tools/audio/generate_elevenlabs_sfx.py --only pair_miss --regenerate
-    python3 Tools/audio/generate_elevenlabs_sfx.py --process-only # re-normalize from saved masters
+    python3 Tools/audio/generate_elevenlabs_sfx.py --status
+    python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch2_interface --dry-run
+    python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch2_interface
+    python3 Tools/audio/generate_elevenlabs_sfx.py --approve mode_select back
+    python3 Tools/audio/generate_elevenlabs_sfx.py --reject confetti --reason "too loud"
+    python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch2_interface --only confetti   # regenerate a rejected one
 
-Budget: every call is charged against ``credit_limit`` in the batch file using
-a conservative estimate (the larger of 40 credits/second and 200 credits per
-generation). The script stops *before* a call that could exceed the limit.
-Every attempt is appended to ``Tools/audio/elevenlabs_credit_log.json``, with
-the credit use reported by ElevenLabs where the account allows reading it.
+Rules: approved sounds are never regenerated or overwritten; new audio goes
+to ``Design/Audio/Review/`` until approved; a batch stops before its credit
+limit (estimated at the documented 40 credits/second, ~4x the observed rate).
 
 Requires: Python 3.10+, numpy, ffmpeg on PATH.
 """
@@ -31,6 +35,7 @@ import argparse
 import json
 import math
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -42,43 +47,43 @@ from pathlib import Path
 import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
-BATCH = ROOT / "Tools/audio/sfx_batch1.json"
+MANIFEST = ROOT / "Tools/audio/audio_manifest.json"
 LEDGER = ROOT / "Tools/audio/elevenlabs_credit_log.json"
 MASTERS = ROOT / "Design/Audio/ElevenLabs"
-OUTPUT = ROOT / "AnimalPairs/Resources/Sounds"
+REVIEW = ROOT / "Design/Audio/Review"
+BUNDLE = ROOT / "AnimalPairs/Resources/Sounds"
 API = "https://api.elevenlabs.io"
 OUTPUT_FORMAT = "mp3_44100_128"
-CREDITS_PER_SECOND = 40          # documented rate when duration_seconds is set
-CREDITS_FLOOR_PER_CALL = 200     # conservative floor (rate reported for auto-duration)
 SAMPLE_RATE = 44_100
 TARGET_LOUDNESS_DBFS = -18.0     # loudest 50 ms window (RMS) of every effect
 PEAK_CEILING_DBFS = -3.0
 SILENCE_DBFS = -50.0
+UNUSABLE_PEAK_DBFS = -40.0       # anything quieter is treated as a failed take
 
 
-def estimate_credits(duration: float) -> int:
-    return max(math.ceil(duration * CREDITS_PER_SECOND), CREDITS_FLOOR_PER_CALL)
+# MARK: Manifest and ledger
+
+def load_json(path: Path, default: dict) -> dict:
+    return json.loads(path.read_text()) if path.exists() else default
 
 
-def load_ledger() -> dict:
-    if LEDGER.exists():
-        return json.loads(LEDGER.read_text())
-    return {"note": "Each ElevenLabs generation attempt. 'charged_credits' uses the reported value "
-                    "when available, otherwise the conservative estimate.", "entries": []}
+def save_json(path: Path, data: dict) -> None:
+    path.write_text(json.dumps(data, indent=2, ensure_ascii=False) + "\n")
 
 
-def save_ledger(ledger: dict) -> None:
-    LEDGER.write_text(json.dumps(ledger, indent=2) + "\n")
+def now_iso() -> str:
+    return datetime.now(timezone.utc).isoformat(timespec="seconds")
 
 
-def charged_total(ledger: dict) -> int:
-    return sum(e.get("charged_credits", 0) for e in ledger["entries"])
+def estimate_credits(manifest: dict, duration: float) -> int:
+    return math.ceil(duration * manifest["credit_policy"]["estimate_credits_per_second"])
 
 
-def api_key() -> str | None:
-    key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
-    return key or None
+def batch_charged(ledger: dict, batch: str) -> int:
+    return sum(e.get("charged_credits", 0) for e in ledger["entries"] if e.get("batch") == batch)
 
+
+# MARK: API
 
 def request(method: str, path: str, key: str, body: dict | None = None,
             query: str = "") -> tuple[int, dict, bytes]:
@@ -94,13 +99,14 @@ def request(method: str, path: str, key: str, body: dict | None = None,
         return error.code, dict(error.headers or {}), error.read()
 
 
-def credits_used(key: str) -> int | None:
-    """Account credit counter, if the key may read it (user_read permission)."""
+def account_remaining(key: str) -> int | None:
+    """Remaining account credits, if the key may read them (user_read)."""
     status, _, body = request("GET", "/v1/user/subscription", key)
     if status != 200:
         return None
     try:
-        return int(json.loads(body)["character_count"])
+        data = json.loads(body)
+        return int(data["character_limit"]) - int(data["character_count"])
     except (ValueError, KeyError, TypeError):
         return None
 
@@ -115,6 +121,8 @@ def error_detail(body: bytes) -> str:
         return body[:200].decode(errors="replace")
 
 
+# MARK: Audio processing
+
 def decode(path: Path) -> np.ndarray:
     pcm = subprocess.run(
         ["ffmpeg", "-v", "error", "-i", str(path), "-ac", "1", "-ar", str(SAMPLE_RATE), "-f", "f32le", "-"],
@@ -122,23 +130,30 @@ def decode(path: Path) -> np.ndarray:
     return np.frombuffer(pcm, dtype=np.float32).astype(np.float64)
 
 
+def window_loudness(audio: np.ndarray, window_seconds: float = 0.05) -> float:
+    """RMS of the loudest short window: how loud a brief effect is perceived."""
+    size = max(1, min(audio.size, int(window_seconds * SAMPLE_RATE)))
+    power = np.convolve(audio ** 2, np.ones(size) / size, mode="valid")
+    return float(np.sqrt(np.max(power)))
+
+
 def process(master: Path, target: Path) -> dict:
     """Trim silence, loudness-match, fade, and write 16-bit mono WAV."""
     audio = decode(master)
     if audio.size == 0:
-        raise ValueError(f"{master.name} decoded to no audio")
+        raise ValueError("decoded to no audio")
+    peak_in = 20 * math.log10(max(float(np.max(np.abs(audio))), 1e-9))
+    if peak_in < UNUSABLE_PEAK_DBFS:
+        raise ValueError(f"near-silent output (peak {peak_in:.0f} dBFS)")
     threshold = 10 ** (SILENCE_DBFS / 20)
     loud = np.nonzero(np.abs(audio) > threshold)[0]
-    if loud.size == 0:
-        raise ValueError(f"{master.name} is silent")
     start = max(0, loud[0] - int(0.005 * SAMPLE_RATE))
     end = min(audio.size, loud[-1] + int(0.05 * SAMPLE_RATE))
     audio = audio[start:end]
 
-    loudness = window_loudness(audio)
-    gain = 10 ** (TARGET_LOUDNESS_DBFS / 20) / max(loudness, 1e-9)
-    peak = float(np.max(np.abs(audio))) * gain
+    gain = 10 ** (TARGET_LOUDNESS_DBFS / 20) / max(window_loudness(audio), 1e-9)
     ceiling = 10 ** (PEAK_CEILING_DBFS / 20)
+    peak = float(np.max(np.abs(audio))) * gain
     if peak > ceiling:
         gain *= ceiling / peak
     audio = audio * gain
@@ -154,79 +169,110 @@ def process(master: Path, target: Path) -> dict:
     pcm = (np.clip(audio, -1, 1) * 32767).astype("<i2").tobytes()
     subprocess.run(["ffmpeg", "-v", "error", "-y", "-f", "s16le", "-ar", str(SAMPLE_RATE), "-ac", "1",
                     "-i", "-", str(target)], input=pcm, check=True)
-    return {"duration_seconds": round(audio.size / SAMPLE_RATE, 3),
-            "peak_dbfs": round(20 * math.log10(max(np.max(np.abs(audio)), 1e-9)), 1),
+    return {"final_duration_seconds": round(audio.size / SAMPLE_RATE, 3),
+            "peak_dbfs": round(20 * math.log10(max(float(np.max(np.abs(audio))), 1e-9)), 1),
             "loudness_dbfs": round(20 * math.log10(max(window_loudness(audio), 1e-9)), 1)}
 
 
-def window_loudness(audio: np.ndarray, window_seconds: float = 0.05) -> float:
-    """RMS of the loudest short window: how loud a brief effect is perceived."""
-    size = max(1, min(audio.size, int(window_seconds * SAMPLE_RATE)))
-    power = np.convolve(audio ** 2, np.ones(size) / size, mode="valid")
-    return float(np.sqrt(np.max(power)))
+# MARK: Commands
+
+def show_status(manifest: dict) -> None:
+    print(f"{'name':<22}{'batch':<18}{'status':<16}{'req s':>6}{'final s':>8}  file")
+    for s in manifest["sounds"]:
+        print(f"{s['name']:<22}{s['batch']:<18}{s['status']:<16}{s.get('duration_seconds', ''):>6}"
+              f"{s.get('final_duration_seconds', ''):>8}  {s.get('file', '')}")
 
 
-def main() -> int:
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    parser.add_argument("--dry-run", action="store_true", help="show the plan and estimated cost only")
-    parser.add_argument("--only", nargs="*", help="limit to these sound names")
-    parser.add_argument("--regenerate", action="store_true", help="generate even if a master exists")
-    parser.add_argument("--process-only", action="store_true", help="re-normalize existing masters")
-    args = parser.parse_args()
+def approve(manifest: dict, names: list[str]) -> int:
+    failures = 0
+    for name in names:
+        sound = next((s for s in manifest["sounds"] if s["name"] == name), None)
+        if sound is None or sound["status"] != "awaiting_review":
+            print(f"skip {name}: not awaiting review ({sound['status'] if sound else 'unknown'})")
+            failures += 1
+            continue
+        review = REVIEW / sound["file"]
+        BUNDLE.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(review, BUNDLE / sound["file"])
+        sound["status"] = "approved"
+        sound["approved_at"] = now_iso()
+        print(f"approved {name} -> AnimalPairs/Resources/Sounds/{sound['file']}")
+    save_json(MANIFEST, manifest)
+    return 1 if failures else 0
 
-    batch = json.loads(BATCH.read_text())
-    sounds = [s for s in batch["sounds"] if not args.only or s["name"] in args.only]
-    ledger = load_ledger()
-    limit = int(batch["credit_limit"])
 
-    if args.process_only:
-        for sound in sounds:
-            master = MASTERS / f"{sound['name']}.mp3"
-            if master.exists():
-                print(f"processed {sound['name']}.wav {process(master, OUTPUT / (sound['name'] + '.wav'))}")
-        return 0
+def reject(manifest: dict, names: list[str], reason: str) -> int:
+    for name in names:
+        sound = next((s for s in manifest["sounds"] if s["name"] == name), None)
+        if sound is None or sound["status"] != "awaiting_review":
+            print(f"skip {name}: only sounds awaiting review can be rejected")
+            continue
+        stamp = now_iso().replace(":", "")
+        for path in (MASTERS / f"{name}.mp3", REVIEW / sound["file"]):
+            if path.exists():
+                dest = MASTERS / "rejected" / f"{path.stem}-{stamp}{path.suffix}"
+                dest.parent.mkdir(parents=True, exist_ok=True)
+                path.replace(dest)
+        sound["status"] = "rejected"
+        sound.setdefault("rejections", []).append({"time": now_iso(), "reason": reason})
+        print(f"rejected {name}: {reason}")
+    save_json(MANIFEST, manifest)
+    return 0
 
-    todo = [s for s in sounds if args.regenerate or not (MASTERS / f"{s['name']}.mp3").exists()]
-    planned = sum(estimate_credits(s["duration_seconds"]) for s in todo)
-    print(f"model {batch['model_id']} · {len(todo)} to generate · conservative estimate {planned} credits · "
-          f"already charged {charged_total(ledger)} · limit {limit}")
+
+def generate(manifest: dict, batch: str, only: list[str] | None, dry_run: bool) -> int:
+    ledger = load_json(LEDGER, {"entries": []})
+    in_batch = [s for s in manifest["sounds"] if s["batch"] == batch]
+    if not in_batch:
+        print(f"unknown batch {batch}")
+        return 2
+    if any(s["kind"] != "sfx" for s in in_batch):
+        print(f"{batch} contains voice lines; voice generation is not enabled in this tool yet.")
+        return 2
+    todo = [s for s in in_batch
+            if s["status"] in ("planned", "rejected") and (not only or s["name"] in only)]
+    skipped = [s["name"] for s in in_batch if only and s["name"] in only and s not in todo]
+    for name in skipped:
+        print(f"skip {name}: status is not planned/rejected (approved sounds are never regenerated)")
+
+    limit = manifest["credit_policy"]["per_batch_limit"]
+    planned = sum(estimate_credits(manifest, s["duration_seconds"]) for s in todo)
+    print(f"model {manifest['sfx_model_id']} · batch {batch} · {len(todo)} to generate · "
+          f"estimate ≤{planned} credits · already charged to batch {batch_charged(ledger, batch)} · limit {limit}")
     for s in todo:
-        print(f"  {s['name']:<18} {s['duration_seconds']:>4}s  ≤{estimate_credits(s['duration_seconds'])} credits")
-    if args.dry_run or not todo:
+        print(f"  {s['name']:<20} {s['duration_seconds']:>4}s  ≤{estimate_credits(manifest, s['duration_seconds'])}")
+    if dry_run or not todo:
         return 0
 
-    key = api_key()
-    if key is None:
+    key = os.environ.get("ELEVENLABS_API_KEY", "").strip()
+    if not key:
         print("\nELEVENLABS_API_KEY is not set. Set it for this shell, then rerun:\n"
-              "  export ELEVENLABS_API_KEY='your-key'   # zsh/bash; the key is never stored or printed",
-              file=sys.stderr)
+              "  export ELEVENLABS_API_KEY='sk_…'   # never stored or printed", file=sys.stderr)
         return 2
 
+    stop_below = manifest["credit_policy"]["stop_if_account_remaining_below"]
     MASTERS.mkdir(parents=True, exist_ok=True)
     for sound in todo:
-        estimate = estimate_credits(sound["duration_seconds"])
-        if charged_total(ledger) + estimate > limit:
-            print(f"STOP before {sound['name']}: {charged_total(ledger)} + {estimate} would exceed {limit} credits")
+        estimate = estimate_credits(manifest, sound["duration_seconds"])
+        if batch_charged(ledger, batch) + estimate > limit:
+            print(f"STOP before {sound['name']}: batch would exceed {limit} credits")
             break
-        before = credits_used(key)
-        body = {"text": sound["prompt"], "model_id": batch["model_id"],
-                "duration_seconds": sound["duration_seconds"], "prompt_influence": batch["prompt_influence"]}
+        remaining = account_remaining(key)
+        if remaining is not None and remaining - estimate < stop_below:
+            print(f"STOP before {sound['name']}: only {remaining} account credits remain")
+            break
+        body = {"text": sound["prompt"], "model_id": manifest["sfx_model_id"],
+                "duration_seconds": sound["duration_seconds"], "prompt_influence": manifest["prompt_influence"]}
         status, headers, payload = request("POST", "/v1/sound-generation", key, body,
                                            query=f"?output_format={OUTPUT_FORMAT}")
-        after = credits_used(key) if status == 200 else before
-        reported = (after - before) if (before is not None and after is not None) else None
-        entry = {
-            "time": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-            "batch": batch["batch"], "name": sound["name"], "model_id": batch["model_id"],
-            "duration_seconds": sound["duration_seconds"], "http_status": status,
-            "request_id": headers.get("request-id") or headers.get("Request-Id"),
-            "estimated_credits": estimate, "reported_credits": reported,
-            "charged_credits": (reported if reported is not None else estimate) if status == 200 else 0,
-        }
+        entry = {"time": now_iso(), "batch": batch, "name": sound["name"], "model_id": manifest["sfx_model_id"],
+                 "duration_seconds": sound["duration_seconds"], "http_status": status,
+                 "request_id": headers.get("request-id") or headers.get("Request-Id"),
+                 "estimated_credits": estimate, "charged_credits": estimate if status == 200 else 0}
         if status != 200:
             entry["error"] = error_detail(payload)
             ledger["entries"].append(entry)
-            save_ledger(ledger)
+            save_json(LEDGER, ledger)
             print(f"FAILED {sound['name']}: HTTP {status} {entry['error']}")
             if status in (401, 403, 429) or status >= 500:
                 print("Stopping: fix the key/quota or retry later.")
@@ -234,28 +280,58 @@ def main() -> int:
             continue
         master = MASTERS / f"{sound['name']}.mp3"
         master.write_bytes(payload)
-        # Record the paid call before anything else can fail.
-        entry["review"] = "processing"
-        ledger["entries"].append(entry)
-        save_ledger(ledger)
+        ledger["entries"].append(entry)          # record the paid call first
+        save_json(LEDGER, ledger)
+        sound["generations"] = sound.get("generations", 0) + 1
+        credits = sound.setdefault("credits", {"script_estimate": 0, "account_rate_estimate": 0})
+        credits["script_estimate"] += estimate
+        credits["account_rate_estimate"] += round(
+            sound["duration_seconds"] * manifest["credit_policy"]["observed_credits_per_second"])
         try:
-            entry["processed"] = process(master, OUTPUT / f"{sound['name']}.wav")
+            sound.update(process(master, REVIEW / sound["file"]))
+            sound["master"] = str(master.relative_to(ROOT))
+            sound["status"] = "awaiting_review"
             entry["review"] = "awaiting review"
-            outcome = "ok"
+            print(f"ok {sound['name']:<20} {sound['final_duration_seconds']}s  "
+                  f"loudness {sound['loudness_dbfs']} dBFS  -> Design/Audio/Review/{sound['file']}")
         except (ValueError, subprocess.CalledProcessError) as error:
-            rejected = MASTERS / "rejected" / f"{sound['name']}-{entry['time'].replace(':', '')}.mp3"
-            rejected.parent.mkdir(parents=True, exist_ok=True)
-            master.replace(rejected)
+            dest = MASTERS / "rejected" / f"{sound['name']}-{entry['time'].replace(':', '')}.mp3"
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            master.replace(dest)
+            sound["status"] = "rejected"
+            sound.setdefault("rejections", []).append({"time": entry["time"], "reason": f"automatic: {error}"})
             entry["review"] = f"unusable: {error}"
-            entry["rejected_master"] = str(rejected.relative_to(ROOT))
-            outcome = "UNUSABLE"
-        save_ledger(ledger)
-        print(f"{outcome} {sound['name']}  credits {entry['charged_credits']}"
-              f"{' (reported)' if reported is not None else ' (estimated)'}  total {charged_total(ledger)}"
-              f"{'' if outcome == 'ok' else '  -> ' + entry['review']}")
+            print(f"UNUSABLE {sound['name']}: {error} (kept in rejected/)")
+        save_json(LEDGER, ledger)
+        save_json(MANIFEST, manifest)
         time.sleep(0.5)
-    print(f"Total charged against budget: {charged_total(ledger)} / {limit}")
+    print(f"Batch {batch}: {batch_charged(ledger, batch)} credits charged by estimate (limit {limit})")
     return 0
+
+
+def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--status", action="store_true", help="list every sound and its approval status")
+    parser.add_argument("--batch", help="generate the planned/rejected sounds of this batch")
+    parser.add_argument("--only", nargs="*", help="limit generation to these names")
+    parser.add_argument("--dry-run", action="store_true", help="plan and estimate only, no API calls")
+    parser.add_argument("--approve", nargs="*", help="bundle these reviewed sounds into the app")
+    parser.add_argument("--reject", nargs="*", help="reject these reviewed sounds")
+    parser.add_argument("--reason", default="rejected in review", help="reason for --reject")
+    args = parser.parse_args()
+
+    manifest = load_json(MANIFEST, {})
+    if args.status:
+        show_status(manifest)
+        return 0
+    if args.approve:
+        return approve(manifest, args.approve)
+    if args.reject:
+        return reject(manifest, args.reject, args.reason)
+    if args.batch:
+        return generate(manifest, args.batch, args.only, args.dry_run)
+    parser.print_help()
+    return 1
 
 
 if __name__ == "__main__":

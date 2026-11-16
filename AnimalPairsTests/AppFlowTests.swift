@@ -31,11 +31,41 @@ final class AppFlowTests: XCTestCase {
         XCTAssertFalse(relaunched.audio.isEnabled)
     }
 
-    func testEverySoundEffectHasABundledFile() {
-        let audio = AudioManager(isEnabled: false)
-        XCTAssertEqual(audio.loadedEffects, Set(SoundEffect.allCases),
-                       "each effect resolves to its generated file or the synthesized fallback")
+    func testEffectsPlayTheirFileAFallbackOrStaySilentUntilApproved() {
+        let audio = AudioManager(isEnabled: false, voiceEnabled: false)
+        for effect in SoundEffect.allCases where !effect.fallbackFiles.isEmpty {
+            XCTAssertTrue(audio.loadedEffects.contains(effect), "\(effect) should have its file or a fallback")
+        }
+        // Batch 1 is approved: these play their own generated files.
+        for effect: SoundEffect in [.cardFlip, .cardClose, .pairMatch, .pairMiss, .boardComplete,
+                                    .buttonTap, .gameStart, .completionJingle] {
+            XCTAssertEqual(audio.resolvedFiles[effect], "\(effect.rawValue).wav")
+        }
     }
+
+    func testAnimalCueIsSharedByAllPosesOfACharacter() {
+        let model = AppTestSupport.makeModel()
+        for character in model.catalog.manifest.characters {
+            let cue = SoundEffect.animal(character.id)
+            XCTAssertNotNil(cue, "\(character.id) needs an animal cue")
+            let poses = model.catalog.manifest.artworks.filter { $0.characterID == character.id }
+            XCTAssertEqual(Set(poses.compactMap { SoundEffect.animal($0.characterID) }), [cue!])
+        }
+        XCTAssertEqual(SoundEffect.animal("iris"), .animalIris)
+    }
+
+    func testVoiceSwitchIsSavedSeparatelyFromSoundEffects() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        let model = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(model.settings.voiceEnabled)
+        model.setVoiceEnabled(false)
+        XCTAssertFalse(model.audio.voiceEnabled)
+        XCTAssertTrue(model.audio.isEnabled, "sound effects are unaffected")
+        let relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertFalse(relaunched.settings.voiceEnabled)
+        XCTAssertTrue(relaunched.settings.soundEnabled)
+    }
+
 
     func testWelcomeShowsOnFirstLaunchOnly() {
         let defaults = AppTestSupport.isolatedDefaults()

@@ -52,7 +52,8 @@ SOUNDS = {
     "flip": (render([bell(880, 0, 0.14, 28)], 0.16)),
     "match": (render([bell(1046.5, 0, 0.5, 7), bell(1318.5, 0.11, 0.6, 6)], 0.75)),
     "mismatch": (render([bell(523.25, 0, 0.3, 10), bell(440, 0.14, 0.35, 10)], 0.52)),
-    "hint": (render([bell(1568, 0, 0.25, 14), bell(1760, 0.08, 0.25, 14), bell(2093, 0.16, 0.3, 12)], 0.5)),
+    # Fallback name: the approved ElevenLabs hint is bundled as hint.wav.
+    "hint_synth": (render([bell(1568, 0, 0.25, 14), bell(1760, 0.08, 0.25, 14), bell(2093, 0.16, 0.3, 12)], 0.5)),
     "complete": (render([bell(523.25, 0, 0.6, 5), bell(659.25, 0.15, 0.6, 5), bell(783.99, 0.3, 0.6, 5), bell(1046.5, 0.45, 0.9, 4)], 1.4)),
     "tap": (render([bell(660, 0, 0.08, 40)], 0.1)),
 }

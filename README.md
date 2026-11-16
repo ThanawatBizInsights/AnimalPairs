@@ -148,52 +148,71 @@ accounts, chat or third-party analytics. Progress stays on the device. A
 privacy manifest (`PrivacyInfo.xcprivacy`) declares the only required-reason
 API used (UserDefaults).
 
-## Sound effects
+## Sound effects and voice
 
 All audio is local: the app plays bundled files from `AnimalPairs/Resources/Sounds/`
 and **never contacts ElevenLabs** (or any server). `AudioManager`
-(`AnimalPairs/Audio/AudioManager.swift`) preloads one player per effect, uses
-the ambient audio session (respects the silent switch, never interrupts music)
-and applies `SoundPlaybackPolicy` (engine package, unit-tested): the same sound
-restarts instead of layering, rapid repeats are dropped, and at most three
-different sounds overlap, with lower-priority ones yielding.
+(`AnimalPairs/Audio/AudioManager.swift`) preloads one player per sound, uses the
+ambient audio session (respects the silent switch, never interrupts music) and
+applies two unit-tested policies from the engine package:
 
-| File | Plays when | Where |
+* `SoundPlaybackPolicy` — the same sound restarts instead of layering, rapid
+  repeats are dropped, at most three different sounds overlap.
+* `NarrationPolicy` — spoken lines stay occasional: never two within 20 s,
+  praise on every third match, encouragement after three misses in a row,
+  "find a pair" only after two quiet minutes. Effects dip while a line plays.
+
+**Sound effects** and **Voice** are separate saved switches (Parents → Settings;
+the board's speaker button controls sound effects).
+
+### Event map
+
+| Moment | Sound | Status |
 | --- | --- | --- |
-| `card_flip` | a card turns face up | `GameSession` (`.revealed`) |
-| `pair_miss` | 0.35 s after the second card, if it is not a match (cancelled on pause/exit) | `GameSession` |
-| `card_close` | a mismatched pair turns back over (1.2 s) | `GameSession` (`.mismatchCovered`) |
-| `pair_match` | a pair is confirmed (not the last one) | `GameSession` (`.matched`) |
-| `board_complete` | the last pair is matched | `GameSession` (`.completed`) |
-| `completion_jingle` | the Results screen appears | `ResultsView` |
-| `game_start` | a new, restarted or resumed round begins | `AppModel` |
-| `button_tap` | navigation, choices, pause/resume, settings | `AppModel`, `SetupView`, `GameSession` |
-| `hint` | a hint is shown (synthesized; not in the ElevenLabs batch) | `GameSession` |
+| Card turns face up | `card_flip` | approved |
+| Second card is not a match (after 0.35 s) | `pair_miss` — or, occasionally, voice `try_again_voice` | approved / voice planned |
+| Mismatched pair turns back | `card_close` | approved |
+| Pair matched (not the last) | `pair_match`, then the animal's cue `animal_<id>` at 0.75 s — or, occasionally, voice `great_match` instead | approved / animals planned |
+| Last pair matched | `board_complete`, or `perfect_round` when there were no misses | approved / in review |
+| Results screen | `completion_jingle`, soft `confetti` at 0.4 s, voice `all_done` after the jingle | approved / in review / planned |
+| Round starts, restarts or resumes | `game_start`, occasionally voice `find_pair` at 1.3 s | approved / planned |
+| Mode or board choice | `mode_select` | in review (plays `button_tap` meanwhile) |
+| Back / Home / leaving Parents | `back` | in review (plays `button_tap` meanwhile) |
+| Pause / resume | `pause` / `resume` | in review (plays `button_tap` meanwhile) |
+| Hint | `hint` | in review (plays the synthesized `hint_synth` meanwhile) |
+| Other buttons | `button_tap` | approved |
+| — | `star_earn`, `badge_reveal`, `new_best`, `try_again` | in review; **no game event yet** (see the asset checklist) |
 
-Until a generated file exists, each effect falls back to the synthesized
-development tone (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint`.wav),
-so the game is never silent. **Sound effects** can be switched off from the
-board's speaker button or Parents → Settings; the choice is saved.
+Until a sound is approved its event plays the fallback listed above, or stays
+silent; nothing in review is ever bundled. `python3 Tools/audio/check_audio.py`
+verifies that.
 
-### Generating the ElevenLabs batch (developer machine only)
+### Generating, reviewing and approving (developer machine only)
 
-The prompts, durations and 5,000-credit cap live in `Tools/audio/sfx_batch1.json`
-(model `eleven_text_to_sound_v3`). Requires `ffmpeg` (`brew install ffmpeg`) and
+`Tools/audio/audio_manifest.json` lists every sound with its prompt, requested
+and final duration, credits and status (`planned` → `awaiting_review` →
+`approved` / `rejected`). Requires `ffmpeg` (`brew install ffmpeg`) and
 `pip install -r Tools/requirements.txt`.
 
 ```bash
-export ELEVENLABS_API_KEY='…'   # current shell only; never commit it or put it in the app
-python3 Tools/audio/generate_elevenlabs_sfx.py --dry-run   # plan + estimate, no API calls
-python3 Tools/audio/generate_elevenlabs_sfx.py             # generates only the missing sounds
+export ELEVENLABS_API_KEY='sk_…'                    # this shell only; never commit it
+python3 Tools/audio/generate_elevenlabs_sfx.py --status
+python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals --dry-run
+python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals
+#   → listen in Design/Audio/Review/
+python3 Tools/audio/generate_elevenlabs_sfx.py --approve animal_momo animal_iris
+python3 Tools/audio/generate_elevenlabs_sfx.py --reject animal_nori --reason "too loud"
+python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals --only animal_nori   # one retry
+python3 Tools/audio/check_audio.py
 ```
 
-The script never prints or stores the key, estimates each call conservatively
-(the larger of 40 credits/s and 200 per call), stops before a call that could
-exceed the cap, records every attempt in `Tools/audio/elevenlabs_credit_log.json`
-(with ElevenLabs' reported usage when the key may read it), keeps the original
-MP3s in `Design/Audio/ElevenLabs/`, and writes loudness-matched 44.1 kHz mono
-WAVs (loudest 50 ms at −18 dBFS, peaks ≤ −3 dBFS) into the app. Re-run a single
-sound with `--only pair_miss --regenerate`. Review them before generating more.
+The generator uses `eleven_text_to_sound_v3`, never regenerates or overwrites an
+approved sound, never prints or stores the key, budgets each call at 40
+credits/second (the account has billed 10/s), stops before a batch's limit or
+when the account runs low, records every call in
+`Tools/audio/elevenlabs_credit_log.json`, rejects near-silent takes
+automatically, and writes loudness-matched 44.1 kHz mono WAVs (loudest 50 ms at
+−18 dBFS, peaks ≤ −3 dBFS).
 
 ## Tools
 
@@ -201,8 +220,9 @@ sound with `--only pair_miss --regenerate`. Review them before generating more.
 python3 -m pip install -r Tools/requirements.txt
 python3 Tools/artwork/build_artwork.py     # clean supplied art, regenerate image sets and placeholders
 python3 Tools/artwork/build_ui_graphics.py # app icon, wordmark, group art, trophy, floral corners, card back
-python3 Tools/audio/build_sounds.py        # synthesized fallback tones (and the hint sound)
-python3 Tools/audio/generate_elevenlabs_sfx.py --dry-run   # ElevenLabs batch (see Sound effects)
+python3 Tools/audio/build_sounds.py        # synthesized fallback tones
+python3 Tools/audio/generate_elevenlabs_sfx.py --status    # ElevenLabs sounds (see Sound effects and voice)
+python3 Tools/audio/check_audio.py         # bundled audio matches approvals
 python3 Tools/localization/check_strings.py
 ```
 

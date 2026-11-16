@@ -117,6 +117,9 @@ struct ParentsView: View {
             Toggle(t["parents.sound"], isOn: Binding(get: { model.settings.soundEnabled },
                                                        set: { model.setSoundEnabled($0) }))
                 .frame(minHeight: 44)
+            Toggle(t["parents.voice"], isOn: Binding(get: { model.settings.voiceEnabled },
+                                                       set: { model.setVoiceEnabled($0) }))
+                .frame(minHeight: 44)
         }
     }
 

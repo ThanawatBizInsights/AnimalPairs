@@ -1,0 +1,640 @@
+{
+  "about": "Every Animal Pairs sound: what it is for, how it was made, what it cost and whether it is approved. Only 'approved' files (and synthesized fallbacks) are bundled in the app. Files awaiting review live in Design/Audio/Review/.",
+  "sfx_model_id": "eleven_text_to_sound_v3",
+  "prompt_influence": 0.6,
+  "credit_policy": {
+    "per_batch_limit": 5000,
+    "estimate_credits_per_second": 40,
+    "observed_credits_per_second": 10,
+    "observed_basis": "Batch 1: 10.9 requested seconds billed as 109 account credits.",
+    "stop_if_account_remaining_below": 2000,
+    "account_usage_log": [
+      {
+        "after": "batch1_core (10 calls, 10.9 requested s)",
+        "account_credits_used": 109,
+        "batch_cost": 109
+      },
+      {
+        "after": "batch2_interface (12 calls incl. 1 unusable, 12.7 requested s)",
+        "account_credits_used": 236,
+        "batch_cost": 127
+      }
+    ],
+    "note": "Account figures come from the ElevenLabs account usage (via the connector) and are authoritative; per-sound 'script_estimate' uses the documented 40 credits/s as a conservative budget."
+  },
+  "sounds": [
+    {
+      "name": "card_flip",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "A card turns face up (first or second card)",
+      "prompt": "Soft, quick flip of a thick felt-covered playing card turning face up, a single gentle swish, close and dry, no music, no reverb, child-friendly",
+      "duration_seconds": 0.6,
+      "file": "card_flip.wav",
+      "master": "Design/Audio/ElevenLabs/card_flip.mp3",
+      "final_duration_seconds": 0.258,
+      "loudness_dbfs": -19.9,
+      "peak_dbfs": -3.0,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 6
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "card_close",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "A mismatched pair turns back face down together",
+      "prompt": "Gentle reverse card flip starting immediately: a soft felt-covered card turning face down with a quiet swish, slightly lower and softer than a flip, dry, no music, child-friendly",
+      "previous_prompts": [
+        "Gentle reverse card flip, a soft felt-covered card turning face down, slightly lower and softer than a flip, short and dry, no music, child-friendly"
+      ],
+      "duration_seconds": 0.8,
+      "file": "card_close.wav",
+      "master": "Design/Audio/ElevenLabs/card_close.mp3",
+      "final_duration_seconds": 0.646,
+      "loudness_dbfs": -23.6,
+      "peak_dbfs": -3.0,
+      "generations": 2,
+      "credits": {
+        "script_estimate": 400,
+        "account_rate_estimate": 14
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "pair_match",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "A matching pair is confirmed",
+      "prompt": "Bright two-note chime, cheerful rising major third on a soft glockenspiel, clean and sparkly, short gentle decay, child-friendly, no voice",
+      "duration_seconds": 1.2,
+      "file": "pair_match.wav",
+      "master": "Design/Audio/ElevenLabs/pair_match.mp3",
+      "final_duration_seconds": 1.034,
+      "loudness_dbfs": -18.2,
+      "peak_dbfs": -9.7,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 12
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "pair_miss",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "The second card is not a match (quiet, encouraging)",
+      "prompt": "Quiet, reassuring two-note soft marimba boop, gently descending, warm and friendly, not sad, not a buzzer, child-friendly, no voice",
+      "duration_seconds": 1.0,
+      "file": "pair_miss.wav",
+      "master": "Design/Audio/ElevenLabs/pair_miss.mp3",
+      "final_duration_seconds": 0.846,
+      "loudness_dbfs": -18.1,
+      "peak_dbfs": -12.6,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 10
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "board_complete",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "The last pair is matched (on the board)",
+      "prompt": "Warm celebratory flourish, quick rising harp glissando with soft twinkling bells, joyful and gentle, child-friendly, no voice",
+      "duration_seconds": 1.5,
+      "file": "board_complete.wav",
+      "master": "Design/Audio/ElevenLabs/board_complete.mp3",
+      "final_duration_seconds": 1.467,
+      "loudness_dbfs": -18.0,
+      "peak_dbfs": -8.3,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 15
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "button_tap",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "Buttons, choices and navigation",
+      "prompt": "A single clear, soft tap on a smooth rounded wooden toy block, gentle and close-up, clearly audible, short pop, no music, child-friendly",
+      "previous_prompts": [
+        "Soft rounded tap, a single gentle muted wooden bubble pop, very short, friendly, no music, child-friendly"
+      ],
+      "duration_seconds": 0.5,
+      "file": "button_tap.wav",
+      "master": "Design/Audio/ElevenLabs/button_tap.mp3",
+      "final_duration_seconds": 0.16,
+      "loudness_dbfs": -18.0,
+      "peak_dbfs": -4.4,
+      "generations": 2,
+      "credits": {
+        "script_estimate": 400,
+        "account_rate_estimate": 10
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "game_start",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "A new or resumed round begins",
+      "prompt": "Short welcoming cue, three gentle rising notes on a soft music box, bright and friendly, child-friendly, no voice",
+      "duration_seconds": 1.2,
+      "file": "game_start.wav",
+      "master": "Design/Audio/ElevenLabs/game_start.mp3",
+      "final_duration_seconds": 1.2,
+      "loudness_dbfs": -18.0,
+      "peak_dbfs": -11.9,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 12
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "completion_jingle",
+      "batch": "batch1_core",
+      "kind": "sfx",
+      "event": "The Results screen appears",
+      "prompt": "Cheerful short ending jingle on xylophone and soft ukulele, happy major key, gentle celebratory finish, child-friendly, no vocals",
+      "duration_seconds": 3.0,
+      "file": "completion_jingle.wav",
+      "master": "Design/Audio/ElevenLabs/completion_jingle.mp3",
+      "final_duration_seconds": 2.894,
+      "loudness_dbfs": -18.0,
+      "peak_dbfs": -8.9,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 200,
+        "account_rate_estimate": 30
+      },
+      "status": "approved",
+      "approval_note": "Batch 1 accepted by the user ('first sound-generation step is complete')."
+    },
+    {
+      "name": "mode_select",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Choosing a mode or board size on Setup",
+      "prompt": "Soft, playful selection cue: a bouncy two-note wooden marimba blip going up, light and friendly, short and dry, child-friendly, no voice",
+      "duration_seconds": 0.6,
+      "file": "mode_select.wav",
+      "status": "awaiting_review",
+      "game_hook": "SetupView mode/board choice",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 24,
+        "account_rate_estimate": 6
+      },
+      "final_duration_seconds": 0.406,
+      "peak_dbfs": -11.2,
+      "loudness_dbfs": -18.2,
+      "master": "Design/Audio/ElevenLabs/mode_select.mp3"
+    },
+    {
+      "name": "back",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Going back or home",
+      "prompt": "Gentle descending cue: two soft wooden xylophone notes stepping down, calm and friendly, short and dry, child-friendly, no voice",
+      "duration_seconds": 0.7,
+      "file": "back.wav",
+      "status": "awaiting_review",
+      "game_hook": "AppModel.goHome / leaveParents",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 28,
+        "account_rate_estimate": 7
+      },
+      "final_duration_seconds": 0.68,
+      "peak_dbfs": -10.8,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/back.mp3"
+    },
+    {
+      "name": "pause",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Opening the pause menu",
+      "prompt": "Calm two-note stop: two soft mellow music-box notes, the second one lower, settling and peaceful, short, child-friendly, no voice",
+      "duration_seconds": 0.8,
+      "file": "pause.wav",
+      "status": "awaiting_review",
+      "game_hook": "GameSession.showPauseMenu",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 32,
+        "account_rate_estimate": 8
+      },
+      "final_duration_seconds": 0.8,
+      "peak_dbfs": -12.5,
+      "loudness_dbfs": -18.2,
+      "master": "Design/Audio/ElevenLabs/pause.mp3"
+    },
+    {
+      "name": "resume",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Resuming from the pause menu",
+      "prompt": "Light two-note return: two soft bright music-box notes rising, gentle and cheerful, short, child-friendly, no voice",
+      "duration_seconds": 0.8,
+      "file": "resume.wav",
+      "status": "awaiting_review",
+      "game_hook": "GameSession.resumeFromPauseMenu",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 32,
+        "account_rate_estimate": 8
+      },
+      "final_duration_seconds": 0.799,
+      "peak_dbfs": -6.4,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/resume.mp3"
+    },
+    {
+      "name": "star_earn",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Earning a star (no star system in the game yet)",
+      "prompt": "Short sparkling chime: a single soft twinkling star sound with a tiny bell shimmer, gentle and magical, child-friendly, no voice",
+      "duration_seconds": 0.9,
+      "file": "star_earn.wav",
+      "status": "awaiting_review",
+      "game_hook": null,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 36,
+        "account_rate_estimate": 9
+      },
+      "final_duration_seconds": 0.861,
+      "peak_dbfs": -8.4,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/star_earn.mp3"
+    },
+    {
+      "name": "badge_reveal",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Revealing a badge (no badge system in the game yet)",
+      "prompt": "Warm magical reveal: soft rising chimes and a gentle harp sweep blooming into a warm glow, short, child-friendly, no voice",
+      "duration_seconds": 1.6,
+      "file": "badge_reveal.wav",
+      "status": "awaiting_review",
+      "game_hook": null,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 64,
+        "account_rate_estimate": 16
+      },
+      "final_duration_seconds": 1.497,
+      "peak_dbfs": -9.8,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/badge_reveal.mp3"
+    },
+    {
+      "name": "perfect_round",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Finishing a round with no misses",
+      "prompt": "Celebratory flourish a little bigger than a normal win: bright rising harp glissando with sparkling bells ending on a soft cheerful chord, child-friendly, no voice",
+      "duration_seconds": 2.0,
+      "file": "perfect_round.wav",
+      "status": "awaiting_review",
+      "game_hook": "GameSession .completed when attempts == pairs (instead of board_complete)",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 80,
+        "account_rate_estimate": 20
+      },
+      "final_duration_seconds": 1.836,
+      "peak_dbfs": -8.9,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/perfect_round.mp3"
+    },
+    {
+      "name": "confetti",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Confetti on the Results screen",
+      "prompt": "Soft paper confetti flutter with a subtle sparkle: a clearly audible light papery rustle of confetti falling, with a faint gentle twinkle, no music, child-friendly",
+      "duration_seconds": 1.2,
+      "file": "confetti.wav",
+      "status": "awaiting_review",
+      "game_hook": "ResultsView, quietly after the jingle starts",
+      "generations": 2,
+      "credits": {
+        "script_estimate": 96,
+        "account_rate_estimate": 24
+      },
+      "rejections": [
+        {
+          "time": "2026-11-16T05:03:11+00:00",
+          "reason": "automatic: near-silent output (peak -41 dBFS)"
+        }
+      ],
+      "previous_prompts": [
+        "Soft paper confetti flutter with a subtle sparkle: light papery rustle drifting down with a faint gentle twinkle, quiet, no music, child-friendly"
+      ],
+      "final_duration_seconds": 1.2,
+      "peak_dbfs": -4.5,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/confetti.mp3"
+    },
+    {
+      "name": "hint",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "A hint is shown",
+      "prompt": "Quiet, inviting cue: a soft gentle twinkle of two light chime notes, curious and encouraging, very gentle, child-friendly, no voice",
+      "duration_seconds": 0.8,
+      "file": "hint.wav",
+      "status": "awaiting_review",
+      "game_hook": "GameSession .hintShown (replaces the synthesized hint)",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 32,
+        "account_rate_estimate": 8
+      },
+      "final_duration_seconds": 0.478,
+      "peak_dbfs": -8.5,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/hint.mp3"
+    },
+    {
+      "name": "try_again",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "Encouragement after a miss (overlaps pair_miss; mapping to be decided)",
+      "prompt": "Reassuring, encouraging cue: two soft warm marimba notes, gentle and kind, never an error sound, not a buzzer, child-friendly, no voice",
+      "duration_seconds": 0.9,
+      "file": "try_again.wav",
+      "status": "awaiting_review",
+      "game_hook": null,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 36,
+        "account_rate_estimate": 9
+      },
+      "final_duration_seconds": 0.753,
+      "peak_dbfs": -10.6,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/try_again.mp3"
+    },
+    {
+      "name": "new_best",
+      "batch": "batch2_interface",
+      "kind": "sfx",
+      "event": "A new personal best (no best-score system in the game yet)",
+      "prompt": "Bright three-note achievement cue: three cheerful rising glockenspiel notes ending with a small sparkle, short, child-friendly, no voice",
+      "duration_seconds": 1.2,
+      "file": "new_best.wav",
+      "status": "awaiting_review",
+      "game_hook": null,
+      "generations": 1,
+      "credits": {
+        "script_estimate": 48,
+        "account_rate_estimate": 12
+      },
+      "final_duration_seconds": 1.144,
+      "peak_dbfs": -7.2,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/new_best.mp3"
+    },
+    {
+      "name": "animal_momo",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Momo (puppy): default, play and nap artwork",
+      "prompt": "Playful puppy yip: one short happy yip from a tiny cartoon puppy, cute and soft, not loud, child-friendly",
+      "duration_seconds": 0.6,
+      "file": "animal_momo.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "momo"
+    },
+    {
+      "name": "animal_iris",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Iris (lilac kitten): default, play and nap artwork",
+      "prompt": "Gentle kitten mew: one soft sweet mew from a tiny kitten, high and friendly, child-friendly",
+      "duration_seconds": 0.7,
+      "file": "animal_iris.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "iris"
+    },
+    {
+      "name": "animal_nori",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Nori (baby elephant): default, play and nap artwork",
+      "prompt": "Soft baby-elephant trumpet: one short gentle playful toot from a tiny elephant calf, not loud, child-friendly",
+      "duration_seconds": 0.9,
+      "file": "animal_nori.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "nori"
+    },
+    {
+      "name": "animal_sprout",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Sprout (dinosaur): default, play and nap artwork",
+      "prompt": "Original friendly cartoon dinosaur chirp: one short cute rounded warble from a tiny baby dinosaur, playful and soft, not scary, child-friendly",
+      "duration_seconds": 0.8,
+      "file": "animal_sprout.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "sprout"
+    },
+    {
+      "name": "animal_mochi",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Mochi (rabbit): default, play and nap artwork",
+      "prompt": "Tiny playful rabbit squeak: one short soft happy squeak from a baby bunny, cute, child-friendly",
+      "duration_seconds": 0.5,
+      "file": "animal_mochi.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "mochi"
+    },
+    {
+      "name": "animal_sunny",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Sunny (duckling): default, play and nap artwork",
+      "prompt": "Soft duckling chirp: two quick gentle peeps from a fluffy baby duck, cute, child-friendly",
+      "duration_seconds": 0.6,
+      "file": "animal_sunny.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "sunny"
+    },
+    {
+      "name": "animal_maple",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Maple (bear cub): default, play and nap artwork",
+      "prompt": "Gentle bear-cub hum: one short soft happy hum from a tiny cartoon bear cub, warm and cozy, child-friendly",
+      "duration_seconds": 0.8,
+      "file": "animal_maple.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "maple"
+    },
+    {
+      "name": "animal_clover",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Clover (turtle): default, play and nap artwork",
+      "prompt": "Tiny turtle character chirp: one short soft cute squeak-chirp from a cartoon baby turtle, gentle, child-friendly",
+      "duration_seconds": 0.6,
+      "file": "animal_clover.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "clover"
+    },
+    {
+      "name": "animal_rusty",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Rusty (red panda): default, play and nap artwork",
+      "prompt": "Playful red-panda chirrup: one short cheerful twittering chirrup from a baby red panda, cute, child-friendly",
+      "duration_seconds": 0.7,
+      "file": "animal_rusty.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "rusty"
+    },
+    {
+      "name": "animal_pebble",
+      "batch": "batch3_animals",
+      "kind": "sfx",
+      "event": "Successful match of Pebble (penguin): default, play and nap artwork",
+      "prompt": "Cute penguin peep: one short high soft peep from a fluffy baby penguin chick, child-friendly",
+      "duration_seconds": 0.5,
+      "file": "animal_pebble.wav",
+      "status": "planned",
+      "game_hook": "GameSession .matched, after pair_match",
+      "character_id": "pebble"
+    },
+    {
+      "name": "voice_find_pair",
+      "batch": "batch4_voice",
+      "kind": "voice",
+      "event": "Occasional nudge at the start of a round",
+      "text": "ลองหาคู่ที่เหมือนกันนะ",
+      "language": "th",
+      "file": "voice_find_pair.wav",
+      "status": "planned",
+      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
+    },
+    {
+      "name": "voice_great_match",
+      "batch": "batch4_voice",
+      "kind": "voice",
+      "event": "Occasional praise after a match",
+      "text": "เก่งมาก! เจอคู่แล้ว",
+      "language": "th",
+      "file": "voice_great_match.wav",
+      "status": "planned",
+      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
+    },
+    {
+      "name": "voice_try_again_voice",
+      "batch": "batch4_voice",
+      "kind": "voice",
+      "event": "Occasional encouragement after repeated misses",
+      "text": "ไม่เป็นไร ลองอีกครั้งนะ",
+      "language": "th",
+      "file": "voice_try_again_voice.wav",
+      "status": "planned",
+      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
+    },
+    {
+      "name": "voice_all_done",
+      "batch": "batch4_voice",
+      "kind": "voice",
+      "event": "When the board is complete",
+      "text": "เยี่ยมเลย จับคู่ครบแล้ว!",
+      "language": "th",
+      "file": "voice_all_done.wav",
+      "status": "planned",
+      "pending_decision": "The app was made English-only at the user's request; confirm Thai narration before generating."
+    },
+    {
+      "name": "synth_flip",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "flip.wav",
+      "status": "fallback",
+      "event": "fallback",
+      "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "synth_match",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "match.wav",
+      "status": "fallback",
+      "event": "fallback",
+      "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "synth_mismatch",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "mismatch.wav",
+      "status": "fallback",
+      "event": "fallback",
+      "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "synth_complete",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "complete.wav",
+      "status": "fallback",
+      "event": "fallback",
+      "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "synth_tap",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "tap.wav",
+      "status": "fallback",
+      "event": "fallback",
+      "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "synth_hint",
+      "batch": "synthesized",
+      "kind": "sfx",
+      "file": "hint_synth.wav",
+      "status": "fallback",
+      "event": "hint fallback until the generated hint is approved",
+      "source": "Tools/audio/build_sounds.py"
+    }
+  ]
+}

@@ -8,6 +8,7 @@ import Observation
 final class SettingsStore {
     private enum Key {
         static let sound = "settings.soundEnabled"
+        static let voice = "settings.voiceEnabled"
         static let mode = "settings.lastMode"
         static let board = "settings.lastBoard"
         static let welcome = "settings.hasSeenWelcome"
@@ -15,7 +16,10 @@ final class SettingsStore {
 
     private let defaults: UserDefaults
 
+    /// "Sound effects" switch.
     var soundEnabled: Bool { didSet { defaults.set(soundEnabled, forKey: Key.sound) } }
+    /// "Voice" switch (occasional narration), saved separately.
+    var voiceEnabled: Bool { didSet { defaults.set(voiceEnabled, forKey: Key.voice) } }
     var hasSeenWelcome: Bool { didSet { defaults.set(hasSeenWelcome, forKey: Key.welcome) } }
     var lastConfiguration: GameConfiguration {
         didSet {
@@ -27,6 +31,7 @@ final class SettingsStore {
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
         soundEnabled = defaults.object(forKey: Key.sound) as? Bool ?? true
+        voiceEnabled = defaults.object(forKey: Key.voice) as? Bool ?? true
         let mode = defaults.string(forKey: Key.mode).flatMap(GameMode.init(rawValue:)) ?? .classic
         let board = BoardSize(rawValue: defaults.integer(forKey: Key.board)) ?? .six
         lastConfiguration = GameConfiguration(mode: mode, boardSize: board)

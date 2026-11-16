@@ -1519,6 +1519,17 @@
         }
       }
     },
+    "parents.voice": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Voice"
+          }
+        }
+      }
+    },
     "pause.restart": {
       "extractionState": "manual",
       "localizations": {

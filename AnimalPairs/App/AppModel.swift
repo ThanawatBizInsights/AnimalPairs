@@ -54,7 +54,7 @@ final class AppModel {
         route = settings.hasSeenWelcome ? .home : .welcome
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
-        audio = AudioManager(isEnabled: settings.soundEnabled)
+        audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled)
 
         if let history {
             self.history = history
@@ -94,10 +94,16 @@ final class AppModel {
         if enabled { audio.play(.buttonTap) }
     }
 
+    /// The saved "Voice" setting, independent of sound effects.
+    func setVoiceEnabled(_ enabled: Bool) {
+        settings.voiceEnabled = enabled
+        audio.voiceEnabled = enabled
+    }
+
     // MARK: Navigation
 
     func goHome() {
-        audio.play(.buttonTap)
+        audio.play(.back)
         leaveGameIfNeeded()
         parentAccess.revoke()
         route = .home
@@ -140,6 +146,7 @@ final class AppModel {
         persist(state)
         route = .game
         audio.play(.gameStart)
+        audio.narrate(.roundStarted, after: 1.3)
     }
 
     func resumeSavedGame() {
@@ -148,6 +155,7 @@ final class AppModel {
         resumableRound = nil
         route = .game
         audio.play(.gameStart)
+        audio.narrate(.roundStarted, after: 1.3)
     }
 
     func restartCurrentGame() {
@@ -254,7 +262,7 @@ final class AppModel {
     }
 
     func leaveParents() {
-        audio.play(.buttonTap)
+        audio.play(.back)
         parentAccess.revoke()
         route = .home
         refreshResumableRound()
