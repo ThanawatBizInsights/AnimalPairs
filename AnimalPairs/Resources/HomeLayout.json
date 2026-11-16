@@ -1,0 +1,510 @@
+{
+  "about": "Home screen layout shared by the SwiftUI HomeView and Tools/home/home_layout.py (previews + collision check). Positions are fractions of the safe-area rectangle: cx = horizontal centre, bottom = where the feet stand, height = character height as a fraction of the safe-area height. 'wide' is used when the safe area is wider than tall (iPad landscape), otherwise 'tall' (iPhone and iPad portrait).",
+  "wordmarkAspect": 4.2781,
+  "topBar": {
+    "height": 76,
+    "controlSize": 60,
+    "padding": 16,
+    "resumeWidth": 210
+  },
+  "layouts": {
+    "wide": {
+      "title": {
+        "cx": 0.5,
+        "cy": 0.115,
+        "widthFraction": 0.4,
+        "maxHeightFraction": 0.15
+      },
+      "play": {
+        "cx": 0.5,
+        "cy": 0.895,
+        "width": 300,
+        "height": 84
+      },
+      "characters": {
+        "iris": {
+          "cx": 0.5,
+          "bottom": 0.72,
+          "height": 0.33
+        },
+        "maple": {
+          "cx": 0.085,
+          "bottom": 0.46,
+          "height": 0.19
+        },
+        "sprout": {
+          "cx": 0.215,
+          "bottom": 0.46,
+          "height": 0.19
+        },
+        "nori": {
+          "cx": 0.72,
+          "bottom": 0.46,
+          "height": 0.19
+        },
+        "mochi": {
+          "cx": 0.835,
+          "bottom": 0.46,
+          "height": 0.19
+        },
+        "sunny": {
+          "cx": 0.94,
+          "bottom": 0.46,
+          "height": 0.19
+        },
+        "pebble": {
+          "cx": 0.07,
+          "bottom": 0.8,
+          "height": 0.22
+        },
+        "momo": {
+          "cx": 0.23,
+          "bottom": 0.8,
+          "height": 0.22
+        },
+        "rusty": {
+          "cx": 0.73,
+          "bottom": 0.8,
+          "height": 0.22
+        },
+        "clover": {
+          "cx": 0.9,
+          "bottom": 0.8,
+          "height": 0.22
+        }
+      },
+      "decor": [
+        {
+          "kind": "hill",
+          "cx": 0.18,
+          "cy": 0.6,
+          "w": 0.7,
+          "h": 0.3,
+          "color": "lavender"
+        },
+        {
+          "kind": "hill",
+          "cx": 0.8,
+          "cy": 0.62,
+          "w": 0.75,
+          "h": 0.28,
+          "color": "peach"
+        },
+        {
+          "kind": "hill",
+          "cx": 0.5,
+          "cy": 0.66,
+          "w": 0.9,
+          "h": 0.22,
+          "color": "butter"
+        },
+        {
+          "kind": "ground",
+          "top": 0.66,
+          "color": "cream"
+        },
+        {
+          "kind": "bunting",
+          "x1": 0.02,
+          "y1": 0.215,
+          "x2": 0.36,
+          "y2": 0.2,
+          "sag": 0.03,
+          "flags": 7,
+          "colors": [
+            "peachDeep",
+            "butterDeep",
+            "lavenderDeep"
+          ]
+        },
+        {
+          "kind": "bunting",
+          "x1": 0.64,
+          "y1": 0.2,
+          "x2": 0.98,
+          "y2": 0.215,
+          "sag": 0.03,
+          "flags": 7,
+          "colors": [
+            "lavenderDeep",
+            "peachDeep",
+            "butterDeep"
+          ]
+        },
+        {
+          "kind": "swing",
+          "cx": 0.335,
+          "bottom": 0.6,
+          "height": 0.17,
+          "frame": "butterDeep",
+          "seat": "peachDeep"
+        },
+        {
+          "kind": "cloud",
+          "cx": 0.1,
+          "cy": 0.1,
+          "size": 0.1,
+          "color": "white",
+          "drift": 14,
+          "period": 22
+        },
+        {
+          "kind": "cloud",
+          "cx": 0.86,
+          "cy": 0.17,
+          "size": 0.08,
+          "color": "white",
+          "drift": 12,
+          "period": 26
+        },
+        {
+          "kind": "cloud",
+          "cx": 0.62,
+          "cy": 0.06,
+          "size": 0.06,
+          "color": "white",
+          "drift": 10,
+          "period": 30
+        },
+        {
+          "kind": "flower",
+          "cx": 0.04,
+          "cy": 0.93,
+          "size": 0.035,
+          "color": "lavenderDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.35,
+          "cy": 0.95,
+          "size": 0.03,
+          "color": "peachDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.65,
+          "cy": 0.95,
+          "size": 0.03,
+          "color": "butterDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.97,
+          "cy": 0.91,
+          "size": 0.035,
+          "color": "peachDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.4,
+          "cy": 0.55,
+          "size": 0.025,
+          "color": "butterDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.3,
+          "cy": 0.08,
+          "size": 0.025,
+          "color": "butterDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.72,
+          "cy": 0.3,
+          "size": 0.02,
+          "color": "lavenderDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.3,
+          "cy": 0.33,
+          "size": 0.02,
+          "color": "peachDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.97,
+          "cy": 0.4,
+          "size": 0.022,
+          "color": "butterDeep"
+        }
+      ]
+    },
+    "tall": {
+      "title": {
+        "cx": 0.5,
+        "cy": 0.165,
+        "widthFraction": 0.86,
+        "maxHeightFraction": 0.1
+      },
+      "play": {
+        "cx": 0.5,
+        "cy": 0.675,
+        "width": 260,
+        "height": 80
+      },
+      "characters": {
+        "mochi": {
+          "cx": 0.14,
+          "bottom": 0.35,
+          "height": 0.115
+        },
+        "sprout": {
+          "cx": 0.38,
+          "bottom": 0.35,
+          "height": 0.115
+        },
+        "maple": {
+          "cx": 0.62,
+          "bottom": 0.35,
+          "height": 0.115
+        },
+        "sunny": {
+          "cx": 0.86,
+          "bottom": 0.35,
+          "height": 0.115
+        },
+        "iris": {
+          "cx": 0.5,
+          "bottom": 0.6,
+          "height": 0.225
+        },
+        "momo": {
+          "cx": 0.17,
+          "bottom": 0.87,
+          "height": 0.115
+        },
+        "nori": {
+          "cx": 0.5,
+          "bottom": 0.87,
+          "height": 0.115
+        },
+        "clover": {
+          "cx": 0.83,
+          "bottom": 0.87,
+          "height": 0.115
+        },
+        "pebble": {
+          "cx": 0.3,
+          "bottom": 0.99,
+          "height": 0.1
+        },
+        "rusty": {
+          "cx": 0.7,
+          "bottom": 0.99,
+          "height": 0.1
+        }
+      },
+      "decor": [
+        {
+          "kind": "hill",
+          "cx": 0.15,
+          "cy": 0.43,
+          "w": 0.95,
+          "h": 0.12,
+          "color": "lavender"
+        },
+        {
+          "kind": "hill",
+          "cx": 0.85,
+          "cy": 0.44,
+          "w": 0.95,
+          "h": 0.11,
+          "color": "peach"
+        },
+        {
+          "kind": "hill",
+          "cx": 0.5,
+          "cy": 0.47,
+          "w": 1.3,
+          "h": 0.09,
+          "color": "butter"
+        },
+        {
+          "kind": "ground",
+          "top": 0.47,
+          "color": "cream"
+        },
+        {
+          "kind": "bunting",
+          "x1": 0.0,
+          "y1": 0.25,
+          "x2": 1.0,
+          "y2": 0.25,
+          "sag": 0.025,
+          "flags": 9,
+          "colors": [
+            "peachDeep",
+            "butterDeep",
+            "lavenderDeep"
+          ]
+        },
+        {
+          "kind": "swing",
+          "cx": 0.86,
+          "bottom": 0.47,
+          "height": 0.075,
+          "frame": "butterDeep",
+          "seat": "peachDeep"
+        },
+        {
+          "kind": "cloud",
+          "cx": 0.14,
+          "cy": 0.11,
+          "size": 0.16,
+          "color": "white",
+          "drift": 10,
+          "period": 24
+        },
+        {
+          "kind": "cloud",
+          "cx": 0.88,
+          "cy": 0.27,
+          "size": 0.13,
+          "color": "white",
+          "drift": 8,
+          "period": 28
+        },
+        {
+          "kind": "flower",
+          "cx": 0.06,
+          "cy": 0.68,
+          "size": 0.06,
+          "color": "lavenderDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.94,
+          "cy": 0.7,
+          "size": 0.06,
+          "color": "peachDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.1,
+          "cy": 0.97,
+          "size": 0.05,
+          "color": "butterDeep"
+        },
+        {
+          "kind": "flower",
+          "cx": 0.9,
+          "cy": 0.97,
+          "size": 0.05,
+          "color": "peachDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.2,
+          "cy": 0.6,
+          "size": 0.04,
+          "color": "butterDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.8,
+          "cy": 0.58,
+          "size": 0.035,
+          "color": "lavenderDeep"
+        },
+        {
+          "kind": "sparkle",
+          "cx": 0.5,
+          "cy": 0.37,
+          "size": 0.03,
+          "color": "peachDeep"
+        }
+      ]
+    }
+  },
+  "motion": {
+    "iris": {
+      "period": 3.4,
+      "phase": 0.0,
+      "rotation": 3.0,
+      "bob": 6,
+      "scale": 0.025
+    },
+    "momo": {
+      "period": 3.0,
+      "phase": 0.13,
+      "rotation": 2.0,
+      "bob": 4,
+      "scale": 0.015
+    },
+    "nori": {
+      "period": 3.9,
+      "phase": 0.41,
+      "rotation": 1.5,
+      "bob": 3,
+      "scale": 0.012
+    },
+    "sprout": {
+      "period": 2.7,
+      "phase": 0.66,
+      "rotation": 2.0,
+      "bob": 5,
+      "scale": 0.02
+    },
+    "mochi": {
+      "period": 2.9,
+      "phase": 0.27,
+      "rotation": 2.0,
+      "bob": 5,
+      "scale": 0.015
+    },
+    "sunny": {
+      "period": 2.6,
+      "phase": 0.85,
+      "rotation": 2.0,
+      "bob": 4,
+      "scale": 0.02
+    },
+    "maple": {
+      "period": 4.1,
+      "phase": 0.52,
+      "rotation": 1.5,
+      "bob": 2,
+      "scale": 0.012
+    },
+    "clover": {
+      "period": 4.4,
+      "phase": 0.74,
+      "rotation": 1.5,
+      "bob": 2,
+      "scale": 0.01
+    },
+    "rusty": {
+      "period": 3.6,
+      "phase": 0.09,
+      "rotation": 2.0,
+      "bob": 3,
+      "scale": 0.015
+    },
+    "pebble": {
+      "period": 3.2,
+      "phase": 0.58,
+      "rotation": 2.0,
+      "bob": 4,
+      "scale": 0.018
+    }
+  },
+  "playPulse": {
+    "period": 2.4,
+    "scale": 0.03
+  },
+  "colors": {
+    "cream": "FFF8EC",
+    "creamDeep": "FBEBD3",
+    "lavender": "E6DEF6",
+    "lavenderDeep": "C9B8E8",
+    "peach": "FFD9C2",
+    "peachDeep": "FFB48C",
+    "butter": "FBE7A6",
+    "butterDeep": "F2CF6B",
+    "mint": "D5EEDF",
+    "white": "FFFFFF"
+  },
+  "decorNote": "Decor uses fractions of the full screen (it may extend under the status bar and home indicator). Sizes are fractions of min(screen width, height). Drift is in points."
+}

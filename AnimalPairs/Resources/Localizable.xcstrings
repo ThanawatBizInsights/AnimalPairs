@@ -914,17 +914,6 @@
         }
       }
     },
-    "home.parents": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Parents"
-          }
-        }
-      }
-    },
     "home.parents.hint": {
       "extractionState": "manual",
       "localizations": {
@@ -943,6 +932,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Play"
+          }
+        }
+      }
+    },
+    "home.play.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Choose a game and start playing."
           }
         }
       }
@@ -969,13 +969,13 @@
         }
       }
     },
-    "home.subtitle": {
+    "home.settings": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Find the friends that look exactly the same!"
+            "value": "Parents and settings"
           }
         }
       }
