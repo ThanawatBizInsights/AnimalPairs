@@ -136,32 +136,3 @@ final class ParentalGateTests: XCTestCase {
     }
 }
 
-final class PersonalBestTests: XCTestCase {
-    private func summary(_ attempts: Int, _ mode: GameMode = .classic, _ board: BoardSize = .twelve) -> RoundSummary {
-        RoundSummary(roundID: UUID(), configuration: GameConfiguration(mode: mode, boardSize: board), attempts: attempts,
-                     hintsUsed: 0, pairCount: board.pairCount, startedAt: Date(), completedAt: Date())
-    }
-
-    func testFirstResultIsNotANewBest() {
-        XCTAssertFalse(PersonalBest.isNewBest(summary(10), comparedTo: []))
-    }
-
-    func testFewerTriesThanEveryEarlierResultOnTheSameBoard() {
-        let history = [CompletionRecord(summary: summary(12)), CompletionRecord(summary: summary(9))]
-        XCTAssertTrue(PersonalBest.isNewBest(summary(8), comparedTo: history))
-        XCTAssertFalse(PersonalBest.isNewBest(summary(9), comparedTo: history), "a tie is not a new best")
-        XCTAssertFalse(PersonalBest.isNewBest(summary(11), comparedTo: history))
-    }
-
-    func testOtherModesAndBoardsDoNotCount() {
-        let history = [CompletionRecord(summary: summary(20, .exactPose, .twelve)),
-                       CompletionRecord(summary: summary(4, .classic, .six))]
-        XCTAssertFalse(PersonalBest.isNewBest(summary(15, .classic, .twelve), comparedTo: history))
-        XCTAssertTrue(PersonalBest.isNewBest(summary(15, .exactPose, .twelve), comparedTo: history))
-    }
-
-    func testTheSameRoundIsIgnored() {
-        let s = summary(5)
-        XCTAssertFalse(PersonalBest.isNewBest(s, comparedTo: [CompletionRecord(summary: s)]))
-    }
-}

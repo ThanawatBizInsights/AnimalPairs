@@ -76,7 +76,7 @@ struct ResultsView: View {
 
                     VStack(spacing: 14) {
                         Button {
-                            try? model.startNewGame(summary.configuration)
+                            model.playAgain(summary.configuration)
                         } label: {
                             Label(t["results.playAgain"], systemImage: "arrow.counterclockwise").frame(minWidth: 260)
                         }
@@ -101,12 +101,12 @@ struct ResultsView: View {
             }
         }
         .onAppear {
-            // Sequenced so nothing loud overlaps: the trophy's reveal, soft
-            // confetti, then the ending jingle (or the new-best cue).
-            model.audio.play(.badgeReveal)
+            // The ending jingle with soft confetti under it. star_earn,
+            // badge_reveal and new_best stay unused: the game has no stars,
+            // badges or best scores.
+            model.audio.play(.completionJingle)
             model.audio.play(.confetti, after: 0.4)
-            model.audio.play(model.lastResultIsNewBest ? .newBest : .completionJingle, after: 1.5)
-            model.audio.narrate(.completed, after: 4.6)
+            model.audio.narrate(.completed, after: 3.1)
         }
     }
 }

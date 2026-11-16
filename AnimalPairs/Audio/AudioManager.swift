@@ -168,12 +168,6 @@ final class AudioManager {
     private(set) var resolvedFiles: [SoundEffect: String] = [:]
     private var policy = SoundPlaybackPolicy(maxVoices: 3)
     private var narration = NarrationPolicy()
-    /// Gentle `try_again` cue after several misses in a row (never per miss).
-    private var encouragement: NarrationPolicy = {
-        var policy = NarrationPolicy()
-        policy.matchesPerPraise = .max   // matches only reset the miss streak
-        return policy
-    }()
     private var pending: [Task<Void, Never>] = []
     private let clock: () -> TimeInterval
 
@@ -238,17 +232,6 @@ final class AudioManager {
     /// Plays after `delay` seconds unless cancelled first (see `cancelPending`).
     func play(_ effect: SoundEffect, after delay: TimeInterval) {
         schedule(after: delay) { [weak self] in self?.play(effect) }
-    }
-
-    /// The cue for a mismatch: usually `pair_miss`; after three misses in a
-    /// row (at most every 20 s) the reassuring `try_again` instead.
-    func missCue() -> SoundEffect {
-        encouragement.missed(at: clock()) != nil ? .tryAgain : .pairMiss
-    }
-
-    /// A pair was matched: resets the miss streak.
-    func noteMatch() {
-        _ = encouragement.matched(at: clock())
     }
 
     // MARK: Voice

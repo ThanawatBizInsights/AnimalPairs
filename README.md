@@ -184,23 +184,35 @@ on Home.
 | Moment | Sound |
 | --- | --- |
 | Card turns face up | `card_flip` |
-| Second card is not a match (after 0.35 s) | `pair_miss`; after three misses in a row (at most every 20 s) the reassuring `try_again` instead |
 | Mismatched pair turns back | `card_close` |
 | Pair matched (not the last) | `pair_match`, then the animal's cue at 0.75 s (same cue for its default, play and nap art) — **animal cues not generated yet, so silent** |
 | Last pair matched | `board_complete`, or `perfect_round` when there were no misses |
-| Results screen | `badge_reveal` with the trophy, soft `confetti` at 0.4 s, then `completion_jingle` at 1.5 s — or `new_best` when this board was finished in fewer tries than ever before |
+| Second card is not a match (after 0.35 s) | `pair_miss` (always) |
+| Results screen | `completion_jingle`, soft `confetti` at 0.4 s |
+| **Play again** after a completed round | `try_again`, then the new round's `game_start` at 0.8 s |
 | Round starts, restarts or resumes | `game_start` |
 | Mode or board choice | `mode_select` |
 | Back / Home / leaving Parents | `back` |
 | Pause / resume | `pause` / `resume` |
 | Hint | `hint` |
 | Other buttons | `button_tap` |
-| — | `star_earn`: bundled but **unused** (the game has no star system) |
+| — | `star_earn`, `badge_reveal`, `new_best`: bundled but **unused** — the game has no stars, badges or best scores |
 
 Pending sounds are cancelled when a round is paused, restarted or left, and when
 leaving the Results screen, so nothing spills into the next screen.
 `python3 Tools/audio/check_audio.py` verifies that only approved files are
 bundled, every file is in the app target, and no Thai remains.
+
+### Music (catalogued, not used)
+
+Four instrumental loops — `music_playground`, `music_meadow`, `music_focus`,
+`music_celebration` — were generated with `music_v2_5` (instrumental forced),
+cut to whole-bar 36–41 s loops with a one-beat crossfade, set to −24 LUFS
+(true peak ≤ −3 dBTP) and exported as AAC `.m4a` (48 kHz, 128 kbps) plus
+lossless 24-bit loop masters in `Design/Audio/Music/masters/` and the raw
+downloads in `Design/Audio/Music/raw/`. They are in review and **not bundled
+or played**; the app has no background music. Rebuild or re-verify with
+`python3 Tools/audio/generate_elevenlabs_music.py --process-only | --verify`.
 
 ### Generating, reviewing and approving (developer machine only)
 

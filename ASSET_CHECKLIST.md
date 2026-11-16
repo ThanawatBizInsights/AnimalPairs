@@ -66,10 +66,11 @@ Currently shipped as **development placeholders**: the character's signature art
 | Card back | `UI/card_back` ← `ui_card_back.webp` | final art supplied — used on every card; the board uses its 0.735 width:height ratio so it is never stretched |
 | Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
 | ElevenLabs batch 1 (8 core sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled |
-| ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn` has no game event (no star system) |
+| ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn`, `badge_reveal`, `new_best` unused (no stars, badges or best scores) |
+| Reward sound revisions (`star_earn_v2`, `badge_reveal_v2`, `new_best_v2`, `try_again_v2`) | `Design/Audio/Review/` | **awaiting your review**; approving one replaces the bundled file of the same name |
+| Music loops (4) | `Design/Audio/Review/*.m4a`, masters in `Design/Audio/Music/` | **awaiting your review**; not bundled, not played |
 | Animal cues (10) | — | **not generated** — approved in principle, but no files exist; matches play only `pair_match` until they are created |
 | Voice recordings | — | none (English only; the planned Thai lines were removed) |
-| Music | — | none licensed; Music setting stays off |
 | Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |
 | Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint_synth`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | fallbacks only |
 | Full sound list, prompts, credits and status | `Tools/audio/audio_manifest.json` | source of truth |

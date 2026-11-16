@@ -18,6 +18,17 @@
         "after": "batch2_interface (12 calls incl. 1 unusable, 12.7 requested s)",
         "account_credits_used": 236,
         "batch_cost": 127
+      },
+      {
+        "after": "batch5_reward_revisions (4 sound effects, 4.5 requested s)",
+        "account_credits_used": 281,
+        "batch_cost": 45
+      },
+      {
+        "after": "batch6_music (4 x 48 s, music_v2_5)",
+        "account_credits_used": 2681,
+        "batch_cost": 2400,
+        "note": "600 credits per 48-second track (about 12.5 credits per second)."
       }
     ],
     "note": "Account figures come from the ElevenLabs account usage (via the connector) and are authoritative; per-sound 'script_estimate' uses the documented 40 credits/s as a conservative budget."
@@ -281,7 +292,7 @@
       "name": "star_earn",
       "batch": "batch2_interface",
       "kind": "sfx",
-      "event": "Earning a star (no star system in the game yet)",
+      "event": "Only when a star is actually earned (the game has no star system: unused)",
       "prompt": "Short sparkling chime: a single soft twinkling star sound with a tiny bell shimmer, gentle and magical, child-friendly, no voice",
       "duration_seconds": 0.9,
       "file": "star_earn.wav",
@@ -303,7 +314,7 @@
       "name": "badge_reveal",
       "batch": "batch2_interface",
       "kind": "sfx",
-      "event": "Revealing a badge (no badge system in the game yet)",
+      "event": "Only when a badge is actually revealed (the game has no badge system: unused)",
       "prompt": "Warm magical reveal: soft rising chimes and a gentle harp sweep blooming into a warm glow, short, child-friendly, no voice",
       "duration_seconds": 1.6,
       "file": "badge_reveal.wav",
@@ -400,7 +411,7 @@
       "name": "try_again",
       "batch": "batch2_interface",
       "kind": "sfx",
-      "event": "Encouragement after a miss (overlaps pair_miss; mapping to be decided)",
+      "event": "When the player chooses Play again after a completed round",
       "prompt": "Reassuring, encouraging cue: two soft warm marimba notes, gentle and kind, never an error sound, not a buzzer, child-friendly, no voice",
       "duration_seconds": 0.9,
       "file": "try_again.wav",
@@ -422,7 +433,7 @@
       "name": "new_best",
       "batch": "batch2_interface",
       "kind": "sfx",
-      "event": "A new personal best (no best-score system in the game yet)",
+      "event": "Only when the player achieves a new best result (the game has no best-score event: unused)",
       "prompt": "Bright three-note achievement cue: three cheerful rising glockenspiel notes ending with a small sparkle, short, child-friendly, no voice",
       "duration_seconds": 1.2,
       "file": "new_best.wav",
@@ -623,6 +634,270 @@
       "status": "fallback",
       "event": "hint fallback until the generated hint is approved",
       "source": "Tools/audio/build_sounds.py"
+    },
+    {
+      "name": "star_earn_v2",
+      "batch": "batch5_reward_revisions",
+      "kind": "sfx",
+      "replaces": "star_earn",
+      "event": "Only when a star is actually earned (the game has no star system: unused)",
+      "prompt": "Soft, bright two-note sparkle: two gentle twinkling glockenspiel notes rising with a tiny shimmer, short, child-friendly, no voice",
+      "duration_seconds": 0.8,
+      "file": "star_earn.wav",
+      "status": "awaiting_review",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 32,
+        "account_rate_estimate": 8
+      },
+      "final_duration_seconds": 0.8,
+      "peak_dbfs": -10.3,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/star_earn_v2.mp3"
+    },
+    {
+      "name": "badge_reveal_v2",
+      "batch": "batch5_reward_revisions",
+      "kind": "sfx",
+      "replaces": "badge_reveal",
+      "event": "Only when a badge is actually revealed (the game has no badge system: unused)",
+      "prompt": "Warm, gentle rising chime: soft bells rising into a warm glowing shimmer, calm and magical, child-friendly, no voice",
+      "duration_seconds": 1.3,
+      "file": "badge_reveal.wav",
+      "status": "awaiting_review",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 52,
+        "account_rate_estimate": 13
+      },
+      "final_duration_seconds": 1.113,
+      "peak_dbfs": -9.9,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/badge_reveal_v2.mp3"
+    },
+    {
+      "name": "new_best_v2",
+      "batch": "batch5_reward_revisions",
+      "kind": "sfx",
+      "replaces": "new_best",
+      "event": "Only when the player achieves a new best result (the game has no best-score event: unused)",
+      "prompt": "Cheerful three-note celebration: three bright rising xylophone notes ending with a happy little sparkle, gentle, child-friendly, no voice",
+      "duration_seconds": 1.6,
+      "file": "new_best.wav",
+      "status": "awaiting_review",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 64,
+        "account_rate_estimate": 16
+      },
+      "final_duration_seconds": 1.202,
+      "peak_dbfs": -12.3,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/new_best_v2.mp3"
+    },
+    {
+      "name": "try_again_v2",
+      "batch": "batch5_reward_revisions",
+      "kind": "sfx",
+      "replaces": "try_again",
+      "event": "When the player chooses Play again after a completed round",
+      "prompt": "Kind, encouraging two-note cue: two soft warm rising marimba notes, friendly and inviting, gentle, child-friendly, no voice",
+      "duration_seconds": 0.8,
+      "file": "try_again.wav",
+      "status": "awaiting_review",
+      "generations": 1,
+      "credits": {
+        "script_estimate": 32,
+        "account_rate_estimate": 8
+      },
+      "final_duration_seconds": 0.761,
+      "peak_dbfs": -12.2,
+      "loudness_dbfs": -18.0,
+      "master": "Design/Audio/ElevenLabs/try_again_v2.mp3"
+    },
+    {
+      "name": "music_playground",
+      "batch": "batch6_music",
+      "kind": "music",
+      "event": "Future: playful menus/boards (not played yet)",
+      "bpm_hint": 100,
+      "prompt": "Light marimba melody with soft plucked strings and a gentle bouncy rhythm, playful and cheerful, major key, about 100 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
+      "duration_seconds": 48.0,
+      "file": "music_playground.m4a",
+      "bundle_dir": "AnimalPairs/Resources/Music",
+      "status": "awaiting_review",
+      "generations": 1,
+      "model_id": "music_v2_5",
+      "loop": {
+        "detected_bpm": 100.4,
+        "bars": 17,
+        "loop_start_seconds": 5.327,
+        "loop_seconds": 40.619,
+        "crossfade_seconds": 0.597
+      },
+      "master": "Design/Audio/Music/masters/music_playground_loop.wav",
+      "raw_master": "Design/Audio/Music/raw/music_playground.mp3",
+      "raw_master_plays": true,
+      "master_plays": true,
+      "mobile_plays": true,
+      "mobile_duration_seconds": 40.619,
+      "mobile_length_matches_master": true,
+      "mobile_bytes": 661187,
+      "format": "AAC-LC 128 kbps, 48 kHz stereo (.m4a)",
+      "loudness_lufs": -24.0,
+      "loudness_range_lu": 3.6,
+      "true_peak_dbtp": -11.5,
+      "low_end_share_below_100hz": 0.1852,
+      "join": {
+        "join_spectral_similarity": 0.9986,
+        "inside_similarity_p05": 0.9472,
+        "join_level_jump_db": 1.94,
+        "inside_level_jump_p95_db": 5.57,
+        "join_sample_step": 0.01036,
+        "inside_sample_step_p999": 0.01572,
+        "smooth": true
+      },
+      "credits": {
+        "account_reported": 600
+      }
+    },
+    {
+      "name": "music_meadow",
+      "batch": "batch6_music",
+      "kind": "music",
+      "event": "Future: relaxed browsing (not played yet)",
+      "bpm_hint": 84,
+      "prompt": "Warm acoustic guitar and soft felt piano textures with tiny bells, relaxed exploration mood, major key, about 84 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
+      "duration_seconds": 48.0,
+      "file": "music_meadow.m4a",
+      "bundle_dir": "AnimalPairs/Resources/Music",
+      "status": "awaiting_review",
+      "generations": 1,
+      "model_id": "music_v2_5",
+      "loop": {
+        "detected_bpm": 84.0,
+        "bars": 14,
+        "loop_start_seconds": 2.394,
+        "loop_seconds": 40.021,
+        "crossfade_seconds": 0.715
+      },
+      "master": "Design/Audio/Music/masters/music_meadow_loop.wav",
+      "raw_master": "Design/Audio/Music/raw/music_meadow.mp3",
+      "raw_master_plays": true,
+      "master_plays": true,
+      "mobile_plays": true,
+      "mobile_duration_seconds": 40.021,
+      "mobile_length_matches_master": true,
+      "mobile_bytes": 650349,
+      "format": "AAC-LC 128 kbps, 48 kHz stereo (.m4a)",
+      "loudness_lufs": -24.1,
+      "loudness_range_lu": 1.0,
+      "true_peak_dbtp": -11.3,
+      "low_end_share_below_100hz": 0.0291,
+      "join": {
+        "join_spectral_similarity": 0.9947,
+        "inside_similarity_p05": 0.9657,
+        "join_level_jump_db": 1.79,
+        "inside_level_jump_p95_db": 7.02,
+        "join_sample_step": 0.00883,
+        "inside_sample_step_p999": 0.01387,
+        "smooth": true
+      },
+      "credits": {
+        "account_reported": 600
+      }
+    },
+    {
+      "name": "music_focus",
+      "batch": "batch6_music",
+      "kind": "music",
+      "event": "Future: during card matching (not played yet)",
+      "bpm_hint": 72,
+      "prompt": "Sparse, calm notes on soft celesta and felt piano with ample silence between phrases, very gentle and unhurried, suitable for concentrating, about 72 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
+      "duration_seconds": 48.0,
+      "file": "music_focus.m4a",
+      "bundle_dir": "AnimalPairs/Resources/Music",
+      "status": "awaiting_review",
+      "generations": 1,
+      "model_id": "music_v2_5",
+      "loop": {
+        "detected_bpm": 72.1,
+        "bars": 12,
+        "loop_start_seconds": 4.826,
+        "loop_seconds": 39.936,
+        "crossfade_seconds": 0.832
+      },
+      "master": "Design/Audio/Music/masters/music_focus_loop.wav",
+      "raw_master": "Design/Audio/Music/raw/music_focus.mp3",
+      "raw_master_plays": true,
+      "master_plays": true,
+      "mobile_plays": true,
+      "mobile_duration_seconds": 39.936,
+      "mobile_length_matches_master": true,
+      "mobile_bytes": 648649,
+      "format": "AAC-LC 128 kbps, 48 kHz stereo (.m4a)",
+      "loudness_lufs": -24.0,
+      "loudness_range_lu": 3.8,
+      "true_peak_dbtp": -8.1,
+      "low_end_share_below_100hz": 0.0078,
+      "join": {
+        "join_spectral_similarity": 0.9889,
+        "inside_similarity_p05": 0.9421,
+        "join_level_jump_db": 0.23,
+        "inside_level_jump_p95_db": 8.6,
+        "join_sample_step": 0.01013,
+        "inside_sample_step_p999": 0.01802,
+        "smooth": true
+      },
+      "credits": {
+        "account_reported": 600
+      }
+    },
+    {
+      "name": "music_celebration",
+      "batch": "batch6_music",
+      "kind": "music",
+      "event": "Future: a completed round (not played yet)",
+      "bpm_hint": 112,
+      "prompt": "Upbeat but gentle celebration with bright glockenspiel and ukulele and a soft light rhythm, happy major key, about 112 BPM. Instrumental only, no vocals, no singing, no speech. Gentle and soft for young children, warm plush-toy feel. No drum kit, no sharp percussion, no heavy bass, nothing sudden or startling. Steady consistent texture from start to end with no intro and no ending, designed as a seamless background loop with room for sound effects on top.",
+      "duration_seconds": 48.0,
+      "file": "music_celebration.m4a",
+      "bundle_dir": "AnimalPairs/Resources/Music",
+      "status": "awaiting_review",
+      "generations": 1,
+      "model_id": "music_v2_5",
+      "loop": {
+        "detected_bpm": 112.5,
+        "bars": 17,
+        "loop_start_seconds": 5.05,
+        "loop_seconds": 36.267,
+        "crossfade_seconds": 0.533
+      },
+      "master": "Design/Audio/Music/masters/music_celebration_loop.wav",
+      "raw_master": "Design/Audio/Music/raw/music_celebration.mp3",
+      "raw_master_plays": true,
+      "master_plays": true,
+      "mobile_plays": true,
+      "mobile_duration_seconds": 36.267,
+      "mobile_length_matches_master": true,
+      "mobile_bytes": 593912,
+      "format": "AAC-LC 128 kbps, 48 kHz stereo (.m4a)",
+      "loudness_lufs": -24.0,
+      "loudness_range_lu": 1.5,
+      "true_peak_dbtp": -10.0,
+      "low_end_share_below_100hz": 0.4069,
+      "join": {
+        "join_spectral_similarity": 0.9869,
+        "inside_similarity_p05": 0.8324,
+        "join_level_jump_db": 1.71,
+        "inside_level_jump_p95_db": 5.98,
+        "join_sample_step": 0.02074,
+        "inside_sample_step_p999": 0.05192,
+        "smooth": true
+      },
+      "credits": {
+        "account_reported": 600
+      }
     }
   ],
   "voice": {
@@ -631,8 +906,14 @@
     "note": "No approved English voice recordings exist. The Voice switch is ready; lines are added only after the user asks for them."
   },
   "music": {
-    "tracks": [],
-    "note": "No licensed music file. The Music setting stays off."
+    "tracks": [
+      "music_playground",
+      "music_meadow",
+      "music_focus",
+      "music_celebration"
+    ],
+    "note": "Four instrumental loops (music_v2_5, instrumental forced) generated for future use. In review: not bundled, not played; the app has no background music, no music selector, and the sound settings are unchanged.",
+    "join_previews": "Design/Audio/Review/loop_joins/<name>_join_preview.m4a (last 5 s of the loop followed by its first 5 s)"
   },
   "video": [
     {

@@ -41,8 +41,6 @@ final class AppModel {
     private(set) var historyRevision = 0
     private var parentAccess = ParentAccessSession()
     @ObservationIgnored private var resultsTask: Task<Void, Never>?
-    /// Whether the round just finished beat this board's earlier best (sound only).
-    private(set) var lastResultIsNewBest = false
 
     /// `settings` defaults to `nil` and is created inside this @MainActor body
     /// (SettingsStore is main-actor isolated; see GameSession.init).
@@ -159,7 +157,7 @@ final class AppModel {
 
     enum StartError: Error { case locked, notEnoughContent }
 
-    func startNewGame(_ configuration: GameConfiguration) throws {
+    func startNewGame(_ configuration: GameConfiguration, startCueDelay: TimeInterval = 0) throws {
         guard policy.isAvailable(configuration) else { throw StartError.locked }
         audio.cancelPending()   // e.g. the Results jingle when tapping Play again
         var generator = SystemRandomNumberGenerator()
@@ -178,7 +176,7 @@ final class AppModel {
         }
         persist(state)
         route = .game
-        audio.play(.gameStart)
+        if startCueDelay > 0 { audio.play(.gameStart, after: startCueDelay) } else { audio.play(.gameStart) }
         audio.narrate(.roundStarted, after: 1.3)
     }
 
@@ -189,6 +187,17 @@ final class AppModel {
         route = .game
         audio.play(.gameStart)
         audio.narrate(.roundStarted, after: 1.3)
+    }
+
+    /// "Play again" after a completed round: the kind try_again cue, then the
+    /// new round's game_start once it has finished (never overlapping).
+    func playAgain(_ configuration: GameConfiguration) {
+        do {
+            try startNewGame(configuration, startCueDelay: 0.8)
+            audio.play(.tryAgain)
+        } catch {
+            goToSetup()
+        }
     }
 
     func restartCurrentGame() {
@@ -216,7 +225,6 @@ final class AppModel {
     }
 
     private func complete(_ summary: RoundSummary, from finished: GameSession) {
-        lastResultIsNewBest = PersonalBest.isNewBest(summary, comparedTo: (try? history.recentRecords()) ?? [])
         do {
             try history.record(summary)
         } catch {

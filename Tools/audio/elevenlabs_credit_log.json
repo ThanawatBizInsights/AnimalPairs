@@ -334,6 +334,94 @@
       "estimated_credits": 48,
       "charged_credits": 48,
       "review": "awaiting review"
+    },
+    {
+      "time": "2026-11-16T06:43:56+00:00",
+      "batch": "batch5_reward_revisions",
+      "name": "star_earn_v2",
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 0.8,
+      "http_status": 200,
+      "request_id": null,
+      "estimated_credits": 32,
+      "charged_credits": 32,
+      "review": "awaiting review"
+    },
+    {
+      "time": "2026-11-16T06:43:58+00:00",
+      "batch": "batch5_reward_revisions",
+      "name": "badge_reveal_v2",
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 1.3,
+      "http_status": 200,
+      "request_id": null,
+      "estimated_credits": 52,
+      "charged_credits": 52,
+      "review": "awaiting review"
+    },
+    {
+      "time": "2026-11-16T06:44:01+00:00",
+      "batch": "batch5_reward_revisions",
+      "name": "new_best_v2",
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 1.6,
+      "http_status": 200,
+      "request_id": null,
+      "estimated_credits": 64,
+      "charged_credits": 64,
+      "review": "awaiting review"
+    },
+    {
+      "time": "2026-11-16T06:44:03+00:00",
+      "batch": "batch5_reward_revisions",
+      "name": "try_again_v2",
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 0.8,
+      "http_status": 200,
+      "request_id": null,
+      "estimated_credits": 32,
+      "charged_credits": 32,
+      "review": "awaiting review"
+    },
+    {
+      "time": "2026-11-16T06:45:30+00:00",
+      "batch": "batch6_music",
+      "name": "music_playground",
+      "model_id": "music_v2_5",
+      "duration_seconds": 48.0,
+      "http_status": 200,
+      "request_id": null,
+      "content_type": "audio/mpeg"
+    },
+    {
+      "time": "2026-11-16T06:46:00+00:00",
+      "batch": "batch6_music",
+      "name": "music_meadow",
+      "model_id": "music_v2_5",
+      "duration_seconds": 48.0,
+      "http_status": 200,
+      "request_id": null,
+      "content_type": "audio/mpeg"
+    },
+    {
+      "time": "2026-11-16T06:46:10+00:00",
+      "batch": "batch6_music",
+      "name": "music_focus",
+      "model_id": "music_v2_5",
+      "duration_seconds": 48.0,
+      "http_status": 200,
+      "request_id": null,
+      "content_type": "audio/mpeg"
+    },
+    {
+      "time": "2026-11-16T06:46:22+00:00",
+      "batch": "batch6_music",
+      "name": "music_celebration",
+      "model_id": "music_v2_5",
+      "duration_seconds": 48.0,
+      "http_status": 200,
+      "request_id": null,
+      "content_type": "audio/mpeg"
     }
   ],
   "account_reconciliation": {

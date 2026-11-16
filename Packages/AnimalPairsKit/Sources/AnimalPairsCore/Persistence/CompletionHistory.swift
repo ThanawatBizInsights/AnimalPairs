@@ -133,18 +133,3 @@ public final class InMemoryCompletionHistory: CompletionHistoryStore {
     public func resetProgress() throws { ledger.reset() }
 }
 
-/// Personal-best detection, used only to choose a celebratory sound (no
-/// scores are shown to the child).
-public enum PersonalBest {
-    /// True when `summary` needed fewer tries than every earlier result for the
-    /// same mode and board size. The first result on a board is not a "best".
-    public static func isNewBest(_ summary: RoundSummary, comparedTo records: [CompletionRecord]) -> Bool {
-        let earlier = records.filter {
-            $0.roundID != summary.roundID
-                && $0.mode == summary.configuration.mode
-                && $0.boardSize == summary.configuration.boardSize
-        }
-        guard let best = earlier.map(\.attempts).min() else { return false }
-        return summary.attempts < best
-    }
-}

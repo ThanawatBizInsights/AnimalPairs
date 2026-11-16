@@ -46,9 +46,12 @@ def main() -> int:
     for s in sounds:
         if s["status"] in ("approved", "fallback") and s["file"] not in bundled:
             problems.append(f"{s['status']} but missing from the bundle: {s['file']}")
-    files = [s["file"] for s in sounds]
-    for name in {f for f in files if files.count(f) > 1}:
-        problems.append(f"file used by more than one manifest entry: {name}")
+    live = [s["file"] for s in sounds if s["status"] in ("approved", "fallback")]
+    for name in {f for f in live if live.count(f) > 1}:
+        problems.append(f"file claimed by more than one approved entry: {name}")
+    for s in sounds:
+        if s.get("replaces") and not any(o["name"] == s["replaces"] for o in sounds):
+            problems.append(f"{s['name']} replaces unknown entry {s['replaces']}")
 
     names = {s["name"] for s in sounds}
     swift = SWIFT.read_text()

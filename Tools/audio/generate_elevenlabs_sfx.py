@@ -176,6 +176,16 @@ def process(master: Path, target: Path) -> dict:
 
 # MARK: Commands
 
+def review_path(sound: dict) -> Path:
+    """Review copies are named after the manifest entry, so a revision
+    (e.g. star_earn_v2) never collides with the approved file it may replace."""
+    return REVIEW / f"{sound['name']}{Path(sound['file']).suffix}"
+
+
+def bundle_path(sound: dict) -> Path:
+    return ROOT / sound.get("bundle_dir", "AnimalPairs/Resources/Sounds") / sound["file"]
+
+
 def show_status(manifest: dict) -> None:
     print(f"{'name':<22}{'batch':<18}{'status':<16}{'req s':>6}{'final s':>8}  file")
     for s in manifest["sounds"]:
@@ -191,12 +201,17 @@ def approve(manifest: dict, names: list[str]) -> int:
             print(f"skip {name}: not awaiting review ({sound['status'] if sound else 'unknown'})")
             failures += 1
             continue
-        review = REVIEW / sound["file"]
-        BUNDLE.mkdir(parents=True, exist_ok=True)
-        shutil.copy2(review, BUNDLE / sound["file"])
+        target = bundle_path(sound)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copy2(review_path(sound), target)
         sound["status"] = "approved"
         sound["approved_at"] = now_iso()
-        print(f"approved {name} -> AnimalPairs/Resources/Sounds/{sound['file']}")
+        replaced = next((s for s in manifest["sounds"] if s["name"] == sound.get("replaces")), None)
+        if replaced is not None:
+            replaced["status"] = "superseded"
+            replaced["superseded_by"] = name
+        print(f"approved {name} -> {target.relative_to(ROOT)}"
+              f"{' (supersedes ' + replaced['name'] + ')' if replaced else ''}")
     save_json(MANIFEST, manifest)
     return 1 if failures else 0
 
@@ -208,7 +223,7 @@ def reject(manifest: dict, names: list[str], reason: str) -> int:
             print(f"skip {name}: only sounds awaiting review can be rejected")
             continue
         stamp = now_iso().replace(":", "")
-        for path in (MASTERS / f"{name}.mp3", REVIEW / sound["file"]):
+        for path in (MASTERS / f"{name}.mp3", review_path(sound)):
             if path.exists():
                 dest = MASTERS / "rejected" / f"{path.stem}-{stamp}{path.suffix}"
                 dest.parent.mkdir(parents=True, exist_ok=True)
@@ -227,7 +242,7 @@ def generate(manifest: dict, batch: str, only: list[str] | None, dry_run: bool) 
         print(f"unknown batch {batch}")
         return 2
     if any(s["kind"] != "sfx" for s in in_batch):
-        print(f"{batch} contains voice lines; voice generation is not enabled in this tool yet.")
+        print(f"{batch} is not a sound-effects batch (music: Tools/audio/generate_elevenlabs_music.py).")
         return 2
     todo = [s for s in in_batch
             if s["status"] in ("planned", "rejected") and (not only or s["name"] in only)]
@@ -288,12 +303,12 @@ def generate(manifest: dict, batch: str, only: list[str] | None, dry_run: bool) 
         credits["account_rate_estimate"] += round(
             sound["duration_seconds"] * manifest["credit_policy"]["observed_credits_per_second"])
         try:
-            sound.update(process(master, REVIEW / sound["file"]))
+            sound.update(process(master, review_path(sound)))
             sound["master"] = str(master.relative_to(ROOT))
             sound["status"] = "awaiting_review"
             entry["review"] = "awaiting review"
             print(f"ok {sound['name']:<20} {sound['final_duration_seconds']}s  "
-                  f"loudness {sound['loudness_dbfs']} dBFS  -> Design/Audio/Review/{sound['file']}")
+                  f"loudness {sound['loudness_dbfs']} dBFS  -> {review_path(sound).relative_to(ROOT)}")
         except (ValueError, subprocess.CalledProcessError) as error:
             dest = MASTERS / "rejected" / f"{sound['name']}-{entry['time'].replace(':', '')}.mp3"
             dest.parent.mkdir(parents=True, exist_ok=True)
