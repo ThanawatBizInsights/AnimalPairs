@@ -81,6 +81,36 @@ final class EntitlementResolverTests: XCTestCase {
         XCTAssertNil(d.cache)
     }
 
+    func testClosingTheRedeemSheetAloneNeverUnlocks() {
+        XCTAssertEqual(RedemptionOutcome.resolve(unlockedBefore: false, verifiedUnlockedNow: false,
+                                                 sheetFailedForNetwork: false), .redeemFoundNothing)
+        XCTAssertEqual(RedemptionOutcome.resolve(unlockedBefore: false, verifiedUnlockedNow: false,
+                                                 sheetFailedForNetwork: true), .networkUnavailable)
+        XCTAssertEqual(RedemptionOutcome.resolve(unlockedBefore: false, verifiedUnlockedNow: true,
+                                                 sheetFailedForNetwork: false), .redeemed)
+        XCTAssertEqual(RedemptionOutcome.resolve(unlockedBefore: true, verifiedUnlockedNow: true,
+                                                 sheetFailedForNetwork: false), .restored,
+                       "already owned: nothing new was redeemed")
+    }
+
+    func testBusyStatesBlockOtherStoreActions() {
+        let busy: [PurchaseFlowState] = [.purchasing, .restoring, .redeeming, .checkingRedemption]
+        XCTAssertTrue(busy.allSatisfy(\.isBusy))
+        let idle: [PurchaseFlowState] = [.idle, .redeemed, .redeemFoundNothing, .networkUnavailable, .cancelled, .purchased]
+        XCTAssertTrue(idle.allSatisfy { !$0.isBusy })
+    }
+
+    func testFullGameUnlocksExactlyThePremiumFeatures() {
+        let starter = ContentAccessPolicy(level: .starter)
+        let full = ContentAccessPolicy(level: .fullGame)
+        // Free for everyone: Classic mode on the 6- and 12-card boards.
+        XCTAssertEqual(Set(GameMode.allCases.filter { starter.isAvailable($0) }), [.classic])
+        XCTAssertEqual(Set(BoardSize.allCases.filter { starter.isAvailable($0) }), [.six, .twelve])
+        // Full Game: everything.
+        XCTAssertEqual(Set(GameMode.allCases.filter { full.isAvailable($0) }), Set(GameMode.allCases))
+        XCTAssertEqual(Set(BoardSize.allCases.filter { full.isAvailable($0) }), Set(BoardSize.allCases))
+    }
+
     func testAccessPolicy() {
         let starter = ContentAccessPolicy(level: .starter)
         XCTAssertTrue(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .six)))

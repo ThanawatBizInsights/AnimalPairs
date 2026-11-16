@@ -69,8 +69,7 @@ Currently shipped as **development placeholders**: the character's signature art
 | ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn`, `badge_reveal`, `new_best` unused (no stars, badges or best scores) |
 | Reward sound revisions (`star_earn_v2`, `badge_reveal_v2`, `new_best_v2`, `try_again_v2`) | `Design/Audio/Review/` | **awaiting your review**; approving one replaces the bundled file of the same name |
 | Music loops (4) | `Design/Audio/Review/*.m4a`, masters in `Design/Audio/Music/` | **awaiting your review**; not bundled, not played |
-| Animal clips: Momo, Iris, Nori, Sprout, Mochi, Sunny, Maple, Clover (32) | `AnimalPairs/Resources/Sounds/Animals/<animal>_<variant>.m4a` | **bundled** (generated with ElevenLabs; masters in `Design/Audio/Animals/`); `mochi_excited` is short (1.2 s) — retake when credits allow |
-| Animal clips: Rusty, Pebble (8) | — | **not generated** — the ElevenLabs key's 5,000-credit cap was reached; these animals play no clip until generated (`python3 Tools/audio/generate_animal_clips.py`) |
+| Animal clips, all 10 animals × greeting, curious, excited, calm (40) | `AnimalPairs/Resources/Sounds/Animals/<animal>_<variant>.m4a` + `animal_clips.json` | **bundled** (generated with ElevenLabs; masters, originals and every take in `Design/Audio/Animals/`); `mochi_excited` is 2.0 s, a little under the 3–5 s aim |
 | Voice recordings | — | none (English only; the planned Thai lines were removed) |
 | Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |
 | Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint_synth`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | fallbacks only |

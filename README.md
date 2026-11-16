@@ -45,7 +45,7 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 
 | Suite | Where | How |
 | --- | --- | --- |
-| `AnimalPairsCoreTests` (81 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
+| `AnimalPairsCoreTests` (84 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
 | `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** purchase states (success, Ask to Buy pending, failure, refund/revocation, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
 | Backend (17 tests) | `backend/` | see [backend/README.md](backend/README.md) |
 | String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
@@ -74,7 +74,7 @@ All configurable values are build settings on the **AnimalPairs** target
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `AP_FULL_UNLOCK_PRODUCT_ID` | `com.example.animalpairs.fullgame` | Non-consumable product ID. Must match App Store Connect and `Config/Products.storekit`. |
+| `AP_FULL_UNLOCK_PRODUCT_ID` | `com.example.animalpairs.fullgame` | Non-consumable *Full Game Unlock* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID](#product-id). |
 | `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). |
 | `AP_SUPPORT_URL` | empty | `https://` support page. |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` | Replace with your own. |
@@ -130,13 +130,11 @@ totals cover every round. If the store cannot be opened the file is left
 untouched and an in-memory store is used for that session. Resetting progress
 never touches purchases.
 
-**Purchases.** One non-consumable. Prices come from `Product.displayPrice`.
-Access is delivered before a verified transaction is finished; unverified
-transactions never unlock; `Transaction.updates` is observed for the app's
-lifetime; refunds and revocations lock again. A previously verified unlock is
-cached so it is honoured before StoreKit answers, but a completed StoreKit scan
-with no entitlement is authoritative. Debug builds have a *Simulate full
-unlock* switch in Parents; it is compiled out of Release builds.
+**Purchases.** One non-consumable, *Full Game Unlock*, which can be bought,
+redeemed with an Apple gift code (offer code) or restored — see
+[Full Game Unlock and gift codes](#full-game-unlock-and-gift-codes). Debug
+builds have a *Simulate full unlock* switch in Parents; it is compiled out of
+Release builds.
 
 **Parents area.** Reached through an adult gate (a multiplication question in
 words with a large keypad, or a standard text field as the accessible
@@ -148,6 +146,108 @@ privacy and support links all live behind it.
 accounts, chat or third-party analytics. Progress stays on the device. A
 privacy manifest (`PrivacyInfo.xcprivacy`) declares the only required-reason
 API used (UserDefaults).
+
+## Full Game Unlock and gift codes
+
+### What it unlocks
+
+| Free for everyone | Added by **Full Game Unlock** |
+| --- | --- |
+| Classic mode | **Exact Pose** mode |
+| 6- and 12-card boards | **16- and 20-card** boards |
+| The 10 default animal pictures | **20 more pictures**: every friend playing and napping (currently development placeholders, see ASSET_CHECKLIST) |
+| Sounds, animal clips, hints, progress, Parents | — |
+
+Nothing that was free before is locked. Unlocking, restoring or redeeming never
+touches game progress or history (`ContentAccessPolicy`, AnimalPairsCore).
+
+### Parents section (behind the adult gate)
+
+* **Full Game Unlocked** status (only from a *verified* StoreKit transaction;
+  the debug "simulate" switch is labelled as such).
+* **Unlock Full Game – {price}** (`Product.purchase` via SwiftUI's `PurchaseAction`).
+* **Redeem Gift Code** — Apple's own sheet, `offerCodeRedemption(isPresented:onCompletion:)`
+  (StoreKit, iOS 16.3+ for one-time purchases; the app targets iOS 17).
+  Apple validates the code (wrong, expired, already used, not eligible) and
+  explains problems inside its sheet. No codes are stored or checked by the app.
+* **Restore Purchases** (`AppStore.sync()`).
+* English messages for success, cancellation, unavailable product, network
+  problems, "no code redeemed" and pending approval. Success is shown only
+  after StoreKit has delivered a verified transaction for the unlock product.
+
+### How ownership is decided
+
+* Source of truth: StoreKit 2 **verified** transactions whose product ID is
+  `AP_FULL_UNLOCK_PRODUCT_ID` and type non-consumable. Unverified transactions,
+  other products and revoked/refunded transactions never unlock.
+* Read at launch, whenever the app returns to the foreground (codes redeemed
+  in the App Store app or via a redeem link), after a purchase, after the redeem
+  sheet closes (waiting up to 8 s for the transaction) and on Restore;
+  `Transaction.updates` is observed for the app's lifetime.
+* Closing the redeem sheet never unlocks anything by itself.
+* Offline: StoreKit keeps verified transactions on the device; in addition the
+  ID of the last *verified* transaction is cached so a launch before StoreKit
+  answers stays unlocked. It is not a "purchased" flag: a completed StoreKit
+  scan without the entitlement (e.g. after a refund) locks again.
+
+### Product ID
+
+The project already uses **`com.example.animalpairs.fullgame`** (build setting
+`AP_FULL_UNLOCK_PRODUCT_ID`, `Config/Products.storekit`). Because the bundle ID
+`com.example.AnimalPairs` is a placeholder too, before creating anything in App
+Store Connect set your real bundle ID and use the matching product ID, e.g.
+bundle `com.yourstudio.AnimalPairs` → product **`com.yourstudio.animalpairs.fullgame`**.
+Change it in three places: `PRODUCT_BUNDLE_IDENTIFIER`, `AP_FULL_UNLOCK_PRODUCT_ID`
+(both targets' build settings) and `productID` in `Config/Products.storekit`
+(`PurchaseTests` checks they match). A product ID can never be reused once created.
+
+### App Store Connect setup
+
+1. **Business → Agreements**: the Paid Apps agreement, tax and banking must be active
+   (required for any in-app purchase, including free offer codes).
+2. **Apps → Animal Pairs → Monetization → In-App Purchases → +**: type
+   **Non-Consumable**, reference name **Full Game Unlock**, the product ID above.
+3. Availability (all territories you sell in), a price, Family Sharing (on in
+   the local config), an English localization (display name "Full Game",
+   description "Adds Exact Pose, the 16- and 20-card boards and 20 extra animal
+   pictures."), a review screenshot of the Parents section and review notes
+   (the adult gate asks a multiplication question written in words before Parents opens).
+4. Submit the in-app purchase **with an app version** (a first in-app purchase is
+   reviewed together with a new version).
+
+### Creating and giving out free codes
+
+1. After the in-app purchase is approved: **In-App Purchases → Full Game Unlock →
+   Offer Codes → Create**. Name it (e.g. "Gift – Full Game"), choose the
+   territories and eligibility (people who don't own it yet) and **Free** as the
+   price.
+2. Choose the code type:
+   * **One-time use codes** — App Store Connect generates a batch; download the
+     list. Each code works once. Best for handing to individual parents.
+   * **Custom codes** — a code you name (e.g. `PAIRSFRIENDS`) with a redemption
+     limit. Easier to share, but anyone with the code can use it until the limit.
+   * **Sandbox codes** — for testing with a sandbox Apple Account only.
+   Set start/end dates; App Store Connect shows the current quantity and validity limits.
+3. Give parents the code, or a link that pre-fills it:
+   `https://apps.apple.com/redeem?ctx=offercodes&id=<Apple ID of the app>&code=<CODE>`.
+   They can redeem it in **Parents → Redeem Gift Code**, by opening the link,
+   or in the App Store app (account → Redeem Gift Card or Code). All three
+   unlock the game on every device signed in to that Apple Account, and
+   **Restore Purchases** brings it back after a reinstall.
+4. App Store Connect reports redemptions per offer; codes can be deactivated there.
+
+### Testing
+
+| Where | What it proves | How |
+| --- | --- | --- |
+| **Simulated** — Xcode StoreKit configuration (`Config/Products.storekit`, already in the scheme), `AnimalPairsTests/PurchaseTests.swift` | purchase, Ask to Buy, failure, refund/revocation, restore after "reinstall" (empty cache), offline launch with a previously verified unlock, a plain UserDefaults flag never unlocks, redeem sheet closed without a code, network failure from the sheet, a transaction arriving while the sheet is open, a redemption made outside the app picked up on returning to the foreground | Xcode → Product → Test on an iPhone and an iPad simulator. Manual: run the app, Parents → Redeem Gift Code opens the sheet; Debug → StoreKit → Manage Transactions to add/delete/refund. |
+| **Sandbox** — a sandbox Apple Account on a real iPhone and iPad, with **sandbox offer codes** from App Store Connect | real code validation by Apple: a valid free code unlocks; a wrong code, an expired offer and an already-used one-time code are refused in Apple's sheet and nothing unlocks; Cancel unlocks nothing; Restore after deleting and reinstalling; redeeming via the redeem link while the game is in the background, then returning | Settings → Developer (or App Store → Sandbox Account) to sign in; run a development build from Xcode **without** the StoreKit configuration (Edit Scheme → Options → StoreKit Configuration: None). |
+| **TestFlight / release** | the same with production one-time-use and custom codes | after the in-app purchase is approved. |
+
+Apple's sheet decides whether a code is valid, so invalid, expired and
+already-redeemed codes can only be tested in the sandbox or later; the
+simulated tests check that the game never unlocks without a verified
+transaction in each of those cases.
 
 ## Sound effects and voice
 

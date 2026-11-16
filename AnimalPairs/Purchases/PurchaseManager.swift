@@ -28,8 +28,19 @@ struct EntitlementCacheStore {
     }
 }
 
-/// StoreKit 2 handling for the single non-consumable full-game unlock.
+/// StoreKit 2 handling for the single non-consumable "Full Game Unlock".
 ///
+/// Verified StoreKit 2 transactions are the only source of ownership; the
+/// small cache below only bridges the moment before StoreKit answers (and
+/// offline launches) and is replaced by every completed StoreKit scan.
+///
+/// * Ways to own it: buy it, redeem an Apple offer code (gift code) in the
+///   App Store's own sheet — inside the app or outside it — or Restore.
+///   All three arrive as the same verified transaction for `productID`.
+/// * Entitlements are re-read at launch, on returning to the foreground,
+///   after a purchase, after the redeem sheet closes and on Restore, and
+///   `StoreKit.Transaction.updates` is observed for the app's lifetime.
+/// * Closing the redeem sheet never unlocks anything by itself.
 /// * Prices come from `Product.displayPrice` (localized by the App Store).
 /// * Access is delivered before a verified transaction is finished.
 /// * Unverified transactions never grant access.
@@ -44,6 +55,12 @@ final class PurchaseManager {
     private(set) var verifiedLevel: AccessLevel
     private(set) var flowState: PurchaseFlowState = .idle
     private(set) var lastStoreError: String?
+    /// Drives `.offerCodeRedemption(isPresented:)` in the Parents area.
+    var isRedeemSheetPresented = false
+    @ObservationIgnored private var unlockedBeforeRedemption = false
+    /// How long to wait after the redeem sheet closes for StoreKit to deliver
+    /// the verified transaction before saying nothing was redeemed.
+    @ObservationIgnored var redemptionWait: TimeInterval = 8
 
     private let cacheStore: EntitlementCacheStore
     private var cache: CachedEntitlement?
@@ -103,7 +120,7 @@ final class PurchaseManager {
             lastStoreError = nil
         } catch {
             lastStoreError = error.localizedDescription
-            flowState = .productUnavailable
+            flowState = Self.isNetworkProblem(error) ? .networkUnavailable : .productUnavailable
         }
     }
 
@@ -112,7 +129,7 @@ final class PurchaseManager {
         var evidence: [EntitlementEvidence] = []
         for await result in StoreKit.Transaction.currentEntitlements {
             switch result {
-            case .verified(let transaction) where transaction.productID == productID:
+            case .verified(let transaction) where Self.isUnlock(transaction, productID: productID):
                 evidence.append(transaction.revocationDate == nil
                                 ? .verifiedActive(transactionID: transaction.id)
                                 : .verifiedRevoked(transactionID: transaction.id))
@@ -137,13 +154,19 @@ final class PurchaseManager {
             let result = try await action(product)
             await handle(result: result)
         } catch {
-            flowState = .failed(error.localizedDescription)
+            flowState = Self.flowState(for: error)
         }
     }
 
     func handle(result: Product.PurchaseResult) async {
         switch result {
         case .success(.verified(let transaction)):
+            guard Self.isUnlock(transaction, productID: productID), transaction.revocationDate == nil else {
+                // Some other product, or already refunded: never unlocks.
+                await transaction.finish()
+                flowState = .verificationFailed
+                return
+            }
             deliver(transaction)
             await transaction.finish()
             flowState = .purchased
@@ -168,8 +191,51 @@ final class PurchaseManager {
         } catch StoreKitError.userCancelled {
             flowState = .cancelled
         } catch {
-            flowState = .failed(error.localizedDescription)
+            flowState = Self.flowState(for: error)
         }
+    }
+
+    // MARK: Gift codes (Apple offer codes)
+
+    /// Opens Apple's offer-code redemption sheet. Apple checks the code
+    /// (valid, expired, already used, eligible) inside its own sheet.
+    func beginRedemption() {
+        guard !flowState.isBusy else { return }
+        unlockedBeforeRedemption = verifiedLevel == .fullGame
+        flowState = .redeeming
+        isRedeemSheetPresented = true
+    }
+
+    /// Called when the sheet closes, whatever happened in it. Unlocks only
+    /// if StoreKit now has a verified transaction for the unlock product.
+    func redemptionSheetClosed(_ result: Result<Void, Error>) async {
+        // Reported once per sheet, whether by its completion or by a dismissal.
+        guard flowState == .redeeming else { return }
+        isRedeemSheetPresented = false
+        flowState = .checkingRedemption
+        var networkProblem = false
+        if case .failure(let error) = result { networkProblem = Self.isNetworkProblem(error) }
+        await refreshEntitlements()
+        // A redemption's transaction can arrive through `updates` a moment
+        // after the sheet closes; wait briefly for it.
+        let deadline = Date().addingTimeInterval(redemptionWait)
+        while verifiedLevel != .fullGame && Date() < deadline && flowState == .checkingRedemption {
+            try? await Task.sleep(nanoseconds: 500_000_000)
+            if verifiedLevel != .fullGame { await refreshEntitlements() }
+        }
+        guard flowState == .checkingRedemption else { return }   // `updates` already reported it
+        flowState = RedemptionOutcome.resolve(unlockedBefore: unlockedBeforeRedemption,
+                                              verifiedUnlockedNow: verifiedLevel == .fullGame,
+                                              sheetFailedForNetwork: networkProblem)
+    }
+
+    // MARK: Foreground
+
+    /// Called when the app becomes active again, e.g. after a code was
+    /// redeemed or a purchase approved outside the app.
+    func appBecameActive() {
+        guard updatesTask != nil, !flowState.isBusy else { return }
+        Task { await refreshEntitlements() }
     }
 
     func clearFlowMessage() {
@@ -178,16 +244,51 @@ final class PurchaseManager {
 
     // MARK: Private
 
+    /// Every transaction StoreKit reports while the app runs: purchases
+    /// approved later (Ask to Buy), codes redeemed in the App Store or in the
+    /// sheet, purchases on another device, refunds and revocations.
+    /// Unverified transactions are ignored and never finished, so StoreKit
+    /// can deliver them again once they verify.
     private func handle(update: VerificationResult<StoreKit.Transaction>, productID: String) async {
-        guard case .verified(let transaction) = update, transaction.productID == productID else { return }
+        guard case .verified(let transaction) = update, Self.isUnlock(transaction, productID: productID) else { return }
         if transaction.revocationDate != nil {
             apply(EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: transaction.id)],
                                               scanCompleted: true, cached: cache))
+            // Another, still valid transaction (e.g. a later purchase) may exist.
+            await refreshEntitlements()
         } else {
             deliver(transaction)
-            if flowState == .pendingApproval { flowState = .purchased }
+            switch flowState {
+            case .pendingApproval: flowState = .purchased
+            case .redeeming, .checkingRedemption:
+                flowState = unlockedBeforeRedemption ? .restored : .redeemed
+            default: break
+            }
         }
         await transaction.finish()
+    }
+
+    /// The unlock is the configured non-consumable and nothing else.
+    nonisolated static func isUnlock(_ transaction: StoreKit.Transaction, productID: String) -> Bool {
+        transaction.productID == productID && transaction.productType == .nonConsumable
+    }
+
+    nonisolated static func isNetworkProblem(_ error: Error) -> Bool {
+        if let storeError = error as? StoreKitError, case .networkError = storeError { return true }
+        if error is URLError { return true }
+        return (error as NSError).domain == NSURLErrorDomain
+    }
+
+    nonisolated static func flowState(for error: Error) -> PurchaseFlowState {
+        if isNetworkProblem(error) { return .networkUnavailable }
+        if let storeError = error as? StoreKitError {
+            switch storeError {
+            case .userCancelled: return .cancelled
+            case .notAvailableInStorefront: return .productUnavailable
+            default: break
+            }
+        }
+        return .failed(error.localizedDescription)
     }
 
     private func deliver(_ transaction: StoreKit.Transaction) {

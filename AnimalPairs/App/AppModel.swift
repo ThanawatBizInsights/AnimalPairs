@@ -287,6 +287,8 @@ final class AppModel {
             if let session, !session.state.isCompleted { persist(session.controller.normalizedState()) }
         case .active:
             if route == .home { refreshResumableRound() }
+            // Codes redeemed or purchases approved outside the app.
+            purchases.appBecameActive()
         @unknown default:
             break
         }
@@ -308,6 +310,9 @@ final class AppModel {
 
     /// Re-checks the timeout; sends the adult back to the gate when expired.
     func validateParentAccess() {
+        // Never pull the Parents area away while Apple's sheet is open or a
+        // store action is finishing.
+        guard !purchases.flowState.isBusy else { return }
         if route == .parents && !parentAccess.isActive() { route = .parentGate }
     }
 

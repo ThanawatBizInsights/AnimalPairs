@@ -940,6 +940,116 @@
       "request_id": null,
       "account_rate_credits": 0,
       "error": "quota_exceeded: This request exceeds your API key (AnimalPairs Development) quota of 5000. You have 34 credits remaining, while 50 credits are required for this request."
+    },
+    {
+      "time": "2026-11-16T10:58:13+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "rusty_greeting",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:16+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "rusty_curious",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:19+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "rusty_excited",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:23+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "rusty_calm",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:26+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "pebble_greeting",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:30+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "pebble_curious",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:33+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "pebble_excited",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:36+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "pebble_calm",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:40+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "mochi_excited",
+      "attempt": 1,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
+    },
+    {
+      "time": "2026-11-16T10:58:42+00:00",
+      "batch": "batch7_animal_clips",
+      "name": "mochi_excited",
+      "attempt": 2,
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 5.0,
+      "http_status": 200,
+      "request_id": null,
+      "account_rate_credits": 50
     }
   ],
   "account_reconciliation": {

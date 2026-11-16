@@ -1343,6 +1343,39 @@
         }
       }
     },
+    "parents.redeem": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Redeem Gift Code"
+          }
+        }
+      }
+    },
+    "parents.redeem.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Have an App Store gift code for Animal Pairs? Tap Redeem Gift Code and enter it in the App Store’s window. Apple checks the code and the full game unlocks for free."
+          }
+        }
+      }
+    },
+    "parents.redeem.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the App Store’s window for entering a code."
+          }
+        }
+      }
+    },
     "parents.reset": {
       "extractionState": "manual",
       "localizations": {
@@ -1404,7 +1437,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Restore purchases"
+            "value": "Restore Purchases"
           }
         }
       }
@@ -1470,7 +1503,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Unlock for %@"
+            "value": "Unlock Full Game – %@"
           }
         }
       }
@@ -1481,7 +1514,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "One-time purchase. Adds Exact Pose mode, 16- and 20-card boards, and all 30 animal pictures. No ads and no subscriptions."
+            "value": "“Full Game Unlock” is a one-time purchase. It adds Exact Pose mode, the 16- and 20-card boards, and 20 extra animal pictures (each friend playing and napping). Classic mode with 6 and 12 cards stays free. No ads and no subscriptions."
           }
         }
       }
@@ -1503,7 +1536,18 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Full game unlocked. Thank you!"
+            "value": "Full Game Unlocked"
+          }
+        }
+      }
+    },
+    "parents.unlock.ownedDetail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exact Pose mode, the 16- and 20-card boards and all 30 animal pictures are unlocked for this Apple Account. Thank you!"
           }
         }
       }
@@ -1536,7 +1580,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Full game"
+            "value": "Full Game"
           }
         }
       }
@@ -1547,7 +1591,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The App Store did not return product “%@”. It must exist in App Store Connect, or select Products.storekit in the Xcode scheme for local testing."
+            "value": "The App Store didn’t return the Full Game Unlock. Check the internet connection and try again."
           }
         }
       }
@@ -1618,6 +1662,17 @@
         }
       }
     },
+    "purchase.checkingRedemption": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checking with the App Store…"
+          }
+        }
+      }
+    },
     "purchase.failed": {
       "extractionState": "manual",
       "localizations": {
@@ -1625,6 +1680,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Something went wrong (%@). Please try again."
+          }
+        }
+      }
+    },
+    "purchase.network": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Couldn’t reach the App Store. Check the internet connection and try again."
           }
         }
       }
@@ -1651,6 +1717,39 @@
         }
       }
     },
+    "purchase.redeemNothing": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No gift code was redeemed, so nothing changed. If you entered a code, the App Store’s window explained why it couldn’t be used."
+          }
+        }
+      }
+    },
+    "purchase.redeemed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Gift code redeemed. Full Game Unlocked!"
+          }
+        }
+      }
+    },
+    "purchase.redeeming": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Enter the code in the App Store’s window."
+          }
+        }
+      }
+    },
     "purchase.restoreNothing": {
       "extractionState": "manual",
       "localizations": {
@@ -1668,7 +1767,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Purchases restored."
+            "value": "Purchases restored. Full Game Unlocked."
           }
         }
       }
@@ -1690,7 +1789,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Purchase complete. Everything is unlocked."
+            "value": "Purchase complete. Full Game Unlocked!"
           }
         }
       }

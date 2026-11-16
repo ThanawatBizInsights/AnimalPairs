@@ -15,6 +15,7 @@ struct ParentsView: View {
 
     var body: some View {
         let t = model.localizer
+        @Bindable var purchases = model.purchases
         VStack(spacing: 0) {
             HStack {
                 Text(t["parents.title"])
@@ -45,6 +46,18 @@ struct ParentsView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.insetGrouped)
         }
+        // Apple's own offer-code sheet (iOS 16.3+ for one-time purchases).
+        // Apple validates the code; the game unlocks only when StoreKit then
+        // delivers a verified transaction for the unlock product.
+        .offerCodeRedemption(isPresented: $purchases.isRedeemSheetPresented) { result in
+            Task { await model.purchases.redemptionSheetClosed(result) }
+        }
+        .onChange(of: purchases.isRedeemSheetPresented) { wasOpen, isOpen in
+            // Swiped away without a completion: check all the same.
+            if wasOpen && !isOpen {
+                Task { await model.purchases.redemptionSheetClosed(.success(())) }
+            }
+        }
         .task(id: model.historyRevision) { loadProgress() }
         .task {
             // Re-check the access timeout while the area is open.
@@ -63,15 +76,27 @@ struct ParentsView: View {
 
     // MARK: Sections
 
+    /// Full Game: status, Unlock, Redeem Gift Code and Restore. Everything
+    /// here is behind the parental gate.
     private var purchaseSection: some View {
         let t = model.localizer
         let purchases = model.purchases
+        let busy = purchases.flowState.isBusy
         return Section {
-            if purchases.isUnlocked {
+            if purchases.verifiedLevel == .fullGame {
                 Label(t["parents.unlock.owned"], systemImage: "checkmark.seal.fill")
                     .foregroundStyle(Palette.mintDeep)
                     .font(.rounded(.headline))
+                Text(t["parents.unlock.ownedDetail"]).font(.rounded(.callout))
             } else {
+                #if DEBUG
+                if purchases.isUnlocked {
+                    Text(verbatim: "Debug build: the full game is simulated as unlocked (Developer section). "
+                         + "No App Store purchase has been verified.")
+                        .font(.rounded(.footnote))
+                        .foregroundStyle(Palette.brownSoft)
+                }
+                #endif
                 Text(t["parents.unlock.includes"]).font(.rounded(.body))
                 if let product = purchases.product {
                     Button {
@@ -80,16 +105,25 @@ struct ParentsView: View {
                         Text(t("parents.unlock.buy", product.displayPrice))
                     }
                     .buttonStyle(PillowButtonStyle(kind: .primary))
-                    .disabled(purchases.flowState == .purchasing || purchases.flowState == .restoring)
+                    .disabled(busy)
                 } else if purchases.flowState == .loadingProducts {
                     ProgressView(t["parents.unlock.loading"])
                 } else {
-                    Text(t("parents.unlock.unavailable", purchases.productID))
+                    Text(t["parents.unlock.unavailable"])
                         .font(.rounded(.callout))
                         .foregroundStyle(Palette.brownSoft)
                     Button(t["parents.unlock.retry"]) { Task { await purchases.loadProduct() } }
                         .frame(minHeight: 44)
+                        .disabled(busy)
                 }
+                Button {
+                    purchases.beginRedemption()
+                } label: {
+                    Label(t["parents.redeem"], systemImage: "giftcard")
+                }
+                .frame(minHeight: 44)
+                .disabled(busy)
+                .accessibilityHint(Text(t["parents.redeem.hint"]))
             }
             Button {
                 Task { await purchases.restore() }
@@ -97,8 +131,11 @@ struct ParentsView: View {
                 Label(t["parents.restore"], systemImage: "arrow.clockwise")
             }
             .frame(minHeight: 44)
-            .disabled(purchases.flowState == .purchasing || purchases.flowState == .restoring)
+            .disabled(busy)
 
+            if busy && purchases.flowState != .purchasing {
+                ProgressView()
+            }
             if let message = flowMessage(purchases.flowState) {
                 Text(message).font(.rounded(.callout)).foregroundStyle(Palette.brown)
             }
@@ -107,6 +144,8 @@ struct ParentsView: View {
         } footer: {
             if model.configuration.usesPlaceholderProductID {
                 Text(t["parents.unlock.placeholderID"])
+            } else if purchases.verifiedLevel != .fullGame {
+                Text(t["parents.redeem.footer"])
             }
         }
     }
@@ -244,6 +283,11 @@ struct ParentsView: View {
         let t = model.localizer
         switch state {
         case .idle, .loadingProducts, .productUnavailable: return nil
+        case .redeeming: return t["purchase.redeeming"]
+        case .checkingRedemption: return t["purchase.checkingRedemption"]
+        case .redeemed: return t["purchase.redeemed"]
+        case .redeemFoundNothing: return t["purchase.redeemNothing"]
+        case .networkUnavailable: return t["purchase.network"]
         case .purchasing: return t["purchase.purchasing"]
         case .purchased: return t["purchase.success"]
         case .pendingApproval: return t["purchase.pending"]

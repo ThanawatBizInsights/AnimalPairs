@@ -66,5 +66,35 @@ public enum PurchaseFlowState: Equatable, Sendable {
     case restoring
     case restoreFoundNothing
     case restored
+    /// Apple's offer-code (gift code) sheet is open.
+    case redeeming
+    /// The sheet closed; waiting for StoreKit to deliver a verified transaction.
+    case checkingRedemption
+    /// A verified transaction for the unlock arrived after redeeming a code.
+    case redeemed
+    /// The sheet closed and no verified unlock arrived (cancelled, or Apple
+    /// declined the code in its own sheet).
+    case redeemFoundNothing
+    /// The App Store could not be reached.
+    case networkUnavailable
     case failed(String)
+
+    /// True while a purchase, restore or redemption is under way.
+    public var isBusy: Bool {
+        switch self {
+        case .purchasing, .restoring, .redeeming, .checkingRedemption: true
+        default: false
+        }
+    }
+}
+
+/// How a gift-code redemption ended. Only a *verified* unlock that was not
+/// there before the sheet opened counts as a redemption; closing the sheet on
+/// its own never unlocks anything.
+public enum RedemptionOutcome {
+    public static func resolve(unlockedBefore: Bool, verifiedUnlockedNow: Bool,
+                               sheetFailedForNetwork: Bool) -> PurchaseFlowState {
+        if verifiedUnlockedNow { return unlockedBefore ? .restored : .redeemed }
+        return sheetFailedForNetwork ? .networkUnavailable : .redeemFoundNothing
+    }
 }

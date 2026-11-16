@@ -88,8 +88,8 @@
     "mochi_excited": {
       "character": "mochi",
       "variant": "excited",
-      "duration": 1.21,
-      "matchEnd": 1.21
+      "duration": 2.01,
+      "matchEnd": 1.72
     },
     "mochi_greeting": {
       "character": "mochi",
@@ -144,6 +144,54 @@
       "variant": "greeting",
       "duration": 3.06,
       "matchEnd": 1.6
+    },
+    "pebble_calm": {
+      "character": "pebble",
+      "variant": "calm",
+      "duration": 4.81,
+      "matchEnd": 1.72
+    },
+    "pebble_curious": {
+      "character": "pebble",
+      "variant": "curious",
+      "duration": 4.48,
+      "matchEnd": 1.4
+    },
+    "pebble_excited": {
+      "character": "pebble",
+      "variant": "excited",
+      "duration": 4.99,
+      "matchEnd": 1.84
+    },
+    "pebble_greeting": {
+      "character": "pebble",
+      "variant": "greeting",
+      "duration": 4.89,
+      "matchEnd": 1.48
+    },
+    "rusty_calm": {
+      "character": "rusty",
+      "variant": "calm",
+      "duration": 4.81,
+      "matchEnd": 2.0
+    },
+    "rusty_curious": {
+      "character": "rusty",
+      "variant": "curious",
+      "duration": 4.52,
+      "matchEnd": 1.86
+    },
+    "rusty_excited": {
+      "character": "rusty",
+      "variant": "excited",
+      "duration": 4.73,
+      "matchEnd": 2.0
+    },
+    "rusty_greeting": {
+      "character": "rusty",
+      "variant": "greeting",
+      "duration": 4.19,
+      "matchEnd": 2.02
     },
     "sprout_calm": {
       "character": "sprout",
