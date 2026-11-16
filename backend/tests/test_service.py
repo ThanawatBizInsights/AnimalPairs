@@ -91,9 +91,13 @@ def test_asset_versions_are_immutable(client, admin):
 def test_production_rejects_placeholders(settings, make_client, admin, bundled_manifest):
     settings.environment = "production"
     client = make_client()
-    assert client.post("/v1/admin/manifests", json=bundled_manifest, headers=admin).status_code == 201
-    upload_all_assets(client, admin, bundled_manifest)
-    r = client.post(f"/v1/admin/manifests/{bundled_manifest['manifestVersion']}/publish", headers=admin)
+    # The bundled manifest is all final art now; mark one pose as a placeholder.
+    manifest = {**bundled_manifest, "manifestVersion": bundled_manifest["manifestVersion"] + "-placeholder",
+                "artworks": [{**a, "status": "placeholder"} if a["assetID"] == "momo.wave" else a
+                             for a in bundled_manifest["artworks"]]}
+    assert client.post("/v1/admin/manifests", json=manifest, headers=admin).status_code == 201
+    upload_all_assets(client, admin, manifest)
+    r = client.post(f"/v1/admin/manifests/{manifest['manifestVersion']}/publish", headers=admin)
     assert r.status_code == 409
     assert "placeholder" in r.text
 
@@ -113,25 +117,25 @@ def test_free_asset_download_and_signed_link(client, admin, bundled_manifest):
 
 def test_premium_download_fails_closed(client, admin, bundled_manifest, make_client):
     publish(client, admin, bundled_manifest)
-    assert client.post("/v1/assets/momo.play/download", json={"version": 1}).status_code == 403
-    bad = client.post("/v1/assets/momo.play/download", json={"version": 1, "signedTransaction": "bad:jws"})
+    assert client.post("/v1/assets/momo.wave/download", json={"version": 1}).status_code == 403
+    bad = client.post("/v1/assets/momo.wave/download", json={"version": 1, "signedTransaction": "bad:jws"})
     assert bad.status_code == 403
     wrong_product = json.dumps({"original": "1", "product": "com.example.other"})
-    assert client.post("/v1/assets/momo.play/download",
+    assert client.post("/v1/assets/momo.wave/download",
                        json={"version": 1, "signedTransaction": wrong_product}).status_code == 403
     revoked = json.dumps({"original": "2", "revoked": True})
-    assert client.post("/v1/assets/momo.play/download",
+    assert client.post("/v1/assets/momo.wave/download",
                        json={"version": 1, "signedTransaction": revoked}).status_code == 403
 
     unconfigured = make_client(verifier=UnavailableVerifier("not configured"))
-    r = unconfigured.post("/v1/assets/momo.play/download",
+    r = unconfigured.post("/v1/assets/momo.wave/download",
                           json={"version": 1, "signedTransaction": json.dumps({"original": "3"})})
     assert r.status_code == 503, "paid content is never served without verification"
 
 
 def test_premium_download_with_verified_purchase(client, admin, bundled_manifest):
     publish(client, admin, bundled_manifest)
-    ok = client.post("/v1/assets/momo.play/download",
+    ok = client.post("/v1/assets/momo.wave/download",
                      json={"version": 1, "signedTransaction": json.dumps({"original": "42", "signed": 100})})
     assert ok.status_code == 200
 
@@ -160,11 +164,11 @@ def test_out_of_order_notifications_keep_newest_state(client, admin, bundled_man
     assert notify(client, "charge", "ONE_TIME_CHARGE", 100).json() == {"outcome": "stale"}
     # A device transaction signed before the refund is denied.
     old_jws = json.dumps({"original": "77", "signed": 150})
-    assert client.post("/v1/assets/momo.play/download",
+    assert client.post("/v1/assets/momo.wave/download",
                        json={"version": 1, "signedTransaction": old_jws}).status_code == 403
     # A refund reversal signed later restores access.
     assert notify(client, "reversed", "REFUND_REVERSED", 300).json() == {"outcome": "applied"}
-    assert client.post("/v1/assets/momo.play/download",
+    assert client.post("/v1/assets/momo.wave/download",
                        json={"version": 1, "signedTransaction": old_jws}).status_code == 200
 
 
@@ -190,3 +194,12 @@ def test_real_verifier_requires_app_apple_id_in_production(tmp_path: Path):
     cert.write_bytes(b"not-a-real-cert")
     settings = Settings(apple_root_cert_paths=[cert], apple_environment="Production", apple_app_apple_id=None)
     assert isinstance(build_verifier(settings), UnavailableVerifier)
+
+
+def test_lookalike_groups_must_name_real_poses(bundled_manifest):
+    chars = [dict(c) for c in bundled_manifest["characters"]]
+    chars[0]["lookalikePoseGroups"] = [["signature", "dance"]]
+    errors = validate_manifest({**bundled_manifest, "characters": chars})
+    assert any("look-alike" in e for e in errors)
+    chars[0]["lookalikePoseGroups"] = [["signature", "wave"], ["wave"]]
+    assert validate_manifest({**bundled_manifest, "characters": chars})

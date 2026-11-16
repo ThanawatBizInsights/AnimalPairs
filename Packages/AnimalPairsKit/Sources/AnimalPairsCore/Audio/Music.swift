@@ -25,11 +25,12 @@ public enum MusicScene: Equatable, Sendable {
 /// Which loop belongs where, and when music may be heard. Pure, so it is
 /// tested on its own; `BackgroundMusicPlayer` (app) does the playing.
 public enum MusicPolicy {
-    /// Track for each scene, following the purpose each loop was made for.
+    /// Track for each scene. Home, choosing a board and playing share one
+    /// loop, so moving between them never restarts the music.
     public static func track(for scene: MusicScene) -> AnimalPairsMusicTrack? {
         switch scene {
         case .menus: .playground
-        case .game: .focus
+        case .game: .playground
         case .results: .celebration
         case .parents: .meadow
         case .silent: nil

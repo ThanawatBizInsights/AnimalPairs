@@ -54,14 +54,18 @@ public enum DeckBuilder {
     ) throws -> [Tile] {
         guard policy.isAvailable(configuration) else { throw DeckBuilderError.configurationLocked(configuration) }
         let artworks = catalog.playableArtworks(for: policy)
-        let selection = try selectArtworks(for: configuration, from: artworks, using: &generator)
+        let selection = try selectArtworks(for: configuration, from: artworks,
+                                           characters: catalog.manifest.characters, using: &generator)
         return makeTiles(for: selection.map(\.assetID), using: &generator)
     }
 
     /// Chooses exactly `pairCount` distinct artworks honouring the mode rules.
+    /// `characters` supplies each animal's look-alike pose groups (Exact Pose
+    /// never deals two look-alike poses of one animal together).
     public static func selectArtworks<G: RandomNumberGenerator>(
         for configuration: GameConfiguration,
         from artworks: [ArtworkDefinition],
+        characters definitions: [CharacterDefinition] = [],
         using generator: inout G
     ) throws -> [ArtworkDefinition] {
         // Stable grouping so a seeded generator yields reproducible boards.
@@ -81,7 +85,9 @@ public enum DeckBuilder {
             return chosen.map { byCharacter[$0]!.randomElement(using: &generator)! }
 
         case .exactPose:
-            return try selectExactPose(pairs: pairs, byCharacter: byCharacter, characters: characters, using: &generator)
+            let lookalikes = Dictionary(definitions.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+            return try selectExactPose(pairs: pairs, byCharacter: byCharacter, characters: characters,
+                                       definitions: lookalikes, using: &generator)
         }
     }
 
@@ -90,13 +96,32 @@ public enum DeckBuilder {
         pairs >= 6 ? 2 : 1
     }
 
+    /// Two poses of one animal that may share a board, chosen at random; nil
+    /// when the animal has no such pair available.
+    static func distinctPosePair<G: RandomNumberGenerator>(
+        _ arts: [ArtworkDefinition], definition: CharacterDefinition?, using generator: inout G
+    ) -> [ArtworkDefinition]? {
+        let shuffled = arts.shuffled(using: &generator)
+        for (i, first) in shuffled.enumerated() {
+            for second in shuffled[(i + 1)...] {
+                let allowed = definition?.canShareBoard(first.poseID, second.poseID) ?? (first.poseID != second.poseID)
+                if allowed { return [first, second] }
+            }
+        }
+        return nil
+    }
+
     private static func selectExactPose<G: RandomNumberGenerator>(
         pairs: Int,
         byCharacter: [CharacterID: [ArtworkDefinition]],
         characters: [CharacterID],
+        definitions: [CharacterID: CharacterDefinition],
         using generator: inout G
     ) throws -> [ArtworkDefinition] {
-        let multiCandidates = characters.filter { byCharacter[$0]!.count >= 2 }.shuffled(using: &generator)
+        var probe = SeededGenerator(seed: 0)
+        let multiCandidates = characters.filter {
+            distinctPosePair(byCharacter[$0]!, definition: definitions[$0], using: &probe) != nil
+        }.shuffled(using: &generator)
         let required = requiredMultiPoseAnimals(pairs: pairs)
         guard multiCandidates.count >= required else {
             throw DeckBuilderError.notEnoughPoseVariety(needed: required, available: multiCandidates.count)
@@ -115,7 +140,9 @@ public enum DeckBuilder {
             if singlesNeeded <= others.count {
                 var result: [ArtworkDefinition] = []
                 for character in multi {
-                    result += byCharacter[character]!.shuffled(using: &generator).prefix(2)
+                    // Two clearly different poses (never two look-alikes).
+                    result += distinctPosePair(byCharacter[character]!, definition: definitions[character],
+                                               using: &generator) ?? []
                 }
                 for character in others.prefix(singlesNeeded) {
                     result.append(byCharacter[character]!.randomElement(using: &generator)!)

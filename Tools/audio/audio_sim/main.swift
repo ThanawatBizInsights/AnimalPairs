@@ -140,11 +140,22 @@ final class Clock { var now = 100.0 }
     // MARK: Background music
     audio.isEnabled = true
     let music = audio.music
-    music.loadsInBackground = false
+    // Decode like a device: the result arrives a moment later (after at least
+    // one tick), not inside the call that asked for it.
+    var heldDecodes: [() -> Void] = []
+    music.decode = { url, expected, done in
+        let box = try? MusicBuffer(url: url, expectedFrames: expected)
+        heldDecodes.append { done(box) }
+    }
     let base = BackgroundMusicPlayer.baseVolume
     func advance(_ seconds: Double, step: Double = 0.05) {
         var t = 0.0
-        while t < seconds - 1e-9 { clock.now += step; t += step; music.tick(at: clock.now) }
+        while t < seconds - 1e-9 {
+            clock.now += step; t += step
+            music.tick(at: clock.now)
+            let finished = heldDecodes; heldDecodes = []
+            finished.forEach { $0() }
+        }
     }
     func audibleTracks() -> [AnimalPairsMusicTrack] { music.deckVolumes.filter { $0.playing && $0.volume > 0.001 }.compactMap(\.track) }
     check(music.availableTracks == Set(AnimalPairsMusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
@@ -159,6 +170,11 @@ final class Clock { var now = 100.0 }
     check(music.currentTrack == .playground, "home starts music_playground")
     advance(1.5)
     check(audibleTracks() == [.playground], "only the home loop: \(audibleTracks())")
+    guard music.deckVolumes.contains(where: { $0.track == .playground && $0.playing }) else {
+        print("FAIL: no music is playing on Home (the track never started)")
+        print("SIMULATION FAILED")
+        return 1
+    }
     let homeVolume = music.deckVolumes.first { $0.track == .playground }!.volume
     check(abs(homeVolume - base) < 0.001, "home loop at the base level, got \(homeVolume)")
     let node = allPlayerNodes.first { $0.isPlaying }!
@@ -166,32 +182,32 @@ final class Clock { var now = 100.0 }
     check(Int(node.scheduled!.frameLength) == 1_949_696, "loop trimmed to its exact length: \(node.scheduled!.frameLength)")
     check(node.scheduled!.floatChannelData![0][0] == 1, "trim starts at the first real sample")
 
-    // Into a round: a soft crossfade to music_focus, never more than two decks.
-    music.setScene(.game)
-    var maxTogether = 0
-    for _ in 0..<40 { advance(0.05); maxTogether = max(maxTogether, audibleTracks().count) }
-    check(maxTogether <= 2, "more than two tracks at once")
-    check(audibleTracks() == [.focus], "gameplay uses music_focus: \(audibleTracks())")
-    let focusNode = allPlayerNodes.first { $0.isPlaying }!
-    let playsBefore = focusNode.playCount
-    music.setScene(.game)                                 // restarted round
-    advance(1)
-    check(focusNode.playCount == playsBefore && audibleTracks() == [.focus], "restart re-created the music")
+    // Home → choosing a board → a game → a restarted round: the same loop
+    // keeps playing on the same player, never restarted or doubled.
+    let homeLoopNode = allPlayerNodes.first { $0.isPlaying }!
+    let homeLoopPlays = homeLoopNode.playCount
+    for scene in [MusicScene.menus, .game, .game, .menus, .game] {
+        music.setScene(scene)
+        advance(0.5)
+        check(audibleTracks() == [.playground], "\(scene): \(audibleTracks())")
+    }
+    check(homeLoopNode.playCount == homeLoopPlays && homeLoopNode.isPlaying,
+          "navigation restarted the music (\(homeLoopNode.playCount - homeLoopPlays) restarts)")
 
     // Ducking under an animal clip, then a smooth return.
     let animal = withClips[0]
     _ = audio.playMatchClip(for: animal)
     advance(0.2)
-    let ducked = music.deckVolumes.first { $0.track == .focus }!.volume
+    let ducked = music.deckVolumes.first { $0.track == .playground }!.volume
     check(ducked < base * 0.4, "music dips under the animal clip: \(ducked)")
     advance(4)
-    let restored = music.deckVolumes.first { $0.track == .focus }!.volume
+    let restored = music.deckVolumes.first { $0.track == .playground }!.volume
     check(abs(restored - base) < 0.001, "music restored after the clip: \(restored)")
 
     // Independent switches.
     audio.isEnabled = false
     advance(0.5)
-    check(audibleTracks() == [.focus], "Sound Effects off must not stop the music")
+    check(audibleTracks() == [.playground], "Sound Effects off must not stop the music")
     check(audio.playMatchClip(for: animal) == nil, "Sound Effects off silences animal clips")
     audio.isEnabled = true
     audio.musicEnabled = false
@@ -202,7 +218,7 @@ final class Clock { var now = 100.0 }
     check(startedLog == ["card_flip"], "Music off keeps sound effects: \(startedLog)")
     audio.musicEnabled = true
     advance(2)
-    check(audibleTracks() == [.focus], "Music back on")
+    check(audibleTracks() == [.playground], "Music back on")
 
     // Results: the jingle first, music_celebration after 3 s.
     music.setScene(.results)
@@ -226,7 +242,7 @@ final class Clock { var now = 100.0 }
     advance(1)
     check(audibleTracks().isEmpty, "no music while interrupted")
     music.interruptionEnded(); advance(2)
-    check(audibleTracks() == [.focus], "resumes with the current scene's track")
+    check(audibleTracks() == [.playground], "resumes with the current scene's track")
 
     // Headphones unplugged: quiet until the next screen.
     music.outputDeviceRemoved(); advance(1)
@@ -259,7 +275,7 @@ final class Clock { var now = 100.0 }
     }
     audio.musicEnabled = true
     music.setScene(.game); advance(5)
-    check(audibleTracks() == [.focus] && allPlayerNodes.filter(\.isPlaying).count == 1,
+    check(audibleTracks() == [.playground] && allPlayerNodes.filter(\.isPlaying).count == 1,
           "settles on exactly one track: \(audibleTracks())")
     check(allPlayerNodes.count == 2, "still only two decks after the stress run")
     print("music: \(Set(decodedFiles).sorted().joined(separator: ", ")) decoded; navigation, ducking, switches, lifecycle checked")

@@ -10,8 +10,14 @@ For every artwork in ``AnimalPairs/Resources/ArtworkManifest.json``:
 
 * ``status == "final"``: the supplied illustration in
   ``Design/Reference/Supplied/<characterID>_<poseID>.png`` is cleaned (stray
-  near-transparent specks removed, the ~99 % opaque body made fully opaque,
-  trimmed and centred on a square canvas) and written to the asset catalog.
+  near-transparent specks removed, the ~99 % opaque body made fully opaque),
+  trimmed and centred on a square canvas, and written to the asset catalog as
+  the image set ``<characterID>_<poseID>`` (the manifest's ``resourceName``).
+  Detached props (water droplets, splashes) are kept: only specks smaller than
+  0.05 % of the body are removed. Sizes are balanced: a pose never fills more
+  than ``MAX_FILL`` of the card (compact poses get a little more margin);
+  nothing is ever stretched, enlarged past its fit or cropped.
+* Image sets in the Artwork catalog that the manifest no longer names are removed.
 * ``status == "placeholder"``: a clearly labelled DEVELOPMENT placeholder is
   generated from the character's signature illustration. Placeholders carry a
   large pose badge (star = play, moon = nap), a tinted disc and a
@@ -37,6 +43,8 @@ MANIFEST = ROOT / "AnimalPairs/Resources/ArtworkManifest.json"
 SUPPLIED = ROOT / "Design/Reference/Supplied"
 CATALOG = ROOT / "AnimalPairs/Assets.xcassets/Artwork"
 OUTPUT_SIZE = 1024
+SPECK_FRACTION = 0.0005   # detached parts smaller than this share of the body are specks
+MAX_FILL = 0.45           # largest share of the card a character may cover
 FONT_CANDIDATES = [
     "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
     "/System/Library/Fonts/Supplemental/Arial Bold.ttf",
@@ -90,9 +98,16 @@ def clean_rgba(image: Image.Image, min_fraction: float = 0.02, min_pixels: int =
 
 def clean(source: Path) -> Image.Image:
     """Clean a supplied character illustration and centre it on a square canvas."""
-    cleaned = clean_rgba(Image.open(source))
+    cleaned = clean_rgba(Image.open(source), min_fraction=SPECK_FRACTION)
     cleaned = cleaned.crop(cleaned.getchannel("A").getbbox())
-    return square(cleaned, padding=0.05)
+    fitted = square(cleaned, padding=0.05)
+    fill = float((np.array(fitted.getchannel("A")) > 128).mean())
+    if fill <= MAX_FILL:
+        return fitted
+    # Shrink (never enlarge) so compact poses look as big as the others.
+    shrink = math.sqrt(MAX_FILL / fill)
+    padding = (1 / shrink * 1.10 - 1) / 2
+    return square(cleaned, padding=padding)
 
 
 def square(image: Image.Image, padding: float) -> Image.Image:
@@ -160,6 +175,13 @@ def write_imageset(name: str, image: Image.Image) -> None:
 def main() -> int:
     manifest = json.loads(MANIFEST.read_text())
     CATALOG.mkdir(parents=True, exist_ok=True)
+    wanted = {art["resourceName"] for art in manifest["artworks"]}
+    for stale in sorted(CATALOG.glob("*.imageset")):
+        if stale.name.removesuffix(".imageset") not in wanted:
+            for f in stale.iterdir():
+                f.unlink()
+            stale.rmdir()
+            print(f"removed     {stale.name}")
     (CATALOG / "Contents.json").write_text(
         json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2) + "\n"
     )

@@ -45,13 +45,24 @@
         }
       }
     },
+    "art.clover.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, cheering with a big smile"
+          }
+        }
+      }
+    },
     "art.clover.nap": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clover the turtle, napping"
+            "value": "Clover the turtle, tucked into the shell, sleepy"
           }
         }
       }
@@ -62,7 +73,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clover the turtle, playing"
+            "value": "Clover the turtle, standing up on tiptoes"
           }
         }
       }
@@ -73,7 +84,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Clover the turtle, walking with its head up"
+            "value": "Clover the turtle, walking with a smile"
+          }
+        }
+      }
+    },
+    "art.clover.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, stretching the neck forward"
+          }
+        }
+      }
+    },
+    "art.clover.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, waving a front foot"
+          }
+        }
+      }
+    },
+    "art.iris.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, standing and cheering, paws up"
           }
         }
       }
@@ -84,7 +128,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iris the kitten, napping"
+            "value": "Iris the kitten, curled up asleep"
           }
         }
       }
@@ -95,7 +139,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iris the kitten, playing"
+            "value": "Iris the kitten, batting a pink yarn ball"
           }
         }
       }
@@ -106,7 +150,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Iris the kitten, sitting with a curled tail"
+            "value": "Iris the kitten, sitting with tail curled"
+          }
+        }
+      }
+    },
+    "art.iris.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, stretching with front paws forward"
+          }
+        }
+      }
+    },
+    "art.iris.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, waving a paw"
+          }
+        }
+      }
+    },
+    "art.maple.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, cheering with both paws up"
           }
         }
       }
@@ -117,7 +194,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maple the bear cub, napping"
+            "value": "Maple the bear, sitting and dozing"
           }
         }
       }
@@ -128,7 +205,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maple the bear cub, playing"
+            "value": "Maple the bear, hugging a peach ball"
           }
         }
       }
@@ -139,7 +216,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Maple the bear cub, sitting with its feet out"
+            "value": "Maple the bear, sitting with paws down"
+          }
+        }
+      }
+    },
+    "art.maple.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, standing and stretching up tall"
+          }
+        }
+      }
+    },
+    "art.maple.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, waving a paw"
+          }
+        }
+      }
+    },
+    "art.mochi.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, leaping with paws up"
           }
         }
       }
@@ -150,7 +260,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mochi the bunny, napping"
+            "value": "Mochi the rabbit, lying down asleep"
           }
         }
       }
@@ -161,7 +271,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mochi the bunny, playing"
+            "value": "Mochi the rabbit, hopping"
           }
         }
       }
@@ -172,7 +282,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Mochi the bunny, holding its paws together"
+            "value": "Mochi the rabbit, sitting with paws together"
+          }
+        }
+      }
+    },
+    "art.mochi.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, stretching both arms up"
+          }
+        }
+      }
+    },
+    "art.mochi.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, waving a paw"
+          }
+        }
+      }
+    },
+    "art.momo.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, cheering with both paws up"
           }
         }
       }
@@ -183,7 +326,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Momo the puppy, napping"
+            "value": "Momo the puppy, curled up fast asleep"
           }
         }
       }
@@ -194,7 +337,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Momo the puppy, playing"
+            "value": "Momo the puppy, bowing down to play, tongue out"
           }
         }
       }
@@ -205,7 +348,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Momo the puppy, waving a paw"
+            "value": "Momo the puppy, sitting with one paw up"
+          }
+        }
+      }
+    },
+    "art.momo.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, stretching long and low, tail up"
+          }
+        }
+      }
+    },
+    "art.momo.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, waving hello"
+          }
+        }
+      }
+    },
+    "art.nori.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, trumpeting with a big smile"
           }
         }
       }
@@ -216,7 +392,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nori the elephant, napping"
+            "value": "Nori the elephant, lying down asleep"
           }
         }
       }
@@ -227,7 +403,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nori the elephant, playing"
+            "value": "Nori the elephant, spraying water bubbles"
           }
         }
       }
@@ -238,7 +414,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Nori the elephant, lifting its trunk high"
+            "value": "Nori the elephant, standing with trunk raised"
+          }
+        }
+      }
+    },
+    "art.nori.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, stretching with front legs forward"
+          }
+        }
+      }
+    },
+    "art.nori.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, waving a front foot"
+          }
+        }
+      }
+    },
+    "art.pebble.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, hopping with flippers up"
           }
         }
       }
@@ -249,7 +458,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pebble the penguin, napping"
+            "value": "Pebble the penguin, standing asleep"
           }
         }
       }
@@ -260,7 +469,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pebble the penguin, playing"
+            "value": "Pebble the penguin, sliding on the tummy"
           }
         }
       }
@@ -271,7 +480,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Pebble the penguin, waving a flipper"
+            "value": "Pebble the penguin, waving one flipper"
+          }
+        }
+      }
+    },
+    "art.pebble.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, stretching both flippers up"
+          }
+        }
+      }
+    },
+    "art.pebble.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, giving a little wave"
+          }
+        }
+      }
+    },
+    "art.rusty.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, cheering with both paws up"
           }
         }
       }
@@ -282,7 +524,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rusty the red panda, napping"
+            "value": "Rusty the red panda, curled up asleep in a striped tail"
           }
         }
       }
@@ -293,7 +535,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rusty the red panda, playing"
+            "value": "Rusty the red panda, hugging a striped tail"
           }
         }
       }
@@ -304,7 +546,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Rusty the red panda, stretching with a big smile"
+            "value": "Rusty the red panda, stretching in a playful bow"
+          }
+        }
+      }
+    },
+    "art.rusty.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, stretching long, tail up"
+          }
+        }
+      }
+    },
+    "art.rusty.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, sitting and waving"
+          }
+        }
+      }
+    },
+    "art.sprout.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, jumping for joy"
           }
         }
       }
@@ -315,7 +590,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sprout the dinosaur, napping"
+            "value": "Sprout the dinosaur, sitting asleep"
           }
         }
       }
@@ -326,7 +601,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sprout the dinosaur, playing"
+            "value": "Sprout the dinosaur, hopping in the air"
           }
         }
       }
@@ -337,7 +612,40 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sprout the dinosaur, standing with paws on its tummy"
+            "value": "Sprout the dinosaur, standing and smiling"
+          }
+        }
+      }
+    },
+    "art.sprout.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, stretching both arms up high"
+          }
+        }
+      }
+    },
+    "art.sprout.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, waving hello"
+          }
+        }
+      }
+    },
+    "art.sunny.celebrate": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, hopping with a happy kick"
           }
         }
       }
@@ -348,7 +656,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunny the duckling, napping"
+            "value": "Sunny the duckling, dozing with head tucked down"
           }
         }
       }
@@ -359,7 +667,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunny the duckling, playing"
+            "value": "Sunny the duckling, splashing and kicking"
           }
         }
       }
@@ -370,7 +678,29 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sunny the duckling, opening its wings wide"
+            "value": "Sunny the duckling, standing with wings open"
+          }
+        }
+      }
+    },
+    "art.sunny.stretch": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, stretching both wings wide"
+          }
+        }
+      }
+    },
+    "art.sunny.wave": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, waving a wing"
           }
         }
       }
@@ -436,7 +766,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turns sound effects on or off."
+            "value": "Turns the music and sound effects on or off together."
           }
         }
       }
@@ -447,7 +777,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sound effects off"
+            "value": "Sound off"
           }
         }
       }
@@ -458,7 +788,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sound effects on"
+            "value": "Sound on"
           }
         }
       }
@@ -1459,7 +1789,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The speaker button on the home screen and on the game board turns Sound Effects on or off; Music has its own switch here. The Ring/Silent switch silences all of the game’s sounds."
+            "value": "The speaker button on the home screen and the game board turns music and sound effects on or off together. Use these switches to choose them separately. The Ring/Silent switch silences all of the game’s sounds."
           }
         }
       }
@@ -1536,7 +1866,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "“Full Game Unlock” is a one-time purchase. It adds Exact Pose mode, the 16- and 20-card boards, and 20 extra animal pictures (each friend playing and napping). Classic mode with 6 and 12 cards stays free. No ads and no subscriptions."
+            "value": "“Full Game Unlock” is a one-time purchase. It adds Exact Pose mode, the 16- and 20-card boards, and 50 more animal pictures: every friend playing, napping, waving, stretching and celebrating. Classic mode with 6 and 12 cards stays free. No ads and no subscriptions."
           }
         }
       }
@@ -1569,7 +1899,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exact Pose mode, the 16- and 20-card boards and all 30 animal pictures are unlocked for this Apple Account. Thank you!"
+            "value": "Exact Pose mode, the 16- and 20-card boards and all 60 animal pictures are unlocked for this Apple Account. Thank you!"
           }
         }
       }

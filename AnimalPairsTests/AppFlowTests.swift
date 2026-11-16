@@ -9,8 +9,38 @@ final class AppFlowTests: XCTestCase {
     func testBundledContentIsCompleteAndLoaded() {
         let model = AppTestSupport.makeModel()
         XCTAssertNil(model.contentError)
-        XCTAssertEqual(model.catalog.manifest.artworks.count, 30)
+        XCTAssertEqual(model.catalog.manifest.artworks.count, 60)
         XCTAssertTrue(model.catalog.missingArtworks.isEmpty, "every manifest resource is in the asset catalog")
+        XCTAssertTrue(model.catalog.manifest.placeholderArtworks.isEmpty, "no development placeholders")
+    }
+
+    func testEveryPoseImageLoadsAsATransparentSquare() throws {
+        let model = AppTestSupport.makeModel()
+        for art in model.catalog.manifest.artworks {
+            let image = try XCTUnwrap(UIImage(named: art.resourceName), "\(art.resourceName) is not in the asset catalog")
+            XCTAssertEqual(image.size.width, image.size.height, "\(art.resourceName) must be square (never stretched)")
+            let alpha = image.cgImage?.alphaInfo
+            XCTAssertTrue(alpha != CGImageAlphaInfo.none && alpha != .noneSkipLast && alpha != .noneSkipFirst,
+                          "\(art.resourceName) keeps its transparency")
+        }
+    }
+
+    func testSpeakerButtonTurnsAllSoundOffAndOnTogether() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        let model = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(model.isAnySoundOn)
+        model.toggleAllSound()
+        XCTAssertFalse(model.settings.musicEnabled)
+        XCTAssertFalse(model.settings.soundEnabled)
+        XCTAssertFalse(model.audio.musicEnabled)
+        XCTAssertFalse(model.audio.isEnabled)
+        model.setMusicEnabled(true)                     // Settings: music only
+        XCTAssertTrue(model.isAnySoundOn)
+        model.toggleAllSound()                          // anything on → everything off
+        XCTAssertFalse(model.isAnySoundOn)
+        model.toggleAllSound()
+        let relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(relaunched.settings.musicEnabled && relaunched.settings.soundEnabled, "saved")
     }
 
     func testInterfaceGraphicsAndIconAreBundled() {

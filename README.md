@@ -108,7 +108,11 @@ backend/                      Optional FastAPI service (not used by the app)
 **Engine (`AnimalPairsCore`).** `DeckBuilder` picks artworks with an injectable
 random generator: every pair key (the exact `AssetID`) appears exactly twice;
 Classic uses distinct animals; Exact Pose uses at least two animals in two
-poses each (for 3 pairs: two poses of one animal plus one other).
+poses each (for 3 pairs: two poses of one animal plus one other). Each animal
+has six poses (signature, play, nap, wave, stretch, celebrate); Exact Pose never
+deals two poses of one animal that the manifest marks as look-alikes
+(`lookalikePoseGroups`), so the difference is always clear. Both cards of a
+pair are the same picture, and a card's picture never changes during a round.
 `RoundState` is the serial state machine `ready → oneRevealed → resolving →
 ready/completed` with an orthogonal pause flag; it rejects taps on matched
 cards, on the open card, and during resolution, counts one attempt per second
@@ -155,7 +159,7 @@ API used (UserDefaults).
 | --- | --- |
 | Classic mode | **Exact Pose** mode |
 | 6- and 12-card boards | **16- and 20-card** boards |
-| The 10 default animal pictures | **20 more pictures**: every friend playing and napping (currently development placeholders, see ASSET_CHECKLIST) |
+| The 10 default animal pictures | **50 more pictures**: every friend playing, napping, waving, stretching and celebrating (see ASSET_CHECKLIST) |
 | Sounds, animal clips, hints, progress, Parents | — |
 
 Nothing that was free before is locked. Unlocking, restoring or redeeming never
@@ -209,7 +213,7 @@ Change it in three places: `PRODUCT_BUNDLE_IDENTIFIER`, `AP_FULL_UNLOCK_PRODUCT_
    **Non-Consumable**, reference name **Full Game Unlock**, the product ID above.
 3. Availability (all territories you sell in), a price, Family Sharing (on in
    the local config), an English localization (display name "Full Game",
-   description "Adds Exact Pose, the 16- and 20-card boards and 20 extra animal
+   description "Adds Exact Pose, the 16- and 20-card boards and 50 more animal
    pictures."), a review screenshot of the Parents section and review notes
    (the adult gate asks a multiplication question written in words before Parents opens).
 4. Submit the in-app purchase **with an app version** (a first in-app purchase is
@@ -271,9 +275,11 @@ Settings, each remembered between launches:
 * **Music** — the background loops only. **On** for a fresh install; a choice a
   family already made is kept (the setting is only stored once someone sets it).
 * **Sound Effects** — card flips, match, mismatch, buttons and the animal clips.
-  The speaker button on the home screen and on the game board is a shortcut for
-  this switch only; the Settings footer says so. (The opening video plays its
-  soundtrack if either Music or Sound Effects is on.)
+  (The opening video plays its soundtrack if either Music or Sound Effects is on.)
+* **Speaker button** (Home and the game board) — one clear control for *all*
+  game sound: if music or sound effects are on, a tap turns both off; when
+  both are off, a tap turns both on. The choice is saved; parents can still set
+  each one separately in Settings (the Settings footer explains this).
 * **Voice** — narration; no approved English recordings exist yet, so it is silent.
 
 ### Opening video
@@ -337,18 +343,30 @@ bundled, every file is in the app target, and no Thai remains.
 
 ### Background music
 
-Why there was none before: the four loops had been generated but were left in
-review (`Design/Audio/Review/`), never bundled; the app had no music player
-(`hasMusic` was hard-coded false) and the Music switch defaulted to off and was
-disabled. Now:
+History of the silent music:
+
+1. Originally the loops were never bundled and the app had no music player.
+2. The first player (November 2026) never became audible on devices: while a
+   track was being decoded on a background thread its deck sat at volume 0,
+   and the player's tick freed every deck whose fade target was 0 — including
+   that waiting deck, in the same instant. When decoding finished the deck no
+   longer held the track, so playback was dropped every time. The Linux
+   simulation decoded synchronously and missed it. Fixed: the deck holding the
+   wanted track (`front`) is never freed while it waits; the simulation now
+   decodes like a device (results arrive a tick later) and fails on the old code.
+3. The Music setting was not the cause: it is only stored when someone flips
+   it (an old default-off was never written), it defaults to on, and an
+   explicit "off" is kept.
 
 | Screen | Track (`AnimalPairs/Resources/Music/`) | Length |
 | --- | --- | --- |
-| Home, Welcome, choosing a board | `music_playground.m4a` | 40.62 s loop |
-| Matching cards (and the pause menu) | `music_focus.m4a` | 39.94 s loop |
+| Home, Welcome, choosing a board **and playing** (one continuous loop — moving between them never restarts it) | `music_playground.m4a` | 40.62 s loop |
 | Results | `music_celebration.m4a`, fading in 3 s after the jingle | 36.27 s loop |
 | Parents area and gate | `music_meadow.m4a` | 40.02 s loop |
 | Opening video | none (the video has its own soundtrack) | — |
+
+`music_focus.m4a` (39.94 s) is bundled and decodes but is not assigned to a
+screen, because Home, the board choice and gameplay now share one loop.
 
 `BackgroundMusicPlayer` (`AnimalPairs/Audio/BackgroundMusicPlayer.swift`, owned by `AudioManager`):
 

@@ -56,12 +56,30 @@ public struct CharacterDefinition: Codable, Hashable, Sendable {
     public let nameKey: String
     public let speciesKey: String
     public let defaultPoseID: PoseID
+    /// Poses of this character that look alike at card size (e.g. sitting and
+    /// sitting while waving). Exact Pose never deals two poses of one group on
+    /// the same board, so every pose difference stays fair for young children.
+    /// Each pose still only matches itself. Optional in the manifest.
+    public let lookalikePoseGroups: [[PoseID]]?
 
-    public init(id: CharacterID, nameKey: String, speciesKey: String, defaultPoseID: PoseID) {
+    public init(id: CharacterID, nameKey: String, speciesKey: String, defaultPoseID: PoseID,
+                lookalikePoseGroups: [[PoseID]]? = nil) {
         self.id = id
         self.nameKey = nameKey
         self.speciesKey = speciesKey
         self.defaultPoseID = defaultPoseID
+        self.lookalikePoseGroups = lookalikePoseGroups
+    }
+
+    /// Poses in the same look-alike group as `pose` (always including itself).
+    public func lookalikes(of pose: PoseID) -> Set<PoseID> {
+        let group = lookalikePoseGroups?.first { $0.contains(pose) } ?? []
+        return Set(group).union([pose])
+    }
+
+    /// True when the two poses may share an Exact Pose board.
+    public func canShareBoard(_ a: PoseID, _ b: PoseID) -> Bool {
+        a != b && !lookalikes(of: a).contains(b)
     }
 }
 
@@ -103,6 +121,9 @@ public enum ManifestError: Error, Equatable, Sendable {
     case defaultPoseNotFree(CharacterID)
     case invalidVersion(AssetID)
     case emptyField(String)
+    /// A look-alike group names a pose the character has no artwork for, or a
+    /// pose appears in two groups.
+    case invalidLookalikeGroup(CharacterID, PoseID)
 }
 
 /// Versioned description of every bundled (or remotely delivered) illustration.
@@ -156,11 +177,24 @@ public struct ArtworkManifest: Codable, Hashable, Sendable {
                 throw ManifestError.missingDefaultPose(character.id)
             }
             guard defaultArt.tier == .free else { throw ManifestError.defaultPoseNotFree(character.id) }
+            var grouped = Set<PoseID>()
+            for pose in (character.lookalikePoseGroups ?? []).joined() {
+                guard grouped.insert(pose).inserted,
+                      poses.contains("\(character.id.rawValue)/\(pose.rawValue)") else {
+                    throw ManifestError.invalidLookalikeGroup(character.id, pose)
+                }
+            }
         }
     }
 
     public func artwork(_ id: AssetID) -> ArtworkDefinition? { artworks.first { $0.assetID == id } }
     public func character(_ id: CharacterID) -> CharacterDefinition? { characters.first { $0.id == id } }
+
+    /// The central animal-and-pose catalogue: every pose of a character, in
+    /// manifest order.
+    public func artworks(for character: CharacterID) -> [ArtworkDefinition] {
+        artworks.filter { $0.characterID == character }
+    }
 
     public var placeholderArtworks: [ArtworkDefinition] { artworks.filter { $0.status == .placeholder } }
     public var isReleaseReady: Bool { placeholderArtworks.isEmpty }

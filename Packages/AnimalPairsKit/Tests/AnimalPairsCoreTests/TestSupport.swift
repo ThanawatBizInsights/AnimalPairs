@@ -17,7 +17,7 @@ enum Fixtures {
             for pose in poses {
                 artworks.append(ArtworkDefinition(
                     assetID: AssetID(rawValue: "\(character).\(pose)"), characterID: character, poseID: pose, version: 1,
-                    resourceName: "art_\(character)_\(pose)", accessibilityKey: "art.\(character).\(pose)",
+                    resourceName: "\(character)_\(pose)", accessibilityKey: "art.\(character).\(pose)",
                     tier: pose == "signature" ? .free : .premium,
                     status: pose == "signature" ? .final : .placeholder))
             }

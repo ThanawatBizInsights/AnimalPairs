@@ -1,66 +1,155 @@
 {
   "schemaVersion": 1,
-  "manifestVersion": "2026.11.1",
+  "manifestVersion": "2026.11.2",
   "characters": [
     {
       "id": "momo",
       "nameKey": "character.momo.name",
       "speciesKey": "character.momo.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "celebrate"
+        ],
+        [
+          "play",
+          "stretch"
+        ]
+      ]
     },
     {
       "id": "iris",
       "nameKey": "character.iris.name",
       "speciesKey": "character.iris.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave"
+        ]
+      ]
     },
     {
       "id": "nori",
       "nameKey": "character.nori.name",
       "speciesKey": "character.nori.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "celebrate",
+          "play"
+        ]
+      ]
     },
     {
       "id": "sprout",
       "nameKey": "character.sprout.name",
       "speciesKey": "character.sprout.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave"
+        ],
+        [
+          "play",
+          "celebrate"
+        ]
+      ]
     },
     {
       "id": "mochi",
       "nameKey": "character.mochi.name",
       "speciesKey": "character.mochi.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave"
+        ],
+        [
+          "play",
+          "celebrate"
+        ]
+      ]
     },
     {
       "id": "sunny",
       "nameKey": "character.sunny.name",
       "speciesKey": "character.sunny.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "stretch"
+        ],
+        [
+          "play",
+          "celebrate"
+        ]
+      ]
     },
     {
       "id": "maple",
       "nameKey": "character.maple.name",
       "speciesKey": "character.maple.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "celebrate"
+        ]
+      ]
     },
     {
       "id": "clover",
       "nameKey": "character.clover.name",
       "speciesKey": "character.clover.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "celebrate",
+          "stretch"
+        ]
+      ]
     },
     {
       "id": "rusty",
       "nameKey": "character.rusty.name",
       "speciesKey": "character.rusty.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "stretch"
+        ],
+        [
+          "wave",
+          "celebrate"
+        ]
+      ]
     },
     {
       "id": "pebble",
       "nameKey": "character.pebble.name",
       "speciesKey": "character.pebble.species",
-      "defaultPoseID": "signature"
+      "defaultPoseID": "signature",
+      "lookalikePoseGroups": [
+        [
+          "signature",
+          "wave",
+          "stretch",
+          "celebrate"
+        ]
+      ]
     }
   ],
   "artworks": [
@@ -69,7 +158,7 @@
       "characterID": "momo",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_momo_signature",
+      "resourceName": "momo_signature",
       "accessibilityKey": "art.momo.signature",
       "tier": "free",
       "status": "final"
@@ -78,28 +167,58 @@
       "assetID": "momo.play",
       "characterID": "momo",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_momo_play",
+      "version": 2,
+      "resourceName": "momo_play",
       "accessibilityKey": "art.momo.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "momo.nap",
       "characterID": "momo",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_momo_nap",
+      "version": 2,
+      "resourceName": "momo_nap",
       "accessibilityKey": "art.momo.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "momo.wave",
+      "characterID": "momo",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "momo_wave",
+      "accessibilityKey": "art.momo.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.stretch",
+      "characterID": "momo",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "momo_stretch",
+      "accessibilityKey": "art.momo.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.celebrate",
+      "characterID": "momo",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "momo_celebrate",
+      "accessibilityKey": "art.momo.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "iris.signature",
       "characterID": "iris",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_iris_signature",
+      "resourceName": "iris_signature",
       "accessibilityKey": "art.iris.signature",
       "tier": "free",
       "status": "final"
@@ -108,28 +227,58 @@
       "assetID": "iris.play",
       "characterID": "iris",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_iris_play",
+      "version": 2,
+      "resourceName": "iris_play",
       "accessibilityKey": "art.iris.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "iris.nap",
       "characterID": "iris",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_iris_nap",
+      "version": 2,
+      "resourceName": "iris_nap",
       "accessibilityKey": "art.iris.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "iris.wave",
+      "characterID": "iris",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "iris_wave",
+      "accessibilityKey": "art.iris.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "iris.stretch",
+      "characterID": "iris",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "iris_stretch",
+      "accessibilityKey": "art.iris.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "iris.celebrate",
+      "characterID": "iris",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "iris_celebrate",
+      "accessibilityKey": "art.iris.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "nori.signature",
       "characterID": "nori",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_nori_signature",
+      "resourceName": "nori_signature",
       "accessibilityKey": "art.nori.signature",
       "tier": "free",
       "status": "final"
@@ -138,28 +287,58 @@
       "assetID": "nori.play",
       "characterID": "nori",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_nori_play",
+      "version": 2,
+      "resourceName": "nori_play",
       "accessibilityKey": "art.nori.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "nori.nap",
       "characterID": "nori",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_nori_nap",
+      "version": 2,
+      "resourceName": "nori_nap",
       "accessibilityKey": "art.nori.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "nori.wave",
+      "characterID": "nori",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "nori_wave",
+      "accessibilityKey": "art.nori.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.stretch",
+      "characterID": "nori",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "nori_stretch",
+      "accessibilityKey": "art.nori.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.celebrate",
+      "characterID": "nori",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "nori_celebrate",
+      "accessibilityKey": "art.nori.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "sprout.signature",
       "characterID": "sprout",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_sprout_signature",
+      "resourceName": "sprout_signature",
       "accessibilityKey": "art.sprout.signature",
       "tier": "free",
       "status": "final"
@@ -168,28 +347,58 @@
       "assetID": "sprout.play",
       "characterID": "sprout",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_sprout_play",
+      "version": 2,
+      "resourceName": "sprout_play",
       "accessibilityKey": "art.sprout.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "sprout.nap",
       "characterID": "sprout",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_sprout_nap",
+      "version": 2,
+      "resourceName": "sprout_nap",
       "accessibilityKey": "art.sprout.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.wave",
+      "characterID": "sprout",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "sprout_wave",
+      "accessibilityKey": "art.sprout.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.stretch",
+      "characterID": "sprout",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "sprout_stretch",
+      "accessibilityKey": "art.sprout.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.celebrate",
+      "characterID": "sprout",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "sprout_celebrate",
+      "accessibilityKey": "art.sprout.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "mochi.signature",
       "characterID": "mochi",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_mochi_signature",
+      "resourceName": "mochi_signature",
       "accessibilityKey": "art.mochi.signature",
       "tier": "free",
       "status": "final"
@@ -198,28 +407,58 @@
       "assetID": "mochi.play",
       "characterID": "mochi",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_mochi_play",
+      "version": 2,
+      "resourceName": "mochi_play",
       "accessibilityKey": "art.mochi.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "mochi.nap",
       "characterID": "mochi",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_mochi_nap",
+      "version": 2,
+      "resourceName": "mochi_nap",
       "accessibilityKey": "art.mochi.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.wave",
+      "characterID": "mochi",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "mochi_wave",
+      "accessibilityKey": "art.mochi.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.stretch",
+      "characterID": "mochi",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "mochi_stretch",
+      "accessibilityKey": "art.mochi.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.celebrate",
+      "characterID": "mochi",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "mochi_celebrate",
+      "accessibilityKey": "art.mochi.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "sunny.signature",
       "characterID": "sunny",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_sunny_signature",
+      "resourceName": "sunny_signature",
       "accessibilityKey": "art.sunny.signature",
       "tier": "free",
       "status": "final"
@@ -228,28 +467,58 @@
       "assetID": "sunny.play",
       "characterID": "sunny",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_sunny_play",
+      "version": 2,
+      "resourceName": "sunny_play",
       "accessibilityKey": "art.sunny.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "sunny.nap",
       "characterID": "sunny",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_sunny_nap",
+      "version": 2,
+      "resourceName": "sunny_nap",
       "accessibilityKey": "art.sunny.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.wave",
+      "characterID": "sunny",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "sunny_wave",
+      "accessibilityKey": "art.sunny.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.stretch",
+      "characterID": "sunny",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "sunny_stretch",
+      "accessibilityKey": "art.sunny.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.celebrate",
+      "characterID": "sunny",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "sunny_celebrate",
+      "accessibilityKey": "art.sunny.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "maple.signature",
       "characterID": "maple",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_maple_signature",
+      "resourceName": "maple_signature",
       "accessibilityKey": "art.maple.signature",
       "tier": "free",
       "status": "final"
@@ -258,28 +527,58 @@
       "assetID": "maple.play",
       "characterID": "maple",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_maple_play",
+      "version": 2,
+      "resourceName": "maple_play",
       "accessibilityKey": "art.maple.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "maple.nap",
       "characterID": "maple",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_maple_nap",
+      "version": 2,
+      "resourceName": "maple_nap",
       "accessibilityKey": "art.maple.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "maple.wave",
+      "characterID": "maple",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "maple_wave",
+      "accessibilityKey": "art.maple.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.stretch",
+      "characterID": "maple",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "maple_stretch",
+      "accessibilityKey": "art.maple.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.celebrate",
+      "characterID": "maple",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "maple_celebrate",
+      "accessibilityKey": "art.maple.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "clover.signature",
       "characterID": "clover",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_clover_signature",
+      "resourceName": "clover_signature",
       "accessibilityKey": "art.clover.signature",
       "tier": "free",
       "status": "final"
@@ -288,28 +587,58 @@
       "assetID": "clover.play",
       "characterID": "clover",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_clover_play",
+      "version": 2,
+      "resourceName": "clover_play",
       "accessibilityKey": "art.clover.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "clover.nap",
       "characterID": "clover",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_clover_nap",
+      "version": 2,
+      "resourceName": "clover_nap",
       "accessibilityKey": "art.clover.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "clover.wave",
+      "characterID": "clover",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "clover_wave",
+      "accessibilityKey": "art.clover.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.stretch",
+      "characterID": "clover",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "clover_stretch",
+      "accessibilityKey": "art.clover.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.celebrate",
+      "characterID": "clover",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "clover_celebrate",
+      "accessibilityKey": "art.clover.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "rusty.signature",
       "characterID": "rusty",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_rusty_signature",
+      "resourceName": "rusty_signature",
       "accessibilityKey": "art.rusty.signature",
       "tier": "free",
       "status": "final"
@@ -318,28 +647,58 @@
       "assetID": "rusty.play",
       "characterID": "rusty",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_rusty_play",
+      "version": 2,
+      "resourceName": "rusty_play",
       "accessibilityKey": "art.rusty.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "rusty.nap",
       "characterID": "rusty",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_rusty_nap",
+      "version": 2,
+      "resourceName": "rusty_nap",
       "accessibilityKey": "art.rusty.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.wave",
+      "characterID": "rusty",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "rusty_wave",
+      "accessibilityKey": "art.rusty.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.stretch",
+      "characterID": "rusty",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "rusty_stretch",
+      "accessibilityKey": "art.rusty.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.celebrate",
+      "characterID": "rusty",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "rusty_celebrate",
+      "accessibilityKey": "art.rusty.celebrate",
+      "tier": "premium",
+      "status": "final"
     },
     {
       "assetID": "pebble.signature",
       "characterID": "pebble",
       "poseID": "signature",
       "version": 1,
-      "resourceName": "art_pebble_signature",
+      "resourceName": "pebble_signature",
       "accessibilityKey": "art.pebble.signature",
       "tier": "free",
       "status": "final"
@@ -348,21 +707,51 @@
       "assetID": "pebble.play",
       "characterID": "pebble",
       "poseID": "play",
-      "version": 1,
-      "resourceName": "art_pebble_play",
+      "version": 2,
+      "resourceName": "pebble_play",
       "accessibilityKey": "art.pebble.play",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
     },
     {
       "assetID": "pebble.nap",
       "characterID": "pebble",
       "poseID": "nap",
-      "version": 1,
-      "resourceName": "art_pebble_nap",
+      "version": 2,
+      "resourceName": "pebble_nap",
       "accessibilityKey": "art.pebble.nap",
       "tier": "premium",
-      "status": "placeholder"
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.wave",
+      "characterID": "pebble",
+      "poseID": "wave",
+      "version": 1,
+      "resourceName": "pebble_wave",
+      "accessibilityKey": "art.pebble.wave",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.stretch",
+      "characterID": "pebble",
+      "poseID": "stretch",
+      "version": 1,
+      "resourceName": "pebble_stretch",
+      "accessibilityKey": "art.pebble.stretch",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.celebrate",
+      "characterID": "pebble",
+      "poseID": "celebrate",
+      "version": 1,
+      "resourceName": "pebble_celebrate",
+      "accessibilityKey": "art.pebble.celebrate",
+      "tier": "premium",
+      "status": "final"
     }
   ]
 }

@@ -126,6 +126,18 @@ final class AppModel {
         if enabled { audio.play(.buttonTap) }
     }
 
+    /// The speaker button on Home and the board: shows "on" while music or
+    /// sound effects are on.
+    var isAnySoundOn: Bool { settings.soundEnabled || settings.musicEnabled }
+
+    /// The speaker button: everything off when anything is on, otherwise
+    /// both back on. Each switch is still saved separately (Settings).
+    func toggleAllSound() {
+        let on = !isAnySoundOn
+        setMusicEnabled(on)
+        setSoundEnabled(on)
+    }
+
     /// The saved "Music" setting: background tracks only (persisted by SettingsStore).
     func setMusicEnabled(_ enabled: Bool) {
         settings.musicEnabled = enabled

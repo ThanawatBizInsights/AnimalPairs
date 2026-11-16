@@ -2,14 +2,13 @@
 import XCTest
 
 final class MusicPolicyTests: XCTestCase {
-    func testEachSceneHasItsTrackAndOnlyOne() {
+    func testHomeSetupAndGameplayShareOneContinuousTrack() {
         XCTAssertEqual(MusicPolicy.track(for: .menus), .playground)
-        XCTAssertEqual(MusicPolicy.track(for: .game), .focus)
+        XCTAssertEqual(MusicPolicy.track(for: .game), MusicPolicy.track(for: .menus),
+                       "the same loop, so Home → board → game never restarts it")
         XCTAssertEqual(MusicPolicy.track(for: .results), .celebration)
         XCTAssertEqual(MusicPolicy.track(for: .parents), .meadow)
         XCTAssertNil(MusicPolicy.track(for: .silent))
-        XCTAssertEqual(Set([MusicScene.menus, .game, .results, .parents].compactMap(MusicPolicy.track)),
-                       Set(AnimalPairsMusicTrack.allCases), "all four loops are used")
         XCTAssertEqual(MusicPolicy.startDelay(for: .game), 0, "gameplay music never waits")
         XCTAssertGreaterThan(MusicPolicy.startDelay(for: .results), 0, "the results jingle plays first")
     }

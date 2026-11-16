@@ -15,6 +15,7 @@ import Foundation
 /// * Quiet by design (`baseVolume`), and dipped further by `MusicDuck` while
 ///   an animal clip plays.
 /// * Loading happens off the main thread; gameplay never waits for music.
+///   While a track decodes, its deck stays reserved (`front`) and silent.
 /// * Lifecycle (see BackgroundMusicPlayer+Session.swift): paused in the background,
 ///   resumed when active, stopped for interruptions, held after headphones
 ///   are unplugged, silent while another app plays audio. The shared session
@@ -53,8 +54,24 @@ final class BackgroundMusicPlayer {
     private var ticker: Task<Void, Never>?
     private var pendingStart: (track: AnimalPairsMusicTrack, at: TimeInterval)?
 
-    /// Decode tracks on a background thread (the app); tests decode inline.
-    var loadsInBackground = true
+    /// Decodes a track and reports the result on the main actor. The app
+    /// decodes on a background task; tests can decode inline or hold the
+    /// completion to imitate a slow device.
+    typealias Decoder = (_ url: URL, _ expectedFrames: Int,
+                         _ done: @escaping @MainActor (MusicBuffer?) -> Void) -> Void
+    var decode: Decoder = BackgroundMusicPlayer.decodeInBackground
+
+    static let decodeInBackground: Decoder = { url, expected, done in
+        Task.detached(priority: .utility) {
+            let box = try? MusicBuffer(url: url, expectedFrames: expected)
+            await MainActor.run { done(box) }
+        }
+    }
+
+    static let decodeImmediately: Decoder = { url, expected, done in
+        let box = try? MusicBuffer(url: url, expectedFrames: expected)
+        MainActor.assumeIsolated { done(box) }
+    }
 
     private(set) var scene: MusicScene = .silent
     var enabled: Bool { didSet { if enabled != oldValue { update(fade: Self.quickFade) } } }
@@ -208,19 +225,11 @@ final class BackgroundMusicPlayer {
         if let buffer = buffers[track] {
             play(buffer, on: deck, at: now)
         } else if let url = Self.url(for: track, in: bundle) {
-            let expected = index[track.rawValue]?.frames ?? 0
-            if loadsInBackground {
-                Task.detached(priority: .utility) {
-                    let box = try? MusicBuffer(url: url, expectedFrames: expected)
-                    await MainActor.run { [weak self] in
-                        guard let self, let box, deck.token == token, deck.track == track else { return }
-                        self.store(box.buffer, for: track)
-                        self.play(box.buffer, on: deck, at: self.clock())
-                    }
-                }
-            } else if let box = try? MusicBuffer(url: url, expectedFrames: expected) {
-                store(box.buffer, for: track)
-                play(box.buffer, on: deck, at: now)
+            // The deck waits (silent, marked `front`) until its track is decoded.
+            decode(url, index[track.rawValue]?.frames ?? 0) { [weak self] box in
+                guard let self, let box, deck.token == token, deck.track == track else { return }
+                self.store(box.buffer, for: track)
+                self.play(box.buffer, on: deck, at: self.clock())
             }
         }
     }
@@ -281,7 +290,9 @@ final class BackgroundMusicPlayer {
         for deck in decks where deck.track != nil {
             let level = deck.ramp.value(at: now)
             deck.node.volume = Self.baseVolume * level * duck
-            if deck.ramp.to == 0 && deck.ramp.isFinished(at: now) { reset(deck) }
+            // Free a deck once its fade-out has finished. Never the front deck:
+            // it may still be waiting (silent) for its track to be decoded.
+            if deck !== front && deck.ramp.to == 0 && deck.ramp.isFinished(at: now) { reset(deck) }
         }
         if decks.allSatisfy({ $0.track == nil }) && pendingStart == nil && engine.isRunning {
             engine.pause()
@@ -291,7 +302,7 @@ final class BackgroundMusicPlayer {
     private var needsTicking: Bool {
         pendingStart != nil || duckState.isActive(at: clock())
             || decks.contains { $0.track != nil && !$0.ramp.isFinished(at: clock()) }
-            || decks.contains { $0.track != nil && $0.ramp.to == 0 }
+            || decks.contains { $0 !== front && $0.track != nil && $0.ramp.to == 0 }
     }
 
     private func ensureTicking() {

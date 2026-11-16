@@ -30,17 +30,17 @@ final class MusicAppTests: XCTestCase {
         XCTAssertEqual(AppModel.musicScene(for: .opening), .silent)
     }
 
-    func testHomeStartsMusicAndARoundSwitchesToTheGameTrack() throws {
+    func testHomeMusicContinuesIntoTheGame() throws {
         let model = AppTestSupport.makeModel()
-        model.audio.music.loadsInBackground = false
+        model.audio.music.decode = BackgroundMusicPlayer.decodeImmediately
         model.start()
         XCTAssertEqual(model.audio.music.scene, .menus)
         XCTAssertEqual(model.audio.music.wantedTrack, .playground)
         try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six))
         XCTAssertEqual(model.audio.music.scene, .game)
-        XCTAssertEqual(model.audio.music.wantedTrack, .focus)
+        XCTAssertEqual(model.audio.music.wantedTrack, .playground, "the same loop continues into the game")
         model.restartCurrentGame()
-        XCTAssertEqual(model.audio.music.wantedTrack, .focus, "a restart keeps the same track")
+        XCTAssertEqual(model.audio.music.wantedTrack, .playground, "a restart keeps the same track")
         XCTAssertLessThanOrEqual(model.audio.music.playingTracks.count, 2, "only two decks exist")
         model.goHome()
         XCTAssertEqual(model.audio.music.wantedTrack, .playground)
@@ -73,7 +73,7 @@ final class MusicAppTests: XCTestCase {
         music.interruptionBegan()
         XCTAssertNil(music.wantedTrack)
         music.interruptionEnded()
-        XCTAssertEqual(music.wantedTrack, .focus)
+        XCTAssertEqual(music.wantedTrack, .playground)
         music.outputDeviceRemoved()
         XCTAssertNil(music.wantedTrack, "held after headphones are unplugged")
         music.setScene(.menus)

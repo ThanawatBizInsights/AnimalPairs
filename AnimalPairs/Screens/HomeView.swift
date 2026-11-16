@@ -149,12 +149,13 @@ private struct HomeTopBar: View {
     var body: some View {
         let t = model.localizer
         let bar = spec?.topBar
-        let soundOn = model.settings.soundEnabled
+        let soundOn = model.isAnySoundOn
         HStack(spacing: 12) {
             Spacer(minLength: 0)
+            // All game sound: music and sound effects together.
             RoundIconButton(systemImage: soundOn ? "speaker.wave.2.fill" : "speaker.slash.fill",
                             label: soundOn ? t["board.sound.on"] : t["board.sound.off"]) {
-                model.setSoundEnabled(!soundOn)
+                model.toggleAllSound()
             }
             .accessibilityHint(Text(t["board.sound.hint"]))
             RoundIconButton(systemImage: "gearshape.fill", label: t["home.settings"]) {

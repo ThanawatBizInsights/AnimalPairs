@@ -1,59 +1,35 @@
 # Asset checklist
 
-Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.1`) and other shipped media. **The app is not release-ready while any row below is marked _placeholder_ or _development_.** `ManifestTests.testBundledManifestHonestlyReportsPlaceholders` and the backend's production publish check both fail closed on placeholders.
+Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.2`) and other shipped media. **No development placeholders remain:** all 60 animal pictures are supplied artwork. `ManifestTests.testNoDevelopmentPlaceholdersRemain` and the backend's production publish check fail if a placeholder ever comes back.
 
-## How to deliver final artwork
+## Animal pictures (60 — 10 animals × 6 poses)
 
-1. One PNG per pose, transparent background, character centred, at least 1024 × 1024 px, same lighting, proportions, colours and facial identity as the reference sheet (`Design/Reference/Supplied`).
-2. Save the source as `Design/Reference/Supplied/<characterID>_<poseID>.png`.
-3. In the manifest, set that artwork's `status` to `final` and increase `version`.
-4. Run `python3 Tools/artwork/build_artwork.py` (regenerates the asset catalog image set) and `python3 Tools/localization/check_strings.py`.
-5. Update the pose description strings `art.<character>.<pose>` in `Localizable.xcstrings` if the final pose differs from the brief.
-6. Never mirror, recolour or redraw one illustration to make another pose, and never ship a pose sheet as a single card image. Both cards of a pair always use the same single file.
+`signature` is each animal's default card and is free; the other five poses are part of **Full Game Unlock**. Image sets in `AnimalPairs/Assets.xcassets/Artwork/` are named `<animal>_<pose>`; asset IDs (used by saved rounds) are `<animal>.<pose>`. Sources, with the original supplied filenames, are in `Design/Reference/Supplied/` (`POSES_SOURCES.md`).
 
-## Supplied illustrations (10 — signature poses, free tier)
+| Animal | signature (free) | play | nap | wave | stretch | celebrate | Look-alike poses (never dealt together in Exact Pose) |
+| --- | --- | --- | --- | --- | --- | --- | --- |
+| Momo (puppy) | `momo_signature` | `momo_play` | `momo_nap` | `momo_wave` | `momo_stretch` | `momo_celebrate` | signature ≈ wave ≈ celebrate; play ≈ stretch |
+| Iris (kitten) | `iris_signature` | `iris_play` | `iris_nap` | `iris_wave` | `iris_stretch` | `iris_celebrate` | signature ≈ wave |
+| Nori (elephant) | `nori_signature` | `nori_play` | `nori_nap` | `nori_wave` | `nori_stretch` | `nori_celebrate` | signature ≈ wave ≈ celebrate ≈ play |
+| Sprout (dinosaur) | `sprout_signature` | `sprout_play` | `sprout_nap` | `sprout_wave` | `sprout_stretch` | `sprout_celebrate` | signature ≈ wave; play ≈ celebrate |
+| Mochi (bunny) | `mochi_signature` | `mochi_play` | `mochi_nap` | `mochi_wave` | `mochi_stretch` | `mochi_celebrate` | signature ≈ wave; play ≈ celebrate |
+| Sunny (duckling) | `sunny_signature` | `sunny_play` | `sunny_nap` | `sunny_wave` | `sunny_stretch` | `sunny_celebrate` | signature ≈ wave ≈ stretch; play ≈ celebrate |
+| Maple (bear cub) | `maple_signature` | `maple_play` | `maple_nap` | `maple_wave` | `maple_stretch` | `maple_celebrate` | signature ≈ wave ≈ celebrate |
+| Clover (turtle) | `clover_signature` | `clover_play` | `clover_nap` | `clover_wave` | `clover_stretch` | `clover_celebrate` | signature ≈ wave ≈ celebrate ≈ stretch |
+| Rusty (red panda) | `rusty_signature` | `rusty_play` | `rusty_nap` | `rusty_wave` | `rusty_stretch` | `rusty_celebrate` | signature ≈ stretch; wave ≈ celebrate |
+| Pebble (penguin) | `pebble_signature` | `pebble_play` | `pebble_nap` | `pebble_wave` | `pebble_stretch` | `pebble_celebrate` | signature ≈ wave ≈ stretch ≈ celebrate |
 
-These came from the supplied character sheet as individual files. `build_artwork.py` cleaned them (removed near-transparent background specks and edge halos, made the ~99 % opaque body fully opaque, trimmed and centred on a 1024 px canvas). **Art-director sign-off on the processed versions is still needed.**
+* All supplied: Play and Nap (21 files, one spare), Wave (10), Stretch (10), Celebrate (10). Nothing is missing.
+* **Duplicate:** Rusty had two nap pictures. `rusty_nap` uses “Sleeping red panda cutout-11” (same 1254 px canvas as the others, face clearly visible); “Rusty's Cozy Red Panda Nap-6” is kept unused in `Design/Reference/Supplied/Alternates/`.
+* Processing (`python3 Tools/artwork/build_artwork.py`): transparent background kept, only specks under 0.05 % of the body removed (Nori's water drops, Sunny's splash and Iris's yarn are kept), trimmed, centred on 1024 × 1024, and no pose fills more than 45 % of the card so compact poses (e.g. Rusty curled up) don't look bigger than tall ones. Never stretched, enlarged past its fit or cropped.
+* The look-alike groups are a judgement call made from the pictures; adjust `lookalikePoseGroups` in the manifest if you see it differently. Art-director sign-off on the processed images is still welcome.
 
-| Asset ID | Character | Pose | Source | Status |
-| --- | --- | --- | --- | --- |
-| `momo.signature` | Momo (golden-and-cream puppy) | signature | `Design/Reference/Supplied/momo_signature.png` | final art supplied — sign-off pending |
-| `iris.signature` | Iris (lilac kitten with white chest) | signature | `Design/Reference/Supplied/iris_signature.png` | final art supplied — sign-off pending |
-| `nori.signature` | Nori (pale-blue elephant) | signature | `Design/Reference/Supplied/nori_signature.png` | final art supplied — sign-off pending |
-| `sprout.signature` | Sprout (sage-green dinosaur) | signature | `Design/Reference/Supplied/sprout_signature.png` | final art supplied — sign-off pending |
-| `mochi.signature` | Mochi (peach rabbit) | signature | `Design/Reference/Supplied/mochi_signature.png` | final art supplied — sign-off pending |
-| `sunny.signature` | Sunny (yellow duck) | signature | `Design/Reference/Supplied/sunny_signature.png` | final art supplied — sign-off pending |
-| `maple.signature` | Maple (beige bear) | signature | `Design/Reference/Supplied/maple_signature.png` | final art supplied — sign-off pending |
-| `clover.signature` | Clover (sage-green turtle) | signature | `Design/Reference/Supplied/clover_signature.png` | final art supplied — sign-off pending |
-| `rusty.signature` | Rusty (rust-red panda) | signature | `Design/Reference/Supplied/rusty_signature.png` | final art supplied — sign-off pending |
-| `pebble.signature` | Pebble (blue penguin) | signature | `Design/Reference/Supplied/pebble_signature.png` | final art supplied — sign-off pending |
+## Adding or replacing a picture
 
-## Missing final illustrations (20 — premium tier)
-
-Currently shipped as **development placeholders**: the character's signature art, tilted, on a tinted disc with a large pose badge (★ = play, ☾ = nap) and a “DEV PLACEHOLDER” banner, so Exact Pose boards stay testable and the poses stay visibly distinct. They are not release artwork.
-
-| Asset ID | Character | Pose | Brief for the illustrator | Status |
-| --- | --- | --- | --- | --- |
-| `momo.play` | Momo (golden-and-cream puppy) | play | sitting in a play bow with tail up, tongue out | **placeholder — final art missing** |
-| `momo.nap` | Momo (golden-and-cream puppy) | nap | curled up asleep, ears draped, paws tucked | **placeholder — final art missing** |
-| `iris.play` | Iris (lilac kitten with white chest) | play | batting at a soft ball of yarn | **placeholder — final art missing** |
-| `iris.nap` | Iris (lilac kitten with white chest) | nap | curled in a ball, tail wrapped around, eyes closed | **placeholder — final art missing** |
-| `nori.play` | Nori (pale-blue elephant) | play | splashing a little arc of water bubbles from the trunk | **placeholder — final art missing** |
-| `nori.nap` | Nori (pale-blue elephant) | nap | lying down, trunk curled, eyes closed | **placeholder — final art missing** |
-| `sprout.play` | Sprout (sage-green dinosaur) | play | mid-hop with arms up, mouth open in a laugh | **placeholder — final art missing** |
-| `sprout.nap` | Sprout (sage-green dinosaur) | nap | sitting, leaning on its tail, dozing | **placeholder — final art missing** |
-| `mochi.play` | Mochi (peach rabbit) | play | hopping, ears back, feet off the ground | **placeholder — final art missing** |
-| `mochi.nap` | Mochi (peach rabbit) | nap | loaf-shaped, ears folded down, eyes closed | **placeholder — final art missing** |
-| `sunny.play` | Sunny (yellow duck) | play | paddling/splashing with one wing raised | **placeholder — final art missing** |
-| `sunny.nap` | Sunny (yellow duck) | nap | sitting, head tucked into a wing | **placeholder — final art missing** |
-| `maple.play` | Maple (beige bear) | play | hugging a soft ball, sitting | **placeholder — final art missing** |
-| `maple.nap` | Maple (beige bear) | nap | lying on its back or side, paws on tummy, asleep | **placeholder — final art missing** |
-| `clover.play` | Clover (sage-green turtle) | play | stretching up on tiptoes with a big smile | **placeholder — final art missing** |
-| `clover.nap` | Clover (sage-green turtle) | nap | head and legs tucked in, sleepy eyes peeking | **placeholder — final art missing** |
-| `rusty.play` | Rusty (rust-red panda) | play | hugging its striped tail, seated | **placeholder — final art missing** |
-| `rusty.nap` | Rusty (rust-red panda) | nap | curled up with tail wrapped over its nose | **placeholder — final art missing** |
-| `pebble.play` | Pebble (blue penguin) | play | sliding on its tummy, flippers back | **placeholder — final art missing** |
-| `pebble.nap` | Pebble (blue penguin) | nap | standing with eyes closed, flippers folded | **placeholder — final art missing** |
+1. One PNG per pose, transparent background, at least 1024 × 1024 px, same style as the others.
+2. Save it as `Design/Reference/Supplied/<animal>_<pose>.png`; add or update its manifest entry (`resourceName` `<animal>_<pose>`, increase `version` when the picture changes).
+3. Run `python3 Tools/artwork/build_artwork.py` and `python3 Tools/localization/check_strings.py`, and write the English description `art.<animal>.<pose>` in `Localizable.xcstrings`.
+4. Never mirror, recolour or redraw one illustration to make another pose. Both cards of a pair always use the same single file.
 
 ## Other media
 

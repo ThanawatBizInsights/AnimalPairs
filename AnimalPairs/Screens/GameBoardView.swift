@@ -59,9 +59,10 @@ private struct GameHeader: View {
 
             Spacer(minLength: 8)
 
-            RoundIconButton(systemImage: model.settings.soundEnabled ? "speaker.wave.2.fill" : "speaker.slash.fill",
-                            label: model.settings.soundEnabled ? t["board.sound.on"] : t["board.sound.off"]) {
-                model.setSoundEnabled(!model.settings.soundEnabled)
+            // Same control as on Home: all game sound (music and effects) on or off.
+            RoundIconButton(systemImage: model.isAnySoundOn ? "speaker.wave.2.fill" : "speaker.slash.fill",
+                            label: model.isAnySoundOn ? t["board.sound.on"] : t["board.sound.off"]) {
+                model.toggleAllSound()
             }
             .accessibilityHint(Text(t["board.sound.hint"]))
         }

@@ -79,6 +79,16 @@ def validate_manifest(payload: dict[str, Any]) -> list[str]:
         if a.get("status") not in STATUSES:
             errors.append(f"{aid}: status must be one of {sorted(STATUSES)}")
 
+    # Optional look-alike pose groups: every pose named must exist for that
+    # character, and no pose may be in two groups (mirrors the Swift check).
+    for c in characters:
+        cid, seen = c.get("id", ""), set()
+        for group in c.get("lookalikePoseGroups") or []:
+            for pose in group:
+                if pose in seen or (cid, pose) not in poses:
+                    errors.append(f"character {cid}: invalid look-alike pose {pose!r}")
+                seen.add(pose)
+
     for cid, default_pose in defaults.items():
         match = [a for a in artworks if a.get("characterID") == cid and a.get("poseID") == default_pose]
         if not match:

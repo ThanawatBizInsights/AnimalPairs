@@ -93,7 +93,7 @@ final class GameSession {
     /// two never sound at full level together.
     static let followUpDelay: TimeInterval = 0.75
 
-    /// The animal shown on a tile (the same for its default, play and nap art).
+    /// The animal shown on a tile (the same for every one of its poses).
     func character(of tileID: TileID) -> CharacterID? {
         controller.state.tile(tileID).flatMap { catalog.artwork($0.pairKey)?.characterID }
     }
