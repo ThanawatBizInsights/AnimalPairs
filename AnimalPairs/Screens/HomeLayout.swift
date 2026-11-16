@@ -9,7 +9,7 @@ struct HomeLayoutSpec: Decodable {
     struct Play: Decodable { let cx, cy, width, height: CGFloat }
     struct Placement: Decodable { let cx, bottom, height: CGFloat }
     struct Motion: Decodable { let period, phase, rotation: Double; let bob, scale: CGFloat }
-    struct TopBar: Decodable { let height, controlSize, padding, resumeWidth: CGFloat }
+    struct TopBar: Decodable { let height, controlSize, padding: CGFloat }
     struct Pulse: Decodable { let period: Double; let scale: CGFloat }
     struct Decor: Decodable {
         let kind: String

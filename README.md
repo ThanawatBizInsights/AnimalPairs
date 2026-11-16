@@ -45,7 +45,7 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 
 | Suite | Where | How |
 | --- | --- | --- |
-| `AnimalPairsCoreTests` (64 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
+| `AnimalPairsCoreTests` (80 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
 | `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** purchase states (success, Ask to Buy pending, failure, refund/revocation, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
 | Backend (17 tests) | `backend/` | see [backend/README.md](backend/README.md) |
 | String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
@@ -123,7 +123,8 @@ round is normalized (a pending match is committed once, a pending mismatch is
 covered, a single open card is kept) and written as a versioned JSON snapshot
 with an atomic write. On launch the snapshot is validated against the current
 manifest, installed artwork and access level; anything invalid is moved aside
-(never silently deleted) and the game simply offers no Resume. Completed
+(never silently deleted). Home has no Resume button (it was removed from the
+Home design), so a saved round is not offered after a relaunch. Completed
 rounds go to SwiftData, unique by round ID; the newest 100 are kept and the
 totals cover every round. If the store cannot be opened the file is left
 untouched and an in-memory store is used for that session. Resetting progress
@@ -183,11 +184,11 @@ on Home.
 
 | Moment | Sound |
 | --- | --- |
-| Card turns face up | `card_flip` |
+| Card turns face up | at random, `card_flip` **or** one of the revealed animal's own short sounds (`animal_<id>.wav` / `animal_<id>_<variant>.wav`); never another animal's; `card_flip` when the animal has no usable file — **no animal files exist yet, so every flip is `card_flip`** |
 | Mismatched pair turns back | `card_close` |
-| Pair matched (not the last) | `pair_match`, then the animal's cue at 0.75 s (same cue for its default, play and nap art) — **animal cues not generated yet, so silent** |
+| Pair matched (not the last) | `pair_match`; the card sound is turned down under it |
 | Last pair matched | `board_complete`, or `perfect_round` when there were no misses |
-| Second card is not a match (after 0.35 s) | `pair_miss` (always) |
+| Second card is not a match (after 0.35 s, or when a short animal sound ends, at most 1 s) | `pair_miss` (always) |
 | Results screen | `completion_jingle`, soft `confetti` at 0.4 s |
 | **Play again** after a completed round | `try_again`, then the new round's `game_start` at 0.8 s |
 | Round starts, restarts or resumes | `game_start` |
@@ -197,6 +198,13 @@ on Home.
 | Hint | `hint` |
 | Other buttons | `button_tap` |
 | — | `star_earn`, `badge_reveal`, `new_best`: bundled but **unused** — the game has no stars, badges or best scores |
+
+Card sounds: `CardRevealSoundPicker` (AnimalPairsCore) chooses for each flip;
+about half of flips use `card_flip` when the animal has sounds, and the same
+animal sound is not repeated twice in a row. Only one card sound plays at a
+time (a new flip replaces it), it stops when a mismatched pair turns back or
+the round is paused or left, and the Sound switch silences it immediately.
+Files longer than 2.5 s, silent or unreadable are ignored.
 
 Pending sounds are cancelled when a round is paused, restarted or left, and when
 leaving the Results screen, so nothing spills into the next screen.

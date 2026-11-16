@@ -947,28 +947,6 @@
         }
       }
     },
-    "home.resume": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Keep playing"
-          }
-        }
-      }
-    },
-    "home.resume.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Continues your unfinished game."
-          }
-        }
-      }
-    },
     "home.settings": {
       "extractionState": "manual",
       "localizations": {

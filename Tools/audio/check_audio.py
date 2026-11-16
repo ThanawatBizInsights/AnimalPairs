@@ -55,7 +55,7 @@ def main() -> int:
 
     names = {s["name"] for s in sounds}
     swift = SWIFT.read_text()
-    enum_body = swift[swift.index("enum SoundEffect"):swift.index("static func animal")]
+    enum_body = swift[swift.index("enum SoundEffect"):swift.index("/// Files tried, in order")]
     effects = set()
     for case, raw in re.findall(r'case (\w+)(?: = "([a-z_]+)")?', enum_body):
         effects.add(raw or case)

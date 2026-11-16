@@ -125,7 +125,7 @@ private struct PlayButton: View {
     }
 }
 
-/// Resume (when a round is saved), Sound and Settings — always above the stage.
+/// Sound and Settings in the top-right corner — always above the stage.
 private struct HomeTopBar: View {
     let spec: HomeLayoutSpec?
     @Environment(AppModel.self) private var model
@@ -135,24 +135,6 @@ private struct HomeTopBar: View {
         let bar = spec?.topBar
         let soundOn = model.settings.soundEnabled
         HStack(spacing: 12) {
-            if model.resumableRound != nil {
-                Button {
-                    model.resumeSavedGame()
-                } label: {
-                    Label(t["home.resume"], systemImage: "play.circle.fill")
-                        .font(.rounded(.headline, weight: .bold))
-                        .lineLimit(1)
-                        .minimumScaleFactor(0.6)
-                        .foregroundStyle(Palette.brown)
-                        .padding(.horizontal, 14)
-                        .frame(width: bar?.resumeWidth ?? 210, height: bar?.controlSize ?? 60)
-                        .background(Capsule().fill(Palette.mint)
-                            .overlay(Capsule().strokeBorder(Palette.mintDeep, lineWidth: 2)))
-                        .contentShape(Capsule())
-                }
-                .buttonStyle(.plain)
-                .accessibilityHint(Text(t["home.resume.hint"]))
-            }
             Spacer(minLength: 0)
             RoundIconButton(systemImage: soundOn ? "speaker.wave.2.fill" : "speaker.slash.fill",
                             label: soundOn ? t["board.sound.on"] : t["board.sound.off"]) {

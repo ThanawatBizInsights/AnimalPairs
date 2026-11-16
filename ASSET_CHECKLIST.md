@@ -69,7 +69,7 @@ Currently shipped as **development placeholders**: the character's signature art
 | ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn`, `badge_reveal`, `new_best` unused (no stars, badges or best scores) |
 | Reward sound revisions (`star_earn_v2`, `badge_reveal_v2`, `new_best_v2`, `try_again_v2`) | `Design/Audio/Review/` | **awaiting your review**; approving one replaces the bundled file of the same name |
 | Music loops (4) | `Design/Audio/Review/*.m4a`, masters in `Design/Audio/Music/` | **awaiting your review**; not bundled, not played |
-| Animal cues (10) | — | **not generated** — approved in principle, but no files exist; matches play only `pair_match` until they are created |
+| Animal card sounds (10 animals) | `AnimalPairs/Resources/Sounds/animal_<id>[_<variant>].wav` | **none exist** — every card flip uses the generic `card_flip` until approved files are added; the app picks them up by name automatically |
 | Voice recordings | — | none (English only; the planned Thai lines were removed) |
 | Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |
 | Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint_synth`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | fallbacks only |

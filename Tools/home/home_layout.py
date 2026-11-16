@@ -11,7 +11,7 @@ approximations.
 
 The check expands every character by its full wobble envelope (rotation about
 the feet, bob and scale) and fails if any two characters touch, a character
-touches the title, the Play button or the top controls (Resume, Sound,
+touches the title, the Play button or the top controls (Sound,
 Settings), or anything leaves the safe area.
 """
 from __future__ import annotations
@@ -121,8 +121,7 @@ class Layout:
         right = self.x0 + self.w - pad
         settings = (right - size, y0, right, y0 + size)
         sound = (right - 2 * size - 12, y0, right - size - 12, y0 + size)
-        resume = (self.x0 + pad, y0, self.x0 + pad + bar["resumeWidth"], y0 + size)
-        return [("Settings", settings), ("Sound", sound), ("Resume", resume)]
+        return [("Settings", settings), ("Sound", sound)]
 
 
 def load() -> tuple[dict, dict[str, float]]:
@@ -278,16 +277,11 @@ def render(spec: dict, aspects: dict[str, float], out: Path) -> list[Path]:
         d.text((pcx - tw / 2, pcy - ph * 0.24), label, font=f, fill=(74, 46, 33, 255))
         for name, r in lay.controls():
             x0, y0, x1, y1 = box(r)
-            if name == "Resume":
-                d.rounded_rectangle((x0, y0, x1, y1), radius=(y1 - y0) / 2, fill=(168, 224, 197, 255), outline=(43, 133, 94, 255), width=SCALE)
-                fr = font(int((y1 - y0) * 0.32))
-                d.text((x0 + 22 * SCALE, y0 + (y1 - y0) * 0.3), "Keep playing", font=fr, fill=(74, 46, 33, 255))
-            else:
-                d.ellipse((x0, y0, x1, y1), fill=(255, 253, 248, 255), outline=(157, 137, 206, 120), width=SCALE)
-                icon = "♪" if name == "Sound" else "⚙"
-                fi = font(int((y1 - y0) * 0.45))
-                iw = d.textlength(icon, font=fi)
-                d.text(((x0 + x1) / 2 - iw / 2, y0 + (y1 - y0) * 0.22), icon, font=fi, fill=(74, 46, 33, 255))
+            d.ellipse((x0, y0, x1, y1), fill=(255, 253, 248, 255), outline=(157, 137, 206, 120), width=SCALE)
+            icon = "♪" if name == "Sound" else "⚙"
+            fi = font(int((y1 - y0) * 0.45))
+            iw = d.textlength(icon, font=fi)
+            d.text(((x0 + x1) / 2 - iw / 2, y0 + (y1 - y0) * 0.22), icon, font=fi, fill=(74, 46, 33, 255))
         # Unsafe areas (status bar / notch, home indicator) shaded for reference.
         if device.top:
             d.rectangle((0, 0, W, device.top * SCALE), fill=(40, 30, 60, 40))

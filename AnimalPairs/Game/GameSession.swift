@@ -43,6 +43,7 @@ final class GameSession {
 
     func showPauseMenu() {
         audio.cancelPending()
+        audio.stopCardSound()
         controller.pause()
         isPauseMenuVisible = true
         audio.play(.pause)
@@ -57,6 +58,7 @@ final class GameSession {
     /// Backgrounding: pause + normalize; the pause menu greets the child on return.
     func pauseForBackground() {
         audio.cancelPending()
+        audio.stopCardSound()
         guard !state.isCompleted else { return }
         controller.pause()
         isPauseMenuVisible = true
@@ -64,12 +66,14 @@ final class GameSession {
 
     func restart(with newState: RoundState) {
         audio.cancelPending()
+        audio.stopCardSound()
         isPauseMenuVisible = false
         controller.replaceRound(with: newState)
     }
 
     func end() {
         audio.cancelPending()
+        audio.stopCardSound()
         controller.tearDown()
     }
 
@@ -84,38 +88,45 @@ final class GameSession {
     /// Delay before the gentle "not a pair" cue, so the second card's flip is
     /// heard first. Cancelled if the round is paused, restarted or left.
     static let missCueDelay: TimeInterval = 0.35
-    /// The animal's own cue (or an occasional spoken line) starts as the
-    /// pair-match chime fades, so the two never sound at full level together.
-    /// Tune once the animal cues have been reviewed.
+    /// The miss cue never waits longer than this for an animal's card sound.
+    static let missCueMaxDelay: TimeInterval = 1.0
+    /// An occasional spoken line starts as the pair-match chime fades, so the
+    /// two never sound at full level together.
     static let followUpDelay: TimeInterval = 0.75
+
+    /// The animal shown on a tile (the same for its default, play and nap art).
+    func character(of tileID: TileID) -> CharacterID? {
+        controller.state.tile(tileID).flatMap { catalog.artwork($0.pairKey)?.characterID }
+    }
 
     /// Event → sound mapping (see README "Sound effects").
     private func handle(_ event: RoundEvent) {
         // Events produced while pausing (normalizing a pending pair) stay quiet.
         let quiet = controller.state.isPaused
         switch event {
-        case .revealed:
-            audio.play(.cardFlip)
-            if let pending = controller.state.pendingResolution, !pending.isMatch,
-               !audio.narrate(.missed, after: Self.missCueDelay) {
-                audio.play(.pairMiss, after: Self.missCueDelay)
+        case .revealed(let tileID):
+            // The generic flip or one of this card's animal's own sounds.
+            audio.playCardReveal(of: character(of: tileID))
+            if let pending = controller.state.pendingResolution, !pending.isMatch {
+                // Let a short animal sound finish before the soft miss cue.
+                let delay = min(max(Self.missCueDelay, audio.cardSoundRemaining), Self.missCueMaxDelay)
+                if !audio.narrate(.missed, after: delay) {
+                    audio.play(.pairMiss, after: delay)
+                }
             }
         case .matched(let key):
+            // The card sound steps back so the match feedback stays clear.
+            audio.duckCardSound()
             // The final pair gets board_complete instead, never both at once.
             if !quiet && !controller.state.isCompleted {
                 audio.play(.pairMatch)
-                // Then the animal's cue (same for its default, play and nap
-                // art), unless an occasional spoken line takes this moment.
-                if !audio.narrate(.matched, after: Self.followUpDelay),
-                   let character = catalog.artwork(key)?.characterID,
-                   let cue = SoundEffect.animal(character) {
-                    audio.play(cue, after: Self.followUpDelay)
-                }
+                audio.narrate(.matched, after: Self.followUpDelay)
             }
             if let art = catalog.artwork(key) {
                 announce(localizer("a11y.announce.match", ArtworkText.description(art, localizer)))
             }
         case .mismatchCovered:
+            audio.stopCardSound()
             if !quiet { audio.play(.cardClose) }
             announce(localizer["a11y.announce.mismatch"])
         case .hintShown:

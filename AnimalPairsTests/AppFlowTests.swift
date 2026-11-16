@@ -43,17 +43,6 @@ final class AppFlowTests: XCTestCase {
         }
     }
 
-    func testAnimalCueIsSharedByAllPosesOfACharacter() {
-        let model = AppTestSupport.makeModel()
-        for character in model.catalog.manifest.characters {
-            let cue = SoundEffect.animal(character.id)
-            XCTAssertNotNil(cue, "\(character.id) needs an animal cue")
-            let poses = model.catalog.manifest.artworks.filter { $0.characterID == character.id }
-            XCTAssertEqual(Set(poses.compactMap { SoundEffect.animal($0.characterID) }), [cue!])
-        }
-        XCTAssertEqual(SoundEffect.animal("iris"), .animalIris)
-    }
-
     func testVoiceSwitchIsSavedSeparatelyFromSoundEffects() {
         let defaults = AppTestSupport.isolatedDefaults()
         let model = AppTestSupport.makeModel(defaults: defaults)

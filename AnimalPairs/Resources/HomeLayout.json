@@ -4,8 +4,7 @@
   "topBar": {
     "height": 76,
     "controlSize": 60,
-    "padding": 16,
-    "resumeWidth": 210
+    "padding": 16
   },
   "layouts": {
     "wide": {

@@ -28,24 +28,8 @@ enum SoundEffect: String, CaseIterable {
     case hint
     case tryAgain = "try_again"
     case newBest = "new_best"
-    // Batch 3 (one cue per animal; shared by its default, play and nap art)
-    case animalMomo = "animal_momo"
-    case animalIris = "animal_iris"
-    case animalNori = "animal_nori"
-    case animalSprout = "animal_sprout"
-    case animalMochi = "animal_mochi"
-    case animalSunny = "animal_sunny"
-    case animalMaple = "animal_maple"
-    case animalClover = "animal_clover"
-    case animalRusty = "animal_rusty"
-    case animalPebble = "animal_pebble"
-
-    /// The animal's cue, used for all of its artwork poses.
-    static func animal(_ character: CharacterID) -> SoundEffect? {
-        SoundEffect(rawValue: "animal_\(character.rawValue)")
-    }
-
-    var isAnimalCue: Bool { rawValue.hasPrefix("animal_") }
+    // Animal sounds are not effects: each card flip picks between `cardFlip`
+    // and the revealed animal's own files (see `playCardReveal`).
 
     /// Files tried, in order, when this effect's own file is not bundled
     /// (not generated or not approved yet). Empty means silent until approved.
@@ -60,7 +44,6 @@ enum SoundEffect: String, CaseIterable {
         case .perfectRound: ["board_complete", "complete"]
         case .hint: ["hint_synth"]
         case .starEarn, .badgeReveal, .confetti, .tryAgain, .newBest: []
-        default: []  // animal cues
         }
     }
 
@@ -80,7 +63,6 @@ enum SoundEffect: String, CaseIterable {
         case .starEarn: 0.85
         case .badgeReveal, .newBest: 0.9
         case .confetti: 0.45
-        default: 0.8  // animal cues
         }
     }
 
@@ -96,7 +78,6 @@ enum SoundEffect: String, CaseIterable {
         case .gameStart, .tryAgain: 0.5
         case .boardComplete, .perfectRound, .confetti, .badgeReveal, .newBest: 1.0
         case .completionJingle: 2.0
-        default: 0.3  // animal cues
         }
     }
 
@@ -107,7 +88,6 @@ enum SoundEffect: String, CaseIterable {
         case .cardFlip, .cardClose, .pairMiss, .hint, .pause, .resume, .confetti, .tryAgain: 1
         case .pairMatch, .gameStart, .starEarn: 2
         case .boardComplete, .completionJingle, .perfectRound, .badgeReveal, .newBest: 3
-        default: 2  // animal cues
         }
     }
 }
@@ -127,6 +107,11 @@ enum NarrationEvent {
 }
 
 /// Plays sound effects and narration from local files.
+///
+/// * Card flips: each flip plays either the generic flip or one of the
+///   revealed animal's own bundled sounds (`animal_<id>[_<variant>]`), chosen
+///   by `CardRevealSoundPicker`. One card sound at a time: a new flip replaces
+///   the previous card's sound, and it is turned down under the match chime.
 ///
 /// * Sound effects: one preloaded player per effect; the same sound restarts
 ///   instead of layering, rapid repeats are dropped and at most three effects
@@ -171,11 +156,33 @@ final class AudioManager {
     private var pending: [Task<Void, Never>] = []
     private let clock: () -> TimeInterval
 
+    /// Mix level of an animal's card sound (the generic flip uses `cardFlip`'s).
+    static let animalMixVolume: Float = 0.75
+    /// Card sound level while the match chime plays.
+    static let cardSoundUnderMatch: Float = 0.4
+    /// Longer files are not "short sounds" and are left out.
+    static let maxAnimalSoundDuration: TimeInterval = 2.5
+    /// Policy channel shared by every card-flip sound, generic or animal.
+    static let cardRevealChannel = "card_reveal"
+    private static let animalExtensions = ["wav", "caf", "m4a", "mp3"]
+
+    private let bundle: Bundle
+    private var animalPlayers: [String: AVAudioPlayer] = [:]
+    private(set) var animalLibrary = AnimalSoundLibrary()
+    private var revealPicker = CardRevealSoundPicker()
+    private var revealRandom: SeededGenerator
+    private weak var cardSoundPlayer: AVAudioPlayer?
+    /// The last card sound that actually started, for tests and debugging.
+    private(set) var lastCardReveal: (character: CharacterID?, sound: CardRevealSound)?
+
     init(isEnabled: Bool, voiceEnabled: Bool, bundle: Bundle = .main,
-         clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }) {
+         clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
+         randomSeed: UInt64 = UInt64.random(in: .min ... .max)) {
         self.isEnabled = isEnabled
         self.voiceEnabled = voiceEnabled
         self.clock = clock
+        self.bundle = bundle
+        revealRandom = SeededGenerator(seed: randomSeed)
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
@@ -217,12 +224,7 @@ final class AudioManager {
         case .restart:
             break
         case .play(let stopping):
-            for name in stopping {
-                if let other = SoundEffect(rawValue: name), let otherPlayer = players[other] {
-                    otherPlayer.stop()
-                    otherPlayer.currentTime = 0
-                }
-            }
+            stopping.forEach(stopVoice)
         }
         player.volume = Self.masterVolume * effect.mixVolume * (isSpeaking ? Self.duckingFactor : 1)
         player.currentTime = 0
@@ -232,6 +234,95 @@ final class AudioManager {
     /// Plays after `delay` seconds unless cancelled first (see `cancelPending`).
     func play(_ effect: SoundEffect, after delay: TimeInterval) {
         schedule(after: delay) { [weak self] in self?.play(effect) }
+    }
+
+    // MARK: Card sounds
+
+    /// Finds each animal's short sounds among the bundled files. Call once the
+    /// characters are known; files that fail to load, are silent or are longer
+    /// than `maxAnimalSoundDuration` are left out (that animal then uses the
+    /// generic flip).
+    func loadAnimalSounds(for characters: [CharacterID]) {
+        animalPlayers.values.forEach { $0.stop() }
+        animalPlayers = [:]
+        var urls: [String: URL] = [:]
+        for ext in Self.animalExtensions {
+            for path in bundle.paths(forResourcesOfType: ext, inDirectory: nil) {
+                let url = URL(fileURLWithPath: path)
+                let name = url.deletingPathExtension().lastPathComponent
+                if urls[name] == nil { urls[name] = url }
+            }
+        }
+        let found = AnimalSoundLibrary(resourceNames: urls.keys, characters: characters)
+        var usable: [CharacterID: [String]] = [:]
+        for (character, names) in found.sounds {
+            for name in names {
+                guard let url = urls[name], let player = try? AVAudioPlayer(contentsOf: url),
+                      player.duration > 0.05, player.duration <= Self.maxAnimalSoundDuration else { continue }
+                player.prepareToPlay()
+                animalPlayers[name] = player
+                usable[character, default: []].append(name)
+            }
+        }
+        animalLibrary = AnimalSoundLibrary(sounds: usable)
+        revealPicker.reset()
+    }
+
+    /// Plays the sound for a card turning face up: the generic flip or one of
+    /// the revealed animal's own sounds, picked at random. Never another
+    /// animal's sound. Returns what started, or nil when sound is off or the
+    /// flip came too quickly after the last one.
+    @discardableResult
+    func playCardReveal(of character: CharacterID?) -> CardRevealSound? {
+        guard isEnabled else { return nil }
+        var choice = revealPicker.pick(for: character, in: animalLibrary, using: &revealRandom)
+        var player: AVAudioPlayer?
+        var mix = SoundEffect.cardFlip.mixVolume
+        if case .animal(let name) = choice, let own = animalPlayers[name] {
+            player = own
+            mix = Self.animalMixVolume
+        } else {
+            choice = .generic
+            player = players[.cardFlip]
+        }
+        guard let player else { return nil }
+        let rule = SoundRule(minInterval: SoundEffect.cardFlip.minInterval, priority: SoundEffect.cardFlip.priority,
+                             duration: max(player.duration, 0.05))
+        switch policy.request(Self.cardRevealChannel, rule: rule, at: clock()) {
+        case .skip:
+            return nil
+        case .restart:
+            break
+        case .play(let stopping):
+            stopping.forEach(stopVoice)
+        }
+        stopCardSound()
+        player.volume = Self.masterVolume * mix * (isSpeaking ? Self.duckingFactor : 1)
+        player.currentTime = 0
+        player.play()
+        cardSoundPlayer = player
+        lastCardReveal = (character, choice)
+        return choice
+    }
+
+    /// Seconds until the current card sound ends (0 when none is playing).
+    var cardSoundRemaining: TimeInterval {
+        guard let player = cardSoundPlayer, player.isPlaying else { return 0 }
+        return max(0, player.duration - player.currentTime)
+    }
+
+    var isCardSoundPlaying: Bool { cardSoundPlayer?.isPlaying == true }
+
+    /// Turns the card sound down so the match chime stays clear.
+    func duckCardSound() {
+        guard let player = cardSoundPlayer, player.isPlaying else { return }
+        player.setVolume(player.volume * Self.cardSoundUnderMatch, fadeDuration: 0.12)
+    }
+
+    func stopCardSound() {
+        cardSoundPlayer?.stop()
+        cardSoundPlayer?.currentTime = 0
+        cardSoundPlayer = nil
     }
 
     // MARK: Voice
@@ -275,6 +366,18 @@ final class AudioManager {
 
     private func stopEffects() {
         for player in players.values {
+            player.stop()
+            player.currentTime = 0
+        }
+        for player in animalPlayers.values { player.stop() }
+        cardSoundPlayer = nil
+    }
+
+    /// Stops the effect (or the card sound) a policy decision named.
+    private func stopVoice(_ name: String) {
+        if name == Self.cardRevealChannel {
+            stopCardSound()
+        } else if let effect = SoundEffect(rawValue: name), let player = players[effect] {
             player.stop()
             player.currentTime = 0
         }

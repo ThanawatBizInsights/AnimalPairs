@@ -85,6 +85,7 @@ final class AppModel {
                                      installedAssets: [])
             contentError = String(describing: error)
         }
+        audio.loadAnimalSounds(for: catalog.manifest.characters.map(\.id))
     }
 
     var policy: ContentAccessPolicy { ContentAccessPolicy(level: purchases.accessLevel) }
