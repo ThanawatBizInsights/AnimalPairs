@@ -20,13 +20,16 @@ final class GameSession {
     /// Called when the round reaches a state worth saving.
     @ObservationIgnored var onSettled: ((RoundState) -> Void)?
 
+    /// `scheduler` defaults to `nil` and is resolved inside this @MainActor
+    /// body: in Swift 5 mode default arguments are evaluated nonisolated, so a
+    /// `= TaskRoundScheduler()` default cannot call its main-actor initializer.
     init(state: RoundState, catalog: ContentCatalog, sounds: SoundPlayer, localizer: Localizer,
-         scheduler: RoundScheduler = TaskRoundScheduler()) {
+         scheduler: RoundScheduler? = nil) {
         self.state = state
         self.catalog = catalog
         self.sounds = sounds
         self.localizer = localizer
-        controller = RoundController(state: state, scheduler: scheduler)
+        controller = RoundController(state: state, scheduler: scheduler ?? TaskRoundScheduler())
         controller.onChange = { [weak self] in self?.sync() }
         controller.onEvent = { [weak self] in self?.handle($0) }
     }

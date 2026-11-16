@@ -96,7 +96,7 @@ private struct CardGrid: View {
             let spacing = max(6, min(18, min(proxy.size.width, proxy.size.height) * 0.02))
             let cellWidth = (proxy.size.width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
             let cellHeight = (proxy.size.height - spacing * CGFloat(rows - 1)) / CGFloat(rows)
-            let aspect: CGFloat = 0.82
+            let aspect = CardGeometry.aspect
             let width = max(44, min(cellWidth, cellHeight * aspect))
             let height = max(44, width / aspect)
             VStack(spacing: spacing) {
@@ -110,7 +110,8 @@ private struct CardGrid: View {
                                          artwork: session.artwork(for: tile),
                                          isHighlighted: session.highlightedTiles.contains(tile.id),
                                          isLocked: state.isInputLocked,
-                                         position: CardPosition(index: index, row: row, column: column))
+                                         position: CardPosition(index: index, row: row, column: column),
+                                         cornerRadius: width * CardGeometry.cornerRatio)
                                     .frame(width: width, height: height)
                                     .onTapGesture { session.tap(tile.id) }
                                     .accessibilityAction { session.tap(tile.id) }
@@ -122,6 +123,15 @@ private struct CardGrid: View {
             .frame(width: proxy.size.width, height: proxy.size.height)
         }
     }
+}
+
+/// Card proportions taken from the supplied card-back artwork, so the back is
+/// never stretched and the face lines up with it when a card flips.
+enum CardGeometry {
+    /// Width ÷ height of `card_back` (753 × 1024).
+    static let aspect: CGFloat = 0.735
+    /// Corner radius as a fraction of card width, matching the artwork.
+    static let cornerRatio: CGFloat = 0.17
 }
 
 struct CardPosition: Equatable {
@@ -136,6 +146,7 @@ struct CardView: View {
     let isHighlighted: Bool
     let isLocked: Bool
     let position: CardPosition
+    let cornerRadius: CGFloat
 
     @Environment(AppModel.self) private var model
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -145,7 +156,7 @@ struct CardView: View {
     private var isFaceUp: Bool { tile.face != .covered }
 
     var body: some View {
-        let corner = Metrics.cornerRadius
+        let corner = cornerRadius
         ZStack {
             CardBack(corner: corner)
                 .opacity(isFaceUp ? 0 : 1)
@@ -208,37 +219,23 @@ enum CardAccessibility {
     }
 }
 
+/// The same supplied artwork on the back of every card, so the back never
+/// hints at what is underneath.
 private struct CardBack: View {
     let corner: CGFloat
     @Environment(\.colorSchemeContrast) private var contrast
 
     var body: some View {
-        RoundedRectangle(cornerRadius: corner, style: .continuous)
-            .fill(LinearGradient(colors: [Palette.lavender, Palette.lavenderDeep.opacity(0.85)], startPoint: .topLeading, endPoint: .bottomTrailing))
+        Image(BrandGraphic.cardBack)
+            .resizable()
+            .interpolation(.high)
+            .aspectRatio(contentMode: .fit)
             .overlay {
-                GeometryReader { proxy in
-                    let s = min(proxy.size.width, proxy.size.height)
-                    ZStack {
-                        RoundedRectangle(cornerRadius: corner * 0.7, style: .continuous)
-                            .strokeBorder(Color.white.opacity(0.55), style: StrokeStyle(lineWidth: 2, dash: [6, 6]))
-                            .padding(s * 0.08)
-                        Image(systemName: "pawprint.fill")
-                            .font(.system(size: s * 0.3, weight: .bold))
-                            .foregroundStyle(Color.white.opacity(0.85))
-                        Image(systemName: "heart.fill")
-                            .font(.system(size: s * 0.1))
-                            .foregroundStyle(Color.white.opacity(0.6))
-                            .offset(x: s * 0.26, y: -s * 0.26)
-                        Image(systemName: "star.fill")
-                            .font(.system(size: s * 0.09))
-                            .foregroundStyle(Color.white.opacity(0.6))
-                            .offset(x: -s * 0.26, y: s * 0.28)
-                    }
-                    .frame(width: proxy.size.width, height: proxy.size.height)
+                if contrast == .increased {
+                    RoundedRectangle(cornerRadius: corner, style: .continuous)
+                        .strokeBorder(Palette.lavenderDeep, lineWidth: 3)
                 }
             }
-            .overlay(RoundedRectangle(cornerRadius: corner, style: .continuous)
-                .strokeBorder(Palette.lavenderDeep, lineWidth: contrast == .increased ? 4 : 2))
             .shadow(color: Palette.shadow, radius: 6, y: 4)
     }
 }

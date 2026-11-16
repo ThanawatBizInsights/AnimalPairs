@@ -153,7 +153,7 @@ API used (UserDefaults).
 ```bash
 python3 -m pip install -r Tools/requirements.txt
 python3 Tools/artwork/build_artwork.py     # clean supplied art, regenerate image sets and placeholders
-python3 Tools/artwork/build_ui_graphics.py # app icon, wordmark, group art, trophy, floral corners
+python3 Tools/artwork/build_ui_graphics.py # app icon, wordmark, group art, trophy, floral corners, card back
 python3 Tools/audio/build_sounds.py        # regenerate the soft sound effects
 python3 Tools/localization/check_strings.py
 ```

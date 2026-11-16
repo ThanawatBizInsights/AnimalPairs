@@ -12,6 +12,7 @@ Sources (kept untouched) in ``Design/Reference/Supplied/``:
 * ``ui_group_animals.png``  → ``UI/home_group_animals``  (Home and Welcome)
 * ``ui_trophy_badge.png``   → ``UI/results_trophy``      (Results)
 * ``ui_floral_corners.png`` → ``UI/decor_corner_*``      (four corner accents)
+* ``ui_card_back.webp``     → ``UI/card_back``          (back of every card)
 
 Processing:
 
@@ -111,7 +112,10 @@ def build_transparent() -> None:
     for name, box in quadrants.items():
         corner = trimmed(clean_rgba(floral.crop(box), min_fraction=0.0, min_pixels=200, fill_holes=False))
         write_imageset(name, fit(corner, 640))
-    print("ui graphics   wordmark, group, trophy, 4 floral corners")
+    # The card back is drawn at card size, so keep it crisp but modest.
+    card_back = trimmed(clean_rgba(Image.open(SUPPLIED / "ui_card_back.webp")))
+    write_imageset("card_back", fit(card_back, 1024))
+    print("ui graphics   wordmark, group, trophy, 4 floral corners, card back")
 
 
 def main() -> None:

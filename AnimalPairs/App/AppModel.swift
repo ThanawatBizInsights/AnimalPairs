@@ -40,12 +40,15 @@ final class AppModel {
     private var parentAccess = ParentAccessSession()
     @ObservationIgnored private var resultsTask: Task<Void, Never>?
 
-    init(settings: SettingsStore = SettingsStore(),
+    /// `settings` defaults to `nil` and is created inside this @MainActor body
+    /// (SettingsStore is main-actor isolated; see GameSession.init).
+    init(settings: SettingsStore? = nil,
          configuration: AppConfiguration = .current,
          history: CompletionHistoryStore? = nil,
          historyWarning: String? = nil,
          snapshots: RoundSnapshotStore? = nil,
          contentBundle: Bundle = .main) {
+        let settings = settings ?? SettingsStore()
         self.settings = settings
         self.configuration = configuration
         route = settings.hasSeenWelcome ? .home : .welcome

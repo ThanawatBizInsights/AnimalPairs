@@ -63,6 +63,7 @@ Currently shipped as **development placeholders**: the character's signature art
 | “Animal Pairs” wordmark | `UI/brand_wordmark` ← `ui_wordmark.png` | final art supplied — background haze removed |
 | Group illustration (all ten) | `UI/home_group_animals` ← `ui_group_animals.png` | final art supplied — used on Welcome and Home only, never as a card image |
 | Trophy badge | `UI/results_trophy` ← `ui_trophy_badge.png` | final art supplied — localized “Well done!” is drawn on the ribbon by the app |
+| Card back | `UI/card_back` ← `ui_card_back.webp` | final art supplied — used on every card; the board uses its 0.735 width:height ratio so it is never stretched |
 | Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
 | Sound effects (flip, match, mismatch, hint, complete, tap) | `AnimalPairs/Resources/Sounds` | synthesized original tones (`Tools/audio/build_sounds.py`); usable, review with sound designer |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |

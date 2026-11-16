@@ -6,9 +6,10 @@ enum BrandGraphic {
     static let wordmark = "brand_wordmark"
     static let groupAnimals = "home_group_animals"
     static let trophy = "results_trophy"
+    static let cardBack = "card_back"
     static let corners = ["decor_corner_top_left", "decor_corner_top_right",
                           "decor_corner_bottom_left", "decor_corner_bottom_right"]
-    static var all: [String] { [wordmark, groupAnimals, trophy] + corners }
+    static var all: [String] { [wordmark, groupAnimals, trophy, cardBack] + corners }
 }
 
 /// The "Animal Pairs" wordmark; VoiceOver reads the app name as a heading.
