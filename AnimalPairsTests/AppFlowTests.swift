@@ -19,6 +19,24 @@ final class AppFlowTests: XCTestCase {
         }
     }
 
+    func testSoundEffectsSettingIsSavedAndApplied() {
+        let defaults = AppTestSupport.isolatedDefaults()
+        let model = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertTrue(model.settings.soundEnabled, "on by default")
+        XCTAssertTrue(model.audio.isEnabled)
+        model.setSoundEnabled(false)
+        XCTAssertFalse(model.audio.isEnabled)
+        let relaunched = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertFalse(relaunched.settings.soundEnabled, "the choice survives a relaunch")
+        XCTAssertFalse(relaunched.audio.isEnabled)
+    }
+
+    func testEverySoundEffectHasABundledFile() {
+        let audio = AudioManager(isEnabled: false)
+        XCTAssertEqual(audio.loadedEffects, Set(SoundEffect.allCases),
+                       "each effect resolves to its generated file or the synthesized fallback")
+    }
+
     func testWelcomeShowsOnFirstLaunchOnly() {
         let defaults = AppTestSupport.isolatedDefaults()
         let first = AppTestSupport.makeModel(defaults: defaults)

@@ -132,7 +132,7 @@ struct SetupView: View {
     }
 
     private func select(mode newMode: GameMode, policy: ContentAccessPolicy) {
-        model.sounds.play(.tap)
+        model.audio.play(.buttonTap)
         if policy.isAvailable(newMode) {
             mode = newMode
             lockedMessageVisible = false
@@ -142,7 +142,7 @@ struct SetupView: View {
     }
 
     private func select(board newBoard: BoardSize, policy: ContentAccessPolicy) {
-        model.sounds.play(.tap)
+        model.audio.play(.buttonTap)
         if policy.isAvailable(newBoard) {
             board = newBoard
             lockedMessageVisible = false

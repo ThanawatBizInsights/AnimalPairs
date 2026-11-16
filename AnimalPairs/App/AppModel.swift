@@ -29,7 +29,7 @@ final class AppModel {
     let history: CompletionHistoryStore
     private(set) var historyWarning: String?
     let snapshots: RoundSnapshotStore
-    let sounds: SoundPlayer
+    let audio: AudioManager
 
     private(set) var session: GameSession?
     /// A validated unfinished round that can be resumed from Home.
@@ -54,7 +54,7 @@ final class AppModel {
         route = settings.hasSeenWelcome ? .home : .welcome
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
-        sounds = SoundPlayer(isEnabled: settings.soundEnabled)
+        audio = AudioManager(isEnabled: settings.soundEnabled)
 
         if let history {
             self.history = history
@@ -87,15 +87,17 @@ final class AppModel {
 
     // MARK: Settings
 
+    /// The saved "Sound effects" setting (persisted by SettingsStore).
     func setSoundEnabled(_ enabled: Bool) {
         settings.soundEnabled = enabled
-        sounds.isEnabled = enabled
-        if enabled { sounds.play(.tap) }
+        audio.isEnabled = enabled
+        if enabled { audio.play(.buttonTap) }
     }
 
     // MARK: Navigation
 
     func goHome() {
+        audio.play(.buttonTap)
         leaveGameIfNeeded()
         parentAccess.revoke()
         route = .home
@@ -103,12 +105,14 @@ final class AppModel {
     }
 
     func finishWelcome() {
+        audio.play(.buttonTap)
         settings.hasSeenWelcome = true
         route = .home
         refreshResumableRound()
     }
 
     func goToSetup() {
+        audio.play(.buttonTap)
         leaveGameIfNeeded()
         route = .setup
     }
@@ -131,17 +135,19 @@ final class AppModel {
         if let session {
             session.restart(with: state)
         } else {
-            attachSession(GameSession(state: state, catalog: catalog, sounds: sounds, localizer: localizer))
+            attachSession(GameSession(state: state, catalog: catalog, audio: audio, localizer: localizer))
         }
         persist(state)
         route = .game
+        audio.play(.gameStart)
     }
 
     func resumeSavedGame() {
         guard let round = resumableRound else { return }
-        attachSession(GameSession(state: round, catalog: catalog, sounds: sounds, localizer: localizer))
+        attachSession(GameSession(state: round, catalog: catalog, audio: audio, localizer: localizer))
         resumableRound = nil
         route = .game
+        audio.play(.gameStart)
     }
 
     func restartCurrentGame() {
@@ -231,6 +237,7 @@ final class AppModel {
     // MARK: Parents area
 
     func openParentGate() {
+        audio.play(.buttonTap)
         leaveGameIfNeeded()
         parentAccess.revoke()
         route = .parentGate
@@ -247,6 +254,7 @@ final class AppModel {
     }
 
     func leaveParents() {
+        audio.play(.buttonTap)
         parentAccess.revoke()
         route = .home
         refreshResumableRound()

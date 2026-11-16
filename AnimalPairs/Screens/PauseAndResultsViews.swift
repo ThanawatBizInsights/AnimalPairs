@@ -100,6 +100,7 @@ struct ResultsView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .onAppear { model.audio.play(.completionJingle) }
     }
 }
 

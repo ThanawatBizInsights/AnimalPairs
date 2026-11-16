@@ -436,7 +436,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turns sounds on or off."
+            "value": "Turns sound effects on or off."
           }
         }
       }
@@ -447,7 +447,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sound off"
+            "value": "Sound effects off"
           }
         }
       }
@@ -458,7 +458,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sound on"
+            "value": "Sound effects on"
           }
         }
       }
@@ -1382,7 +1382,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Sounds"
+            "value": "Sound effects"
           }
         }
       }

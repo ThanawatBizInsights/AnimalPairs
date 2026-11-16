@@ -148,13 +148,61 @@ accounts, chat or third-party analytics. Progress stays on the device. A
 privacy manifest (`PrivacyInfo.xcprivacy`) declares the only required-reason
 API used (UserDefaults).
 
+## Sound effects
+
+All audio is local: the app plays bundled files from `AnimalPairs/Resources/Sounds/`
+and **never contacts ElevenLabs** (or any server). `AudioManager`
+(`AnimalPairs/Audio/AudioManager.swift`) preloads one player per effect, uses
+the ambient audio session (respects the silent switch, never interrupts music)
+and applies `SoundPlaybackPolicy` (engine package, unit-tested): the same sound
+restarts instead of layering, rapid repeats are dropped, and at most three
+different sounds overlap, with lower-priority ones yielding.
+
+| File | Plays when | Where |
+| --- | --- | --- |
+| `card_flip` | a card turns face up | `GameSession` (`.revealed`) |
+| `pair_miss` | 0.35 s after the second card, if it is not a match (cancelled on pause/exit) | `GameSession` |
+| `card_close` | a mismatched pair turns back over (1.2 s) | `GameSession` (`.mismatchCovered`) |
+| `pair_match` | a pair is confirmed (not the last one) | `GameSession` (`.matched`) |
+| `board_complete` | the last pair is matched | `GameSession` (`.completed`) |
+| `completion_jingle` | the Results screen appears | `ResultsView` |
+| `game_start` | a new, restarted or resumed round begins | `AppModel` |
+| `button_tap` | navigation, choices, pause/resume, settings | `AppModel`, `SetupView`, `GameSession` |
+| `hint` | a hint is shown (synthesized; not in the ElevenLabs batch) | `GameSession` |
+
+Until a generated file exists, each effect falls back to the synthesized
+development tone (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint`.wav),
+so the game is never silent. **Sound effects** can be switched off from the
+board's speaker button or Parents → Settings; the choice is saved.
+
+### Generating the ElevenLabs batch (developer machine only)
+
+The prompts, durations and 5,000-credit cap live in `Tools/audio/sfx_batch1.json`
+(model `eleven_text_to_sound_v3`). Requires `ffmpeg` (`brew install ffmpeg`) and
+`pip install -r Tools/requirements.txt`.
+
+```bash
+export ELEVENLABS_API_KEY='…'   # current shell only; never commit it or put it in the app
+python3 Tools/audio/generate_elevenlabs_sfx.py --dry-run   # plan + estimate, no API calls
+python3 Tools/audio/generate_elevenlabs_sfx.py             # generates only the missing sounds
+```
+
+The script never prints or stores the key, estimates each call conservatively
+(the larger of 40 credits/s and 200 per call), stops before a call that could
+exceed the cap, records every attempt in `Tools/audio/elevenlabs_credit_log.json`
+(with ElevenLabs' reported usage when the key may read it), keeps the original
+MP3s in `Design/Audio/ElevenLabs/`, and writes loudness-matched 44.1 kHz mono
+WAVs (loudest 50 ms at −18 dBFS, peaks ≤ −3 dBFS) into the app. Re-run a single
+sound with `--only pair_miss --regenerate`. Review them before generating more.
+
 ## Tools
 
 ```bash
 python3 -m pip install -r Tools/requirements.txt
 python3 Tools/artwork/build_artwork.py     # clean supplied art, regenerate image sets and placeholders
 python3 Tools/artwork/build_ui_graphics.py # app icon, wordmark, group art, trophy, floral corners, card back
-python3 Tools/audio/build_sounds.py        # regenerate the soft sound effects
+python3 Tools/audio/build_sounds.py        # synthesized fallback tones (and the hint sound)
+python3 Tools/audio/generate_elevenlabs_sfx.py --dry-run   # ElevenLabs batch (see Sound effects)
 python3 Tools/localization/check_strings.py
 ```
 

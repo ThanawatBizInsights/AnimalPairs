@@ -13,7 +13,7 @@ final class GameSession {
     private(set) var isPauseMenuVisible = false
 
     let controller: RoundController
-    private let sounds: SoundPlayer
+    private let audio: AudioManager
     private let localizer: Localizer
     private let catalog: ContentCatalog
     @ObservationIgnored var onCompleted: ((RoundSummary) -> Void)?
@@ -23,11 +23,11 @@ final class GameSession {
     /// `scheduler` defaults to `nil` and is resolved inside this @MainActor
     /// body: in Swift 5 mode default arguments are evaluated nonisolated, so a
     /// `= TaskRoundScheduler()` default cannot call its main-actor initializer.
-    init(state: RoundState, catalog: ContentCatalog, sounds: SoundPlayer, localizer: Localizer,
+    init(state: RoundState, catalog: ContentCatalog, audio: AudioManager, localizer: Localizer,
          scheduler: RoundScheduler? = nil) {
         self.state = state
         self.catalog = catalog
-        self.sounds = sounds
+        self.audio = audio
         self.localizer = localizer
         controller = RoundController(state: state, scheduler: scheduler ?? TaskRoundScheduler())
         controller.onChange = { [weak self] in self?.sync() }
@@ -42,29 +42,34 @@ final class GameSession {
     func hint() { controller.requestHint() }
 
     func showPauseMenu() {
+        audio.cancelPending()
         controller.pause()
         isPauseMenuVisible = true
-        sounds.play(.tap)
+        audio.play(.buttonTap)
     }
 
     func resumeFromPauseMenu() {
         isPauseMenuVisible = false
         controller.resume()
+        audio.play(.buttonTap)
     }
 
     /// Backgrounding: pause + normalize; the pause menu greets the child on return.
     func pauseForBackground() {
+        audio.cancelPending()
         guard !state.isCompleted else { return }
         controller.pause()
         isPauseMenuVisible = true
     }
 
     func restart(with newState: RoundState) {
+        audio.cancelPending()
         isPauseMenuVisible = false
         controller.replaceRound(with: newState)
     }
 
     func end() {
+        audio.cancelPending()
         controller.tearDown()
     }
 
@@ -76,25 +81,36 @@ final class GameSession {
         }
     }
 
+    /// Delay before the gentle "not a pair" cue, so the second card's flip is
+    /// heard first. Cancelled if the round is paused, restarted or left.
+    static let missCueDelay: TimeInterval = 0.35
+
+    /// Event → sound mapping (see README "Sound effects").
     private func handle(_ event: RoundEvent) {
+        // Events produced while pausing (normalizing a pending pair) stay quiet.
+        let quiet = controller.state.isPaused
         switch event {
         case .revealed:
-            sounds.play(.flip)
+            audio.play(.cardFlip)
+            if let pending = controller.state.pendingResolution, !pending.isMatch {
+                audio.play(.pairMiss, after: Self.missCueDelay)
+            }
         case .matched(let key):
-            sounds.play(.match)
+            // The final pair gets board_complete instead, never both at once.
+            if !quiet && !controller.state.isCompleted { audio.play(.pairMatch) }
             if let art = catalog.artwork(key) {
                 announce(localizer("a11y.announce.match", ArtworkText.description(art, localizer)))
             }
         case .mismatchCovered:
-            sounds.play(.mismatch)
+            if !quiet { audio.play(.cardClose) }
             announce(localizer["a11y.announce.mismatch"])
         case .hintShown:
-            sounds.play(.hint)
+            audio.play(.hint)
             announce(localizer["a11y.announce.hint"])
         case .tapIgnored:
             break
         case .completed(let summary):
-            sounds.play(.complete)
+            audio.play(.boardComplete)
             onCompleted?(summary)
         }
     }

@@ -28,7 +28,6 @@ struct WelcomeView: View {
                     }
 
                     Button {
-                        model.sounds.play(.tap)
                         model.finishWelcome()
                     } label: {
                         Label(t["welcome.start"], systemImage: "pawprint.fill")

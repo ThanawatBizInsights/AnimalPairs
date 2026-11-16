@@ -1,0 +1,18 @@
+{
+  "note": "Each ElevenLabs generation attempt. 'charged_credits' uses the reported value when available, otherwise the conservative estimate.",
+  "entries": [
+    {
+      "time": "2026-11-16T04:40:20+00:00",
+      "batch": "batch1",
+      "name": "card_flip",
+      "model_id": "eleven_text_to_sound_v3",
+      "duration_seconds": 0.6,
+      "http_status": 401,
+      "request_id": null,
+      "estimated_credits": 200,
+      "reported_credits": null,
+      "charged_credits": 0,
+      "error": "invalid_api_key: Invalid API key"
+    }
+  ]
+}

@@ -65,7 +65,8 @@ Currently shipped as **development placeholders**: the character's signature art
 | Trophy badge | `UI/results_trophy` ← `ui_trophy_badge.png` | final art supplied — localized “Well done!” is drawn on the ribbon by the app |
 | Card back | `UI/card_back` ← `ui_card_back.webp` | final art supplied — used on every card; the board uses its 0.735 width:height ratio so it is never stretched |
 | Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
-| Sound effects (flip, match, mismatch, hint, complete, tap) | `AnimalPairs/Resources/Sounds` | synthesized original tones (`Tools/audio/build_sounds.py`); usable, review with sound designer |
+| ElevenLabs batch 1: `card_flip`, `card_close`, `pair_match`, `pair_miss`, `board_complete`, `button_tap`, `game_start`, `completion_jingle` | `AnimalPairs/Resources/Sounds/<name>.wav` ← `Tools/audio/generate_elevenlabs_sfx.py` | **not generated yet** — the saved API key was rejected (HTTP 401, 0 credits used). Each effect currently plays its synthesized fallback. After generation: **awaiting your review** |
+| Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | development fallbacks; `hint` is still in use (not part of batch 1) |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |
 | App Store screenshots, preview video, marketing text | — | **missing** |
 | Privacy policy and support pages (URLs) | build settings `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **missing** — the Parents screen explains this until set |
