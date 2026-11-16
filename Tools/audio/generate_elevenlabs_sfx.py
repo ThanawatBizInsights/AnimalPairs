@@ -234,12 +234,25 @@ def main() -> int:
             continue
         master = MASTERS / f"{sound['name']}.mp3"
         master.write_bytes(payload)
-        entry["processed"] = process(master, OUTPUT / f"{sound['name']}.wav")
-        entry["review"] = "awaiting review"
+        # Record the paid call before anything else can fail.
+        entry["review"] = "processing"
         ledger["entries"].append(entry)
         save_ledger(ledger)
-        print(f"ok {sound['name']}.wav  credits {entry['charged_credits']}"
-              f"{' (reported)' if reported is not None else ' (estimated)'}  total {charged_total(ledger)}")
+        try:
+            entry["processed"] = process(master, OUTPUT / f"{sound['name']}.wav")
+            entry["review"] = "awaiting review"
+            outcome = "ok"
+        except (ValueError, subprocess.CalledProcessError) as error:
+            rejected = MASTERS / "rejected" / f"{sound['name']}-{entry['time'].replace(':', '')}.mp3"
+            rejected.parent.mkdir(parents=True, exist_ok=True)
+            master.replace(rejected)
+            entry["review"] = f"unusable: {error}"
+            entry["rejected_master"] = str(rejected.relative_to(ROOT))
+            outcome = "UNUSABLE"
+        save_ledger(ledger)
+        print(f"{outcome} {sound['name']}  credits {entry['charged_credits']}"
+              f"{' (reported)' if reported is not None else ' (estimated)'}  total {charged_total(ledger)}"
+              f"{'' if outcome == 'ok' else '  -> ' + entry['review']}")
         time.sleep(0.5)
     print(f"Total charged against budget: {charged_total(ledger)} / {limit}")
     return 0

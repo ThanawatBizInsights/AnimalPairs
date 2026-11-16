@@ -13,8 +13,9 @@
     {
       "name": "card_close",
       "event": "A mismatched pair turns back face down together",
-      "duration_seconds": 0.6,
-      "prompt": "Gentle reverse card flip, a soft felt-covered card turning face down, slightly lower and softer than a flip, short and dry, no music, child-friendly"
+      "duration_seconds": 0.8,
+      "prompt": "Gentle reverse card flip starting immediately: a soft felt-covered card turning face down with a quiet swish, slightly lower and softer than a flip, dry, no music, child-friendly",
+      "previous_prompt": "Gentle reverse card flip, a soft felt-covered card turning face down, slightly lower and softer than a flip, short and dry, no music, child-friendly"
     },
     {
       "name": "pair_match",
@@ -38,7 +39,8 @@
       "name": "button_tap",
       "event": "Buttons, choices and navigation",
       "duration_seconds": 0.5,
-      "prompt": "Soft rounded tap, a single gentle muted wooden bubble pop, very short, friendly, no music, child-friendly"
+      "prompt": "A single clear, soft tap on a smooth rounded wooden toy block, gentle and close-up, clearly audible, short pop, no music, child-friendly",
+      "previous_prompt": "Soft rounded tap, a single gentle muted wooden bubble pop, very short, friendly, no music, child-friendly"
     },
     {
       "name": "game_start",
