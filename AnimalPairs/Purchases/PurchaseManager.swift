@@ -2,6 +2,10 @@ import AnimalPairsCore
 import Foundation
 import Observation
 import StoreKit
+// `PurchaseAction` (the value of `@Environment(\.purchase)`) lives in the
+// StoreKit–SwiftUI cross-import overlay, which is only visible when a file
+// imports both StoreKit and SwiftUI.
+import SwiftUI
 
 /// Persists the last access granted from a *verified* transaction.
 struct EntitlementCacheStore {
