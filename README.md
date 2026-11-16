@@ -45,7 +45,7 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 
 | Suite | Where | How |
 | --- | --- | --- |
-| `AnimalPairsCoreTests` (80 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
+| `AnimalPairsCoreTests` (81 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
 | `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** purchase states (success, Ask to Buy pending, failure, refund/revocation, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
 | Backend (17 tests) | `backend/` | see [backend/README.md](backend/README.md) |
 | String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
@@ -184,11 +184,12 @@ on Home.
 
 | Moment | Sound |
 | --- | --- |
-| Card turns face up | at random, `card_flip` **or** one of the revealed animal's own short sounds (`animal_<id>.wav` / `animal_<id>_<variant>.wav`); never another animal's; `card_flip` when the animal has no usable file — **no animal files exist yet, so every flip is `card_flip`** |
+| Card turns face up (first **and** second card) | `card_flip` only — never an animal clip |
 | Mismatched pair turns back | `card_close` |
-| Pair matched (not the last) | `pair_match`; the card sound is turned down under it |
-| Last pair matched | `board_complete`, or `perfect_round` when there were no misses |
-| Second card is not a match (after 0.35 s, or when a short animal sound ends, at most 1 s) | `pair_miss` (always) |
+| Pair matched (not the last) | one random clip of **the matched animal** (any of its four), stopped with a 0.25 s fade at a natural pause about 1–2 s in; `pair_match` plays softer (60 %) under it. Without clips for that animal: `pair_match` at full level |
+| Last pair matched | the matched animal's clip as above, with `board_complete` (or `perfect_round` when there were no misses) softer under it; the clip fades out when the Results screen opens |
+| Second card is not a match (after 0.35 s) | `pair_miss` (always); no animal clip |
+| Tap an animal on Home | that animal's `greeting` or `curious` clip, in full (3–5 s); taps within 0.8 s of the last accepted one are ignored; the wobble animation never makes a sound |
 | Results screen | `completion_jingle`, soft `confetti` at 0.4 s |
 | **Play again** after a completed round | `try_again`, then the new round's `game_start` at 0.8 s |
 | Round starts, restarts or resumes | `game_start` |
@@ -199,12 +200,28 @@ on Home.
 | Other buttons | `button_tap` |
 | — | `star_earn`, `badge_reveal`, `new_best`: bundled but **unused** — the game has no stars, badges or best scores |
 
-Card sounds: `CardRevealSoundPicker` (AnimalPairsCore) chooses for each flip;
-about half of flips use `card_flip` when the animal has sounds, and the same
-animal sound is not repeated twice in a row. Only one card sound plays at a
-time (a new flip replaces it), it stops when a mismatched pair turns back or
-the round is paused or left, and the Sound switch silences it immediately.
-Files longer than 2.5 s, silent or unreadable are ignored.
+### Animal clips
+
+Four clips per animal — `<animal>_greeting`, `_curious`, `_excited`, `_calm`
+(e.g. `iris_curious.m4a`) — live in `AnimalPairs/Resources/Sounds/Animals/`
+with `animal_clips.json` (each clip's length and `matchEnd`, the natural pause
+where the shorter matched-pair version stops). `AnimalClipLibrary` and
+`AnimalClipPicker` (AnimalPairsCore) only ever offer the requested animal's
+own clips and never repeat the same clip twice in a row for an animal. Only
+one clip plays at a time (a new one stops the previous one), clips stop when
+a round is paused, restarted or left, and the Sound switch silences them at
+once. An animal without clips simply plays none.
+
+The clips were generated offline with ElevenLabs (`eleven_text_to_sound_v3`)
+by `python3 Tools/audio/generate_animal_clips.py`: every paid take is kept in
+`Design/Audio/Animals/takes/`, the chosen original download in
+`Design/Audio/Animals/raw/`, and the processed 24-bit WAV master in
+`Design/Audio/Animals/masters/`. Processing trims silence, shortens pauses
+longer than 0.7 s to 0.45 s, caps clips at 5 s, sets −21 LUFS with peaks at or
+below −3 dBFS (gentle limiter) and exports AAC mono 96 kbps `.m4a`.
+`--verify` decodes every bundled clip; `Tools/audio/audio_sim/run.sh` (Linux)
+plays thousands of simulated flips, matches and Home taps through the real
+`GameSession` and `AudioManager`.
 
 Pending sounds are cancelled when a round is paused, restarted or left, and when
 leaving the Results screen, so nothing spills into the next screen.
@@ -232,12 +249,15 @@ and final duration, credits and status (`planned` → `awaiting_review` →
 ```bash
 export ELEVENLABS_API_KEY='sk_…'                    # this shell only; never commit it
 python3 Tools/audio/generate_elevenlabs_sfx.py --status
-python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals --dry-run
-python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals
-#   → listen in Design/Audio/Review/
-python3 Tools/audio/generate_elevenlabs_sfx.py --approve animal_momo animal_iris
-python3 Tools/audio/generate_elevenlabs_sfx.py --reject animal_nori --reason "too loud"
-python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch3_animals --only animal_nori   # one retry
+python3 Tools/audio/generate_elevenlabs_sfx.py --batch batch2_interface --dry-run
+#   → new effects land in Design/Audio/Review/ for listening
+python3 Tools/audio/generate_elevenlabs_sfx.py --approve mode_select back
+python3 Tools/audio/generate_elevenlabs_sfx.py --reject confetti --reason "too loud"
+# Animal clips (bundled directly after the automatic checks):
+python3 Tools/audio/generate_animal_clips.py --dry-run
+python3 Tools/audio/generate_animal_clips.py                       # whatever is missing
+python3 Tools/audio/generate_animal_clips.py --only mochi_excited --retake
+python3 Tools/audio/generate_animal_clips.py --verify
 python3 Tools/audio/check_audio.py
 ```
 

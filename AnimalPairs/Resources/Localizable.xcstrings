@@ -903,6 +903,17 @@
         }
       }
     },
+    "home.animal.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Plays a happy animal sound."
+          }
+        }
+      }
+    },
     "home.contentError": {
       "extractionState": "manual",
       "localizations": {

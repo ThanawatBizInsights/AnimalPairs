@@ -56,8 +56,13 @@ private struct HomeStage: View {
     let spec: HomeLayoutSpec
     /// nil = still (Reduce Motion, hidden or inactive).
     let time: TimeInterval?
+    @Environment(AppModel.self) private var model
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The animal giving a little hop after being tapped.
+    @State private var hopping: String?
 
     var body: some View {
+        let t = model.localizer
         ZStack(alignment: .topLeading) {
             ForEach(geometry.drawOrder, id: \.self) { id in
                 if let frame = geometry.characterFrame(id) {
@@ -67,11 +72,19 @@ private struct HomeStage: View {
                         .interpolation(.high)
                         .aspectRatio(contentMode: .fit)   // never stretched
                         .frame(height: frame.height)
-                        .scaleEffect(wobble.scale, anchor: .bottom)
+                        .scaleEffect(wobble.scale * (hopping == id ? 1.06 : 1), anchor: .bottom)
                         .rotationEffect(.degrees(wobble.rotation), anchor: .bottom)
                         .offset(y: -wobble.rise)
+                        // Tapping an animal plays one of its greeting clips. The
+                        // wobble itself never makes a sound.
+                        .contentShape(Rectangle())
+                        .onTapGesture { tap(id) }
+                        .accessibilityElement()
+                        .accessibilityLabel(Text(t["character.\(id).name"]))
+                        .accessibilityAddTraits(.isButton)
+                        .accessibilityHint(Text(t["home.animal.hint"]))
+                        .accessibilityAction { tap(id) }
                         .position(frame.center)
-                        .accessibilityHidden(true)
                 }
             }
 
@@ -83,6 +96,16 @@ private struct HomeStage: View {
                 .position(geometry.playCenter)
         }
         .frame(width: geometry.size.width, height: geometry.size.height, alignment: .topLeading)
+    }
+
+    private func tap(_ id: String) {
+        model.tapHomeAnimal(id)
+        guard !reduceMotion else { return }
+        withAnimation(.spring(response: 0.22, dampingFraction: 0.45)) { hopping = id }
+        Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 220_000_000)
+            if hopping == id { withAnimation(.easeOut(duration: 0.2)) { hopping = nil } }
+        }
     }
 
     private var pulse: CGFloat {

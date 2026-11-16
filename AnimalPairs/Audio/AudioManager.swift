@@ -28,8 +28,8 @@ enum SoundEffect: String, CaseIterable {
     case hint
     case tryAgain = "try_again"
     case newBest = "new_best"
-    // Animal sounds are not effects: each card flip picks between `cardFlip`
-    // and the revealed animal's own files (see `playCardReveal`).
+    // Animal clips (`<animal>_<variant>.m4a`) are not effects: see
+    // `playAnimalClip` and `AnimalClipLibrary`.
 
     /// Files tried, in order, when this effect's own file is not bundled
     /// (not generated or not approved yet). Empty means silent until approved.
@@ -108,10 +108,11 @@ enum NarrationEvent {
 
 /// Plays sound effects and narration from local files.
 ///
-/// * Card flips: each flip plays either the generic flip or one of the
-///   revealed animal's own bundled sounds (`animal_<id>[_<variant>]`), chosen
-///   by `CardRevealSoundPicker`. One card sound at a time: a new flip replaces
-///   the previous card's sound, and it is turned down under the match chime.
+/// * Animal clips: four per animal (`momo_greeting`, `momo_curious`, …).
+///   A matched pair plays one of that animal's clips, cut short at a natural
+///   pause (`matchEnd` in animal_clips.json); tapping an animal on Home plays
+///   its greeting or curious clip in full. One clip at a time: a new clip
+///   replaces the previous one. Home taps have a short cooldown.
 ///
 /// * Sound effects: one preloaded player per effect; the same sound restarts
 ///   instead of layering, rapid repeats are dropped and at most three effects
@@ -156,24 +157,29 @@ final class AudioManager {
     private var pending: [Task<Void, Never>] = []
     private let clock: () -> TimeInterval
 
-    /// Mix level of an animal's card sound (the generic flip uses `cardFlip`'s).
-    static let animalMixVolume: Float = 0.75
-    /// Card sound level while the match chime plays.
-    static let cardSoundUnderMatch: Float = 0.4
-    /// Longer files are not "short sounds" and are left out.
-    static let maxAnimalSoundDuration: TimeInterval = 2.5
-    /// Policy channel shared by every card-flip sound, generic or animal.
-    static let cardRevealChannel = "card_reveal"
-    private static let animalExtensions = ["wav", "caf", "m4a", "mp3"]
+    /// Mix level of the animal clips.
+    static let animalClipVolume: Float = 0.85
+    /// Effects that share the moment with an animal clip play at this share.
+    static let levelUnderAnimalClip: Float = 0.6
+    /// Matched-pair clips stop here when the clip index has no `matchEnd`.
+    static let defaultMatchLength: TimeInterval = 2.0
+    /// Fade at the end of a shortened clip.
+    static let clipFadeOut: TimeInterval = 0.25
+    /// Taps on Home animals sooner than this after the last one are ignored.
+    static let homeTapCooldown: TimeInterval = 0.8
+    private static let clipExtensions = ["m4a", "wav", "caf"]
 
     private let bundle: Bundle
-    private var animalPlayers: [String: AVAudioPlayer] = [:]
-    private(set) var animalLibrary = AnimalSoundLibrary()
-    private var revealPicker = CardRevealSoundPicker()
-    private var revealRandom: SeededGenerator
-    private weak var cardSoundPlayer: AVAudioPlayer?
-    /// The last card sound that actually started, for tests and debugging.
-    private(set) var lastCardReveal: (character: CharacterID?, sound: CardRevealSound)?
+    private var clipPlayers: [String: AVAudioPlayer] = [:]
+    private var matchEnds: [String: TimeInterval] = [:]
+    private(set) var clipLibrary = AnimalClipLibrary()
+    private var clipPicker = AnimalClipPicker()
+    private var clipRandom: SeededGenerator
+    private var homeTaps = Cooldown(interval: homeTapCooldown)
+    private var clipPlayer: AVAudioPlayer?
+    private var clipStopTask: Task<Void, Never>?
+    /// The last animal clip that started, and for which moment (tests, debugging).
+    private(set) var lastAnimalClip: (clip: AnimalClip, moment: AnimalClipMoment)?
 
     init(isEnabled: Bool, voiceEnabled: Bool, bundle: Bundle = .main,
          clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
@@ -182,7 +188,7 @@ final class AudioManager {
         self.voiceEnabled = voiceEnabled
         self.clock = clock
         self.bundle = bundle
-        revealRandom = SeededGenerator(seed: randomSeed)
+        clipRandom = SeededGenerator(seed: randomSeed)
         try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
@@ -214,7 +220,8 @@ final class AudioManager {
 
     // MARK: Effects
 
-    func play(_ effect: SoundEffect) {
+    /// Plays an effect; `level` scales it (e.g. under an animal clip).
+    func play(_ effect: SoundEffect, level: Float = 1) {
         guard isEnabled, let player = players[effect] else { return }
         let rule = SoundRule(minInterval: effect.minInterval, priority: effect.priority,
                              duration: max(player.duration, 0.05))
@@ -226,7 +233,7 @@ final class AudioManager {
         case .play(let stopping):
             stopping.forEach(stopVoice)
         }
-        player.volume = Self.masterVolume * effect.mixVolume * (isSpeaking ? Self.duckingFactor : 1)
+        player.volume = Self.masterVolume * effect.mixVolume * level * (isSpeaking ? Self.duckingFactor : 1)
         player.currentTime = 0
         player.play()
     }
@@ -236,93 +243,122 @@ final class AudioManager {
         schedule(after: delay) { [weak self] in self?.play(effect) }
     }
 
-    // MARK: Card sounds
+    // MARK: Animal clips
 
-    /// Finds each animal's short sounds among the bundled files. Call once the
-    /// characters are known; files that fail to load, are silent or are longer
-    /// than `maxAnimalSoundDuration` are left out (that animal then uses the
-    /// generic flip).
-    func loadAnimalSounds(for characters: [CharacterID]) {
-        animalPlayers.values.forEach { $0.stop() }
-        animalPlayers = [:]
+    /// Finds each animal's clips among the bundled files (`<animal>_<variant>`)
+    /// and their matched-pair lengths from `animal_clips.json`. Files that fail
+    /// to load or are silent are left out; that animal then plays no clip.
+    func loadAnimalClips(for characters: [CharacterID]) {
+        stopAnimalClip()
+        clipPlayers = [:]
         var urls: [String: URL] = [:]
-        for ext in Self.animalExtensions {
-            for path in bundle.paths(forResourcesOfType: ext, inDirectory: nil) {
+        // Xcode copies Sounds/Animals/ flat into the bundle; the subfolder is
+        // also searched in case a build keeps the folder.
+        for ext in Self.clipExtensions {
+            for path in bundle.paths(forResourcesOfType: ext, inDirectory: nil)
+                + bundle.paths(forResourcesOfType: ext, inDirectory: "Animals") {
                 let url = URL(fileURLWithPath: path)
                 let name = url.deletingPathExtension().lastPathComponent
                 if urls[name] == nil { urls[name] = url }
             }
         }
-        let found = AnimalSoundLibrary(resourceNames: urls.keys, characters: characters)
-        var usable: [CharacterID: [String]] = [:]
-        for (character, names) in found.sounds {
-            for name in names {
-                guard let url = urls[name], let player = try? AVAudioPlayer(contentsOf: url),
-                      player.duration > 0.05, player.duration <= Self.maxAnimalSoundDuration else { continue }
-                player.prepareToPlay()
-                animalPlayers[name] = player
-                usable[character, default: []].append(name)
-            }
+        var usable: [AnimalClip] = []
+        for clip in AnimalClipLibrary(resourceNames: urls.keys, characters: characters).clips.values.joined() {
+            guard let url = urls[clip.name], let player = try? AVAudioPlayer(contentsOf: url),
+                  player.duration > 0.3 else { continue }
+            player.prepareToPlay()
+            clipPlayers[clip.name] = player
+            usable.append(clip)
         }
-        animalLibrary = AnimalSoundLibrary(sounds: usable)
-        revealPicker.reset()
+        clipLibrary = AnimalClipLibrary(clips: usable)
+        matchEnds = Self.matchEnds(in: bundle)
+        clipPicker.reset()
+        homeTaps.reset()
     }
 
-    /// Plays the sound for a card turning face up: the generic flip or one of
-    /// the revealed animal's own sounds, picked at random. Never another
-    /// animal's sound. Returns what started, or nil when sound is off or the
-    /// flip came too quickly after the last one.
+    /// A matched pair: one of the matched animal's clips, chosen at random and
+    /// stopped with a short fade at its natural pause (about 1–2 s). Returns the
+    /// clip, or nil when sound is off or the animal has no clip.
     @discardableResult
-    func playCardReveal(of character: CharacterID?) -> CardRevealSound? {
-        guard isEnabled else { return nil }
-        var choice = revealPicker.pick(for: character, in: animalLibrary, using: &revealRandom)
-        var player: AVAudioPlayer?
-        var mix = SoundEffect.cardFlip.mixVolume
-        if case .animal(let name) = choice, let own = animalPlayers[name] {
-            player = own
-            mix = Self.animalMixVolume
-        } else {
-            choice = .generic
-            player = players[.cardFlip]
+    func playMatchClip(for character: CharacterID?) -> AnimalClip? {
+        guard isEnabled, let character,
+              let clip = clipPicker.pick(for: character, moment: .matched, in: clipLibrary, using: &clipRandom)
+        else { return nil }
+        start(clip, moment: .matched, stopAfter: matchEnds[clip.name] ?? Self.defaultMatchLength)
+        return clip
+    }
+
+    /// A tap on a Home animal: its greeting or curious clip, played in full.
+    /// Taps within `homeTapCooldown` of the last accepted one are ignored.
+    @discardableResult
+    func playHomeClip(for character: CharacterID) -> AnimalClip? {
+        guard isEnabled, homeTaps.accept(at: clock()),
+              let clip = clipPicker.pick(for: character, moment: .homeTap, in: clipLibrary, using: &clipRandom)
+        else { return nil }
+        start(clip, moment: .homeTap, stopAfter: nil)
+        return clip
+    }
+
+    func hasAnimalClips(for character: CharacterID?) -> Bool {
+        character.map { !clipLibrary.clips(for: $0, moment: .matched).isEmpty } ?? false
+    }
+
+    var isAnimalClipPlaying: Bool { clipPlayer?.isPlaying == true }
+
+    /// Stops the current clip, at once or with a short fade.
+    func stopAnimalClip(fadeDuration: TimeInterval = 0) {
+        clipStopTask?.cancel()
+        clipStopTask = nil
+        guard let player = clipPlayer else { return }
+        clipPlayer = nil
+        guard fadeDuration > 0, player.isPlaying else {
+            player.stop()
+            return
         }
-        guard let player else { return nil }
-        let rule = SoundRule(minInterval: SoundEffect.cardFlip.minInterval, priority: SoundEffect.cardFlip.priority,
-                             duration: max(player.duration, 0.05))
-        switch policy.request(Self.cardRevealChannel, rule: rule, at: clock()) {
-        case .skip:
-            return nil
-        case .restart:
-            break
-        case .play(let stopping):
-            stopping.forEach(stopVoice)
+        player.setVolume(0, fadeDuration: fadeDuration)
+        Task { @MainActor [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(fadeDuration * 1_000_000_000))
+            // Leave it alone if it was restarted as the new clip meanwhile.
+            if self?.clipPlayer !== player { player.stop() }
         }
-        stopCardSound()
-        player.volume = Self.masterVolume * mix * (isSpeaking ? Self.duckingFactor : 1)
+    }
+
+    private func start(_ clip: AnimalClip, moment: AnimalClipMoment, stopAfter: TimeInterval?) {
+        guard let player = clipPlayers[clip.name] else { return }
+        stopAllClips()                     // one clip at a time, fading ones included
+        player.volume = Self.masterVolume * Self.animalClipVolume * (isSpeaking ? Self.duckingFactor : 1)
         player.currentTime = 0
         player.play()
-        cardSoundPlayer = player
-        lastCardReveal = (character, choice)
-        return choice
+        clipPlayer = player
+        lastAnimalClip = (clip, moment)
+        if let stopAfter, stopAfter < player.duration {
+            let fade = min(Self.clipFadeOut, stopAfter / 2)
+            clipStopTask = Task { @MainActor [weak self, weak player] in
+                try? await Task.sleep(nanoseconds: UInt64((stopAfter - fade) * 1_000_000_000))
+                guard !Task.isCancelled, let self, let player, self.clipPlayer === player else { return }
+                self.stopAnimalClip(fadeDuration: fade)
+            }
+        }
     }
 
-    /// Seconds until the current card sound ends (0 when none is playing).
-    var cardSoundRemaining: TimeInterval {
-        guard let player = cardSoundPlayer, player.isPlaying else { return 0 }
-        return max(0, player.duration - player.currentTime)
+    /// Stops every clip player, including one still fading out.
+    private func stopAllClips() {
+        clipStopTask?.cancel()
+        clipStopTask = nil
+        clipPlayer = nil
+        for player in clipPlayers.values where player.isPlaying { player.stop() }
     }
 
-    var isCardSoundPlaying: Bool { cardSoundPlayer?.isPlaying == true }
-
-    /// Turns the card sound down so the match chime stays clear.
-    func duckCardSound() {
-        guard let player = cardSoundPlayer, player.isPlaying else { return }
-        player.setVolume(player.volume * Self.cardSoundUnderMatch, fadeDuration: 0.12)
-    }
-
-    func stopCardSound() {
-        cardSoundPlayer?.stop()
-        cardSoundPlayer?.currentTime = 0
-        cardSoundPlayer = nil
+    private static func matchEnds(in bundle: Bundle) -> [String: TimeInterval] {
+        struct Index: Decodable {
+            struct Clip: Decodable { let matchEnd: Double }
+            let clips: [String: Clip]
+        }
+        guard let url = bundle.url(forResource: "animal_clips", withExtension: "json")
+                ?? bundle.url(forResource: "animal_clips", withExtension: "json", subdirectory: "Animals"),
+              let data = try? Data(contentsOf: url),
+              let index = try? JSONDecoder().decode(Index.self, from: data) else { return [:] }
+        return index.clips.mapValues(\.matchEnd)
     }
 
     // MARK: Voice
@@ -369,15 +405,12 @@ final class AudioManager {
             player.stop()
             player.currentTime = 0
         }
-        for player in animalPlayers.values { player.stop() }
-        cardSoundPlayer = nil
+        stopAllClips()
     }
 
     /// Stops the effect (or the card sound) a policy decision named.
     private func stopVoice(_ name: String) {
-        if name == Self.cardRevealChannel {
-            stopCardSound()
-        } else if let effect = SoundEffect(rawValue: name), let player = players[effect] {
+        if let effect = SoundEffect(rawValue: name), let player = players[effect] {
             player.stop()
             player.currentTime = 0
         }

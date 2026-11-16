@@ -1,0 +1,197 @@
+{
+  "about": "Animal clips bundled with the app (generated offline). matchEnd: where the shorter matched-pair version stops, at a natural pause where possible.",
+  "clips": {
+    "clover_calm": {
+      "character": "clover",
+      "variant": "calm",
+      "duration": 3.73,
+      "matchEnd": 1.06
+    },
+    "clover_curious": {
+      "character": "clover",
+      "variant": "curious",
+      "duration": 3.54,
+      "matchEnd": 1.62
+    },
+    "clover_excited": {
+      "character": "clover",
+      "variant": "excited",
+      "duration": 4.61,
+      "matchEnd": 1.28
+    },
+    "clover_greeting": {
+      "character": "clover",
+      "variant": "greeting",
+      "duration": 3.01,
+      "matchEnd": 1.72
+    },
+    "iris_calm": {
+      "character": "iris",
+      "variant": "calm",
+      "duration": 5.0,
+      "matchEnd": 2.0
+    },
+    "iris_curious": {
+      "character": "iris",
+      "variant": "curious",
+      "duration": 4.48,
+      "matchEnd": 1.78
+    },
+    "iris_excited": {
+      "character": "iris",
+      "variant": "excited",
+      "duration": 2.79,
+      "matchEnd": 1.68
+    },
+    "iris_greeting": {
+      "character": "iris",
+      "variant": "greeting",
+      "duration": 3.37,
+      "matchEnd": 2.04
+    },
+    "maple_calm": {
+      "character": "maple",
+      "variant": "calm",
+      "duration": 4.54,
+      "matchEnd": 1.9
+    },
+    "maple_curious": {
+      "character": "maple",
+      "variant": "curious",
+      "duration": 3.93,
+      "matchEnd": 1.44
+    },
+    "maple_excited": {
+      "character": "maple",
+      "variant": "excited",
+      "duration": 3.83,
+      "matchEnd": 2.06
+    },
+    "maple_greeting": {
+      "character": "maple",
+      "variant": "greeting",
+      "duration": 3.56,
+      "matchEnd": 1.5
+    },
+    "mochi_calm": {
+      "character": "mochi",
+      "variant": "calm",
+      "duration": 3.75,
+      "matchEnd": 1.44
+    },
+    "mochi_curious": {
+      "character": "mochi",
+      "variant": "curious",
+      "duration": 3.74,
+      "matchEnd": 1.4
+    },
+    "mochi_excited": {
+      "character": "mochi",
+      "variant": "excited",
+      "duration": 1.21,
+      "matchEnd": 1.21
+    },
+    "mochi_greeting": {
+      "character": "mochi",
+      "variant": "greeting",
+      "duration": 4.01,
+      "matchEnd": 1.82
+    },
+    "momo_calm": {
+      "character": "momo",
+      "variant": "calm",
+      "duration": 4.61,
+      "matchEnd": 1.92
+    },
+    "momo_curious": {
+      "character": "momo",
+      "variant": "curious",
+      "duration": 3.97,
+      "matchEnd": 2.0
+    },
+    "momo_excited": {
+      "character": "momo",
+      "variant": "excited",
+      "duration": 4.33,
+      "matchEnd": 1.52
+    },
+    "momo_greeting": {
+      "character": "momo",
+      "variant": "greeting",
+      "duration": 4.46,
+      "matchEnd": 1.46
+    },
+    "nori_calm": {
+      "character": "nori",
+      "variant": "calm",
+      "duration": 2.54,
+      "matchEnd": 1.3
+    },
+    "nori_curious": {
+      "character": "nori",
+      "variant": "curious",
+      "duration": 3.46,
+      "matchEnd": 1.82
+    },
+    "nori_excited": {
+      "character": "nori",
+      "variant": "excited",
+      "duration": 3.98,
+      "matchEnd": 1.88
+    },
+    "nori_greeting": {
+      "character": "nori",
+      "variant": "greeting",
+      "duration": 3.06,
+      "matchEnd": 1.6
+    },
+    "sprout_calm": {
+      "character": "sprout",
+      "variant": "calm",
+      "duration": 3.57,
+      "matchEnd": 1.94
+    },
+    "sprout_curious": {
+      "character": "sprout",
+      "variant": "curious",
+      "duration": 2.69,
+      "matchEnd": 1.62
+    },
+    "sprout_excited": {
+      "character": "sprout",
+      "variant": "excited",
+      "duration": 4.16,
+      "matchEnd": 1.06
+    },
+    "sprout_greeting": {
+      "character": "sprout",
+      "variant": "greeting",
+      "duration": 3.5,
+      "matchEnd": 1.78
+    },
+    "sunny_calm": {
+      "character": "sunny",
+      "variant": "calm",
+      "duration": 4.81,
+      "matchEnd": 2.0
+    },
+    "sunny_curious": {
+      "character": "sunny",
+      "variant": "curious",
+      "duration": 4.56,
+      "matchEnd": 1.82
+    },
+    "sunny_excited": {
+      "character": "sunny",
+      "variant": "excited",
+      "duration": 4.83,
+      "matchEnd": 1.22
+    },
+    "sunny_greeting": {
+      "character": "sunny",
+      "variant": "greeting",
+      "duration": 3.56,
+      "matchEnd": 1.64
+    }
+  }
+}

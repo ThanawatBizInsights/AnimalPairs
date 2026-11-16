@@ -85,7 +85,13 @@ final class AppModel {
                                      installedAssets: [])
             contentError = String(describing: error)
         }
-        audio.loadAnimalSounds(for: catalog.manifest.characters.map(\.id))
+        audio.loadAnimalClips(for: catalog.manifest.characters.map(\.id))
+    }
+
+    /// A Home animal was tapped: one of its greeting clips (with a short
+    /// cooldown, one clip at a time, silent when sound is off).
+    func tapHomeAnimal(_ id: String) {
+        audio.playHomeClip(for: CharacterID(rawValue: id))
     }
 
     var policy: ContentAccessPolicy { ContentAccessPolicy(level: purchases.accessLevel) }
