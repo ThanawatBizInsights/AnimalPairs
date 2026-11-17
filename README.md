@@ -386,8 +386,22 @@ screen, because Home, the board choice and gameplay now share one loop.
   app is active again; stopped for interruptions (calls, alarms) and resumed
   when they end; held after headphones are unplugged until the next screen or
   the app becomes active; silent while another app is playing audio
-  (`secondaryAudioShouldBeSilencedHint`) and never stops that audio; restarted
-  cleanly after an audio engine configuration change.
+  (`secondaryAudioShouldBeSilencedHint`) and never stops that audio.
+* **Audio session** (`AudioSessionController`): the category is set once and
+  the session is activated on a private background queue — at launch, on
+  returning to the foreground and after an interruption only. Nothing
+  activates it on the main thread: the music engine starts only once the
+  session is active and then keeps running across screens, and sound effects
+  are not started before it is active (`AVAudioPlayer.play()` and
+  `AVAudioEngine.start()` would otherwise activate it implicitly on the main
+  thread, which iOS logs as “This method can lead to UI unresponsiveness…”).
+* **Engine configuration changes**: only this engine's notifications are
+  observed; a change restarts the engine and continues the current track on
+  the same deck, at most three times in ten seconds, so it can never loop.
+  (Earlier, every change — from any engine in the process — rebuilt the music
+  and restarted the engine, which activated the session again on the main
+  thread and could repeat endlessly, logging the warning and keeping the
+  music at the start of its fade-in.)
 
 The masters (`Design/Audio/Music/masters/`) and raw downloads
 (`Design/Audio/Music/raw/`) are kept. `python3 Tools/audio/generate_elevenlabs_music.py

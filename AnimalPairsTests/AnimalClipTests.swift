@@ -11,7 +11,8 @@ final class AnimalClipAppTests: XCTestCase {
 
     private func makeAudio(clock: TestClock, seed: UInt64 = 7) -> AudioManager {
         let audio = AudioManager(isEnabled: true, voiceEnabled: false, bundle: .main,
-                                 clock: { clock.now }, randomSeed: seed)
+                                 clock: { clock.now }, randomSeed: seed,
+                                 sessionController: AppTestSupport.activeSession())
         audio.loadAnimalClips(for: AnimalClipLibraryNames.animals)
         return audio
     }

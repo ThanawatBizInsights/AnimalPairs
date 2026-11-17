@@ -51,7 +51,13 @@ public final class AVAudioSession {
         public static let mixWithOthers = CategoryOptions(rawValue: 1)
     }
     public static func sharedInstance() -> AVAudioSession { AVAudioSession() }
-    public func setCategory(_ c: Category, mode: Mode, options: CategoryOptions) throws {}
+    public func setCategory(_ c: Category, mode: Mode, options: CategoryOptions) throws { sessionCategoryCalls += 1 }
+    /// Counts activations and how many came from the main thread (iOS logs
+    /// "This method can lead to UI unresponsiveness…" for those).
+    public func setActive(_ active: Bool) throws {
+        sessionActivations += 1
+        if Thread.isMainThread { sessionMainThreadActivations += 1 }
+    }
 }
 
 // MARK: Engine (MusicPlayer)
@@ -158,3 +164,7 @@ public final class AVAudioEngine {
 public typealias MusicPlayer = OpaquePointer
 public typealias MusicTrack = OpaquePointer
 public typealias MusicSequence = OpaquePointer
+
+public var sessionActivations = 0
+public var sessionMainThreadActivations = 0
+public var sessionCategoryCalls = 0

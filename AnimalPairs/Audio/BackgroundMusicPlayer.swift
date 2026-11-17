@@ -80,14 +80,32 @@ final class BackgroundMusicPlayer {
     private(set) var otherAudioPlaying = false
     private(set) var heldAfterRouteLoss = false
 
+    /// The shared session: the engine only starts once it is active, so
+    /// starting never activates the session implicitly on the main thread.
+    let session: AudioSessionController
+    /// Recent restarts after engine configuration changes (see
+    /// `engineConfigurationChanged`); bounded so a change can never loop.
+    private var configurationRestarts: [TimeInterval] = []
+    static let maxConfigurationRestarts = 3
+    static let configurationRestartWindow: TimeInterval = 10
+    /// How often the engine was started (tests and diagnostics).
+    private(set) var engineStarts = 0
+
+    /// `session` defaults to nil and is created inside this @MainActor body
+    /// (a main-actor initializer cannot run in a default argument).
     init(enabled: Bool, bundle: Bundle = .main,
-         clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }) {
+         clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
+         session: AudioSessionController? = nil) {
         self.enabled = enabled
         self.bundle = bundle
         self.clock = clock
+        self.session = session ?? AudioSessionController()
         index = Self.loadIndex(bundle)
         for deck in decks { engine.attach(deck.node) }
     }
+
+    /// The engine whose configuration-change notifications concern us.
+    var engineForNotifications: AnyObject { engine }
 
     // MARK: State
 
@@ -123,7 +141,7 @@ final class BackgroundMusicPlayer {
     // MARK: Inputs
 
     func setScene(_ newScene: MusicScene) {
-        if newScene != scene { heldAfterRouteLoss = false }
+        if newScene != scene { heldAfterRouteLoss = false; configurationRestarts = [] }
         scene = newScene
         update(fade: Self.fadeOut)
     }
@@ -139,24 +157,33 @@ final class BackgroundMusicPlayer {
         appActive = false
         pendingStart = nil
         engine.pause()           // keeps each deck's position; nothing renders in the background
+        session.markInactive()   // the system deactivates it while the app is suspended
     }
 
     func appDidBecomeActive() {
         appActive = true
         heldAfterRouteLoss = false
-        if decks.contains(where: { $0.track != nil && $0.isScheduled }) { startEngineIfNeeded() }
-        update(fade: Self.fadeOut)
+        configurationRestarts = []
+        // Reactivate the session off the main thread, then resume the paused
+        // deck where it was (same player) or start the scene's track.
+        session.activate { [weak self] in
+            guard let self, self.appActive else { return }
+            if self.decks.contains(where: { $0.track != nil && $0.isScheduled }) { self.startEngineIfNeeded() }
+            self.update(fade: Self.fadeOut)
+        }
     }
 
     func interruptionBegan() {
         interrupted = true
         pendingStart = nil
-        stopAllDecks()           // the system has already stopped the engine
+        session.markInactive()   // the system deactivated it
+        stopAllDecks()           // and has already stopped the engine
     }
 
     func interruptionEnded() {
         interrupted = false
-        update(fade: Self.fadeOut)
+        // Reactivate (off the main thread), then resume.
+        session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
     }
 
     /// Headphones (or another output) were removed: go quiet until the next
@@ -172,10 +199,47 @@ final class BackgroundMusicPlayer {
         update(fade: Self.fadeOut)
     }
 
-    /// The engine's configuration changed (output route etc.); the engine has
-    /// stopped, so restart the wanted track cleanly.
+    /// Our engine's configuration changed (e.g. the output route) and it
+    /// stopped. Restart it and continue the current track on the same deck —
+    /// no new player, no new session activation. Ignored when the engine is
+    /// still running; at most `maxConfigurationRestarts` within
+    /// `configurationRestartWindow`, so a change that keeps recurring can
+    /// never turn into a restart loop (the next screen or foreground retries).
     func engineConfigurationChanged() {
-        stopAllDecks()
+        guard !engine.isRunning else { return }
+        let now = clock()
+        configurationRestarts = configurationRestarts.filter { now - $0 < Self.configurationRestartWindow }
+        guard configurationRestarts.count < Self.maxConfigurationRestarts else { return }
+        configurationRestarts.append(now)
+        for deck in decks where deck !== front { reset(deck) }
+        if !restartFrontIfStalled() { update(fade: Self.fadeOut) }
+    }
+
+    /// If the current track's deck has stopped (engine stopped by a
+    /// configuration change or interruption), reschedule its decoded loop on
+    /// the same deck and play it again. Returns false when there is no
+    /// decoded current track to restart.
+    @discardableResult
+    private func restartFrontIfStalled() -> Bool {
+        guard let front, let track = front.track, front.isScheduled else { return false }
+        if engine.isRunning && front.node.isPlaying { return true }
+        guard let buffer = buffers[track] else { return false }
+        front.node.stop()
+        front.node.scheduleBuffer(buffer, at: nil, options: .loops)
+        guard startEngineIfNeeded() else { return true }     // continues in sessionDidActivate
+        front.node.play()
+        ensureTicking()
+        return true
+    }
+
+    /// The session became active (launch, foreground, end of an
+    /// interruption): start whatever has been waiting for it.
+    func sessionDidActivate() {
+        if let front, front.track == wantedTrack, restartFrontIfStalled() {
+            front.ramp = front.ramp.retargeted(to: 1, at: clock(), duration: Self.fadeIn)
+            ensureTicking()
+            return
+        }
         update(fade: Self.fadeOut)
     }
 
@@ -187,6 +251,9 @@ final class BackgroundMusicPlayer {
         let wanted = wantedTrack
         pendingStart = nil
         if let front, front.track == wanted, wanted != nil {
+            // Same track: keep the same deck (never a second player); restart
+            // it in place only if the engine stopped underneath it.
+            restartFrontIfStalled()
             front.ramp = front.ramp.retargeted(to: 1, at: now, duration: Self.fadeIn)   // e.g. back from a dip-out
             ensureTicking()
             return
@@ -253,12 +320,21 @@ final class BackgroundMusicPlayer {
         buffers[track] = buffer
     }
 
+    /// Starts the engine once the session is active. While it is not, asks
+    /// the session controller to activate (off the main thread) and continues
+    /// in `sessionDidActivate`. The engine then keeps running while music may
+    /// play, so navigation and track changes never restart it.
     @discardableResult
     private func startEngineIfNeeded() -> Bool {
         guard appActive, !interrupted else { return false }
         if engine.isRunning { return true }
+        guard session.allowsPlayback else {
+            session.activate { [weak self] in self?.sessionDidActivate() }
+            return false
+        }
         do {
             try engine.start()
+            engineStarts += 1
             return true
         } catch {
             return false
@@ -294,7 +370,9 @@ final class BackgroundMusicPlayer {
             // it may still be waiting (silent) for its track to be decoded.
             if deck !== front && deck.ramp.to == 0 && deck.ramp.isFinished(at: now) { reset(deck) }
         }
-        if decks.allSatisfy({ $0.track == nil }) && pendingStart == nil && engine.isRunning {
+        // Pause only when music can't be heard at all (switched off, another
+        // app playing…), not between tracks or screens.
+        if !isAudible && decks.allSatisfy({ $0.track == nil }) && pendingStart == nil && engine.isRunning {
             engine.pause()
         }
     }

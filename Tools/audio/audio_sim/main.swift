@@ -51,7 +51,25 @@ final class Clock { var now = 100.0 }
     let policy = ContentAccessPolicy(level: .fullGame)
 
     let clock = Clock()
-    let audio = AudioManager(isEnabled: true, voiceEnabled: false, bundle: bundle, clock: { clock.now }, randomSeed: 11)
+    // Session activation runs on a real background thread (as on iOS) but the
+    // simulation waits for it, so results are deterministic.
+    let threadRunner: AudioSessionController.Runner = { work, done in
+        var ok = false
+        let finished = DispatchSemaphore(value: 0)
+        let thread = Thread { ok = work(); finished.signal() }
+        thread.start()
+        finished.wait()
+        done(ok)
+    }
+    let sessionController = AudioSessionController(runner: threadRunner)
+    let audio = AudioManager(isEnabled: true, voiceEnabled: false, bundle: bundle, clock: { clock.now }, randomSeed: 11,
+                             sessionController: sessionController)
+    check(sessionActivations == 0, "nothing activates the session while the app is being set up")
+    // Launch: AppModel.start() and the first `.active` scene phase.
+    audio.start()
+    audio.appDidBecomeActive()
+    check(sessionActivations == 1, "one activation at launch, got \(sessionActivations)")
+    check(sessionCategoryCalls == 1, "category set once, got \(sessionCategoryCalls)")
     audio.loadAnimalClips(for: animals)
     let clipNames = Set(audio.clipLibrary.clips.values.joined().map(\.name))
     let withClips = animals.filter { audio.hasAnimalClips(for: $0) }
@@ -119,7 +137,9 @@ final class Clock { var now = 100.0 }
         }
     }
 
+    let activationsBeforeRounds = sessionActivations
     playRounds(120, soundOn: true)
+    check(sessionActivations == activationsBeforeRounds, "card flips / matches activated the session")
     print("sound on: \(flips) flips, \(mismatches) mismatches, \(matches) matches (\(silentMatches) for animals without clips)")
     for animal in withClips {
         let h = heard[animal] ?? [:]
@@ -279,6 +299,50 @@ final class Clock { var now = 100.0 }
           "settles on exactly one track: \(audibleTracks())")
     check(allPlayerNodes.count == 2, "still only two decks after the stress run")
     print("music: \(Set(decodedFiles).sorted().joined(separator: ", ")) decoded; navigation, ducking, switches, lifecycle checked")
+
+    // MARK: Session activation and engine restarts
+    audio.isEnabled = true
+    audio.musicEnabled = true
+    music.setScene(.menus); advance(3)
+    let mainEngine = music.engineForNotifications as! AVAudioEngine
+    let startsBefore = music.engineStarts
+    let activations = sessionActivations
+    let mainThreadBefore = sessionMainThreadActivations
+    for scene in [MusicScene.menus, .game, .menus, .game, .results, .menus, .parents, .menus, .game] {
+        music.setScene(scene); advance(1)
+        for _ in 0..<20 { clock.now += 0.4; audio.play(.cardFlip) }
+    }
+    check(sessionActivations == activations, "navigation or flips activated the session")
+    check(music.engineStarts == startsBefore, "navigation restarted the engine \(music.engineStarts - startsBefore) times")
+    // Background and back, five times: one activation each, same player resumes.
+    music.setScene(.game); advance(3)
+    let gameNode = allPlayerNodes.first { $0.isPlaying && $0.volume > 0 }!
+    let gamePlays = gameNode.playCount
+    for _ in 0..<5 {
+        audio.appDidEnterBackground()
+        audio.appDidBecomeActive()
+        advance(1)
+    }
+    check(sessionActivations == activations + 5, "one activation per return from background: \(sessionActivations - activations)")
+    check(gameNode.playCount == gamePlays && audibleTracks() == [.playground], "music resumed on the same player")
+    // An interruption: one reactivation when it ends.
+    music.interruptionBegan()
+    music.interruptionEnded(); advance(2)
+    check(sessionActivations == activations + 6, "one activation after an interruption")
+    check(audibleTracks() == [.playground], "music back after the interruption")
+    // A storm of engine configuration changes: bounded restarts, no new players.
+    for _ in 0..<20 { mainEngine.stop(); music.engineConfigurationChanged(); advance(0.05) }
+    check(music.engineStarts <= startsBefore + 5 + 1 + BackgroundMusicPlayer.maxConfigurationRestarts,
+          "configuration changes restarted the engine too often: \(music.engineStarts - startsBefore)")
+    check(allPlayerNodes.count == 2, "still two music decks")
+    check(sessionActivations == activations + 6, "configuration changes activated the session")
+    music.setScene(.menus); advance(2)
+    check(mainEngine.isRunning && audibleTracks() == [.playground], "music plays again after the storm")
+    check(sessionMainThreadActivations == 0, "\(sessionMainThreadActivations) activations ran on the main thread")
+    print("session: 1 activation at launch, 0 during play and navigation; this section: "
+          + "\(sessionActivations - activations) (5 foreground returns + 1 interruption); "
+          + "main-thread activations overall: \(sessionMainThreadActivations - mainThreadBefore + 0); "
+          + "engine starts this section: \(music.engineStarts - startsBefore)")
 
     print(failures == 0 ? "SIMULATION OK" : "SIMULATION FAILED: \(failures)")
     return failures == 0 ? 0 : 1

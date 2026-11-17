@@ -16,7 +16,7 @@ sed -e '/^@Observable$/d' -e 's/@ObservationIgnored //' -e '/^import Observation
   "$ROOT/AnimalPairs/Game/GameSession.swift" > "$OUT/GameSession.swift"
 M=$(dirname "$(find "$ROOT/Packages/AnimalPairsKit/.build" -name AnimalPairsCore.swiftmodule -path '*Modules*' | head -1)")
 swiftc -swift-version 5 -I "$OUT" -L "$OUT" -lAVFoundation -lSwiftUI -I "$M" \
-  "$ROOT/AnimalPairs/Audio/AudioManager.swift" "$ROOT/AnimalPairs/Audio/BackgroundMusicPlayer.swift" "$OUT/GameSession.swift" \
+  "$ROOT/AnimalPairs/Audio/AudioManager.swift" "$ROOT/AnimalPairs/Audio/BackgroundMusicPlayer.swift" "$ROOT/AnimalPairs/Audio/AudioSessionController.swift" "$OUT/GameSession.swift" \
   "$ROOT/AnimalPairs/Localization/Localizer.swift" "$HERE/main.swift" \
   $(find "$(dirname "$M")" -path '*AnimalPairsCore.build/*.o') -o "$OUT/sim"
 LD_LIBRARY_PATH="$OUT" "$OUT/sim" "$ROOT"

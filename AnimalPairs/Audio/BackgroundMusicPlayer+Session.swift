@@ -1,7 +1,8 @@
 import AVFoundation
 import Foundation
 
-/// Connects `BackgroundMusicPlayer` to the system: audio interruptions (calls, alarms,
+/// Connects `BackgroundMusicPlayer` to the system (observers only; this file
+/// never configures or activates the session — see AudioSessionController): audio interruptions (calls, alarms,
 /// Siri), headphones being unplugged, other apps starting or stopping audio,
 /// and engine configuration changes. Observers run on the main queue.
 extension BackgroundMusicPlayer {
@@ -36,7 +37,9 @@ extension BackgroundMusicPlayer {
                 let type = raw.flatMap(AVAudioSession.SilenceSecondaryAudioHintType.init(rawValue:))
                 MainActor.assumeIsolated { self?.otherAudioChanged(playing: type == .begin) }
             },
-            center.addObserver(forName: .AVAudioEngineConfigurationChange, object: nil,
+            // Only OUR engine: with `object: nil` a change in any audio engine
+            // in the process restarted the music (and its session activation).
+            center.addObserver(forName: .AVAudioEngineConfigurationChange, object: engineForNotifications,
                                queue: .main) { [weak self] _ in
                 MainActor.assumeIsolated { self?.engineConfigurationChanged() }
             },

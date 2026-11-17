@@ -27,7 +27,16 @@ enum AppTestSupport {
                                                  privacyPolicyURL: nil, supportURL: nil),
                  history: history ?? SwiftDataCompletionStore.inMemory(),
                  snapshots: RoundSnapshotStore(directory: snapshotDirectory ?? temporaryDirectory()),
-                 playsOpeningVideo: playsOpeningVideo)
+                 playsOpeningVideo: playsOpeningVideo,
+                 audioSession: activeSession())
+    }
+
+    /// An audio session controller that activates synchronously, so tests can
+    /// play sounds immediately (the app activates off the main thread).
+    static func activeSession() -> AudioSessionController {
+        let session = AudioSessionController(runner: AudioSessionController.immediateRunner)
+        session.activate()
+        return session
     }
 
     static func summary(_ i: Int, id: UUID = UUID()) -> RoundSummary {

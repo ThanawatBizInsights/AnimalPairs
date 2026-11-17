@@ -58,7 +58,8 @@ final class AppModel {
          historyWarning: String? = nil,
          snapshots: RoundSnapshotStore? = nil,
          contentBundle: Bundle = .main,
-         playsOpeningVideo: Bool = true) {
+         playsOpeningVideo: Bool = true,
+         audioSession: AudioSessionController? = nil) {
         let settings = settings ?? SettingsStore()
         self.settings = settings
         self.configuration = configuration
@@ -72,7 +73,7 @@ final class AppModel {
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
         audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled,
-                             musicEnabled: settings.musicEnabled)
+                             musicEnabled: settings.musicEnabled, sessionController: audioSession)
 
         if let history {
             self.history = history
@@ -104,6 +105,7 @@ final class AppModel {
         refreshResumableRound()
         if musicObservers.isEmpty { musicObservers = audio.music.observeAudioSession() }
         audio.music.setScene(Self.musicScene(for: route))
+        audio.start()            // the one launch-time session activation (off the main thread)
     }
 
     /// Background music for each screen (`MusicPolicy` picks the track).
@@ -311,14 +313,14 @@ final class AppModel {
             parentAccess.revoke()
             if route == .parents || route == .parentGate { route = .home }
             if route == .opening { finishOpening() }   // never replay it on return
-            audio.music.appDidEnterBackground()
+            audio.appDidEnterBackground()
         case .inactive:
             if let session, !session.state.isCompleted { persist(session.controller.normalizedState()) }
         case .active:
             if route == .home { refreshResumableRound() }
             // Codes redeemed or purchases approved outside the app.
             purchases.appBecameActive()
-            audio.music.appDidBecomeActive()
+            audio.appDidBecomeActive()
         @unknown default:
             break
         }

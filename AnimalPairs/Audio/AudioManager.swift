@@ -191,16 +191,23 @@ final class AudioManager {
         set { music.enabled = newValue }
     }
 
+    /// The app's audio session (configured and activated once, off the main thread).
+    let session: AudioSessionController
+
     init(isEnabled: Bool, voiceEnabled: Bool, musicEnabled: Bool = false, bundle: Bundle = .main,
          clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
-         randomSeed: UInt64 = UInt64.random(in: .min ... .max)) {
+         randomSeed: UInt64 = UInt64.random(in: .min ... .max),
+         sessionController: AudioSessionController? = nil) {
         self.isEnabled = isEnabled
         self.voiceEnabled = voiceEnabled
         self.clock = clock
         self.bundle = bundle
         clipRandom = SeededGenerator(seed: randomSeed)
-        try? AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [.mixWithOthers])
-        music = BackgroundMusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock)
+        // One session controller for music and effects. It sets the category
+        // and activates the session off the main thread (see AudioSessionController).
+        let session = sessionController ?? AudioSessionController()
+        self.session = session
+        music = BackgroundMusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock, session: session)
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
                   let player = try? AVAudioPlayer(contentsOf: url) else { continue }
@@ -233,7 +240,7 @@ final class AudioManager {
 
     /// Plays an effect; `level` scales it (e.g. under an animal clip).
     func play(_ effect: SoundEffect, level: Float = 1) {
-        guard isEnabled, let player = players[effect] else { return }
+        guard isEnabled, let player = players[effect], sessionReady() else { return }
         let rule = SoundRule(minInterval: effect.minInterval, priority: effect.priority,
                              duration: max(player.duration, 0.05))
         switch policy.request(effect.rawValue, rule: rule, at: clock()) {
@@ -291,7 +298,7 @@ final class AudioManager {
     /// clip, or nil when sound is off or the animal has no clip.
     @discardableResult
     func playMatchClip(for character: CharacterID?) -> AnimalClip? {
-        guard isEnabled, let character,
+        guard isEnabled, sessionReady(), let character,
               let clip = clipPicker.pick(for: character, moment: .matched, in: clipLibrary, using: &clipRandom)
         else { return nil }
         start(clip, moment: .matched, stopAfter: matchEnds[clip.name] ?? Self.defaultMatchLength)
@@ -384,12 +391,37 @@ final class AudioManager {
     }
 
     private func speak(_ cue: NarrationCue) {
-        guard voiceEnabled, let player = voicePlayers[cue], !isSpeaking else { return }
+        guard voiceEnabled, let player = voicePlayers[cue], !isSpeaking, sessionReady() else { return }
         player.currentTime = 0
         player.play()
     }
 
-    // MARK: Lifecycle
+    // MARK: Session and lifecycle
+
+    /// A sound may start only once the session is active: `AVAudioPlayer.play()`
+    /// would otherwise activate it implicitly on the main thread. Until then
+    /// (the first moments after launch or after an interruption) the sound is
+    /// skipped and activation is requested once, off the main thread.
+    private func sessionReady() -> Bool {
+        if session.allowsPlayback { return true }
+        session.activate()
+        return false
+    }
+
+    /// Launch: configure and activate the session once, off the main thread;
+    /// music starts when it is active.
+    func start() {
+        session.activate { [weak self] in self?.music.sessionDidActivate() }
+    }
+
+    func appDidEnterBackground() {
+        cancelPending()
+        music.appDidEnterBackground()
+    }
+
+    func appDidBecomeActive() {
+        music.appDidBecomeActive()
+    }
 
     func cancelPending() {
         pending.forEach { $0.cancel() }
