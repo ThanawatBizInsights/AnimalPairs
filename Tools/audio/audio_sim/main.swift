@@ -30,6 +30,27 @@ let animals: [CharacterID] = ["momo", "iris", "nori", "sprout", "mochi", "sunny"
 }
 final class Clock { var now = 100.0 }
 
+/// Runs scheduled work when the simulated clock reaches it (music fades,
+/// pauses after a fade, the results delay, the duck release).
+@MainActor final class TimedScheduler: RoundScheduler {
+    final class Work: ScheduledWork { var cancelled = false; let at: Double; let run: @MainActor () -> Void
+        init(_ at: Double, _ run: @escaping @MainActor () -> Void) { self.at = at; self.run = run }
+        func cancel() { cancelled = true } }
+    let clock: Clock
+    var queue: [Work] = []
+    init(clock: Clock) { self.clock = clock }
+    func schedule(after seconds: Double, _ work: @escaping @MainActor () -> Void) -> ScheduledWork {
+        let item = Work(clock.now + seconds, work); queue.append(item); return item
+    }
+    func runDue() {
+        while let next = queue.filter({ !$0.cancelled && $0.at <= clock.now }).min(by: { $0.at < $1.at }) {
+            queue.removeAll { $0 === next }
+            next.run()
+        }
+        queue.removeAll { $0.cancelled }
+    }
+}
+
 @MainActor func run() -> Int32 {
     var failures = 0
     func check(_ ok: Bool, _ message: @autoclosure () -> String) { if !ok { failures += 1; print("FAIL:", message()) } }
@@ -40,7 +61,7 @@ final class Clock { var now = 100.0 }
     for folder in ["Sounds", "Music"] {
         let dir = URL(fileURLWithPath: root).appendingPathComponent("AnimalPairs/Resources/\(folder)")
         for case let file as URL in FileManager.default.enumerator(at: dir, includingPropertiesForKeys: nil)!
-        where ["wav", "m4a", "json"].contains(file.pathExtension) {
+        where ["wav", "m4a", "caf", "json"].contains(file.pathExtension) {
             try! FileManager.default.copyItem(at: file, to: bundleDir.appendingPathComponent(file.lastPathComponent))
         }
     }
@@ -62,8 +83,9 @@ final class Clock { var now = 100.0 }
         done(ok)
     }
     let sessionController = AudioSessionController(runner: threadRunner)
+    let musicScheduler = TimedScheduler(clock: clock)
     let audio = AudioManager(isEnabled: true, voiceEnabled: false, bundle: bundle, clock: { clock.now }, randomSeed: 11,
-                             sessionController: sessionController)
+                             sessionController: sessionController, musicScheduler: musicScheduler)
     check(sessionActivations == 0, "nothing activates the session while the app is being set up")
     // Launch: AppModel.start() and the first `.active` scene phase.
     audio.start()
@@ -157,192 +179,153 @@ final class Clock { var now = 100.0 }
 
     // Home animals no longer have a tap sound: there is no API for it any more.
 
-    // MARK: Background music
+    // MARK: Background music (AVAudioPlayer)
     audio.isEnabled = true
     let music = audio.music
-    // Decode like a device: the result arrives a moment later (after at least
-    // one tick), not inside the call that asked for it.
-    var heldDecodes: [() -> Void] = []
-    music.decode = { url, expected, done in
-        let box = try? MusicBuffer(url: url, expectedFrames: expected)
-        heldDecodes.append { done(box) }
-    }
     let base = BackgroundMusicPlayer.baseVolume
     func advance(_ seconds: Double, step: Double = 0.05) {
         var t = 0.0
-        while t < seconds - 1e-9 {
-            clock.now += step; t += step
-            music.tick(at: clock.now)
-            let finished = heldDecodes; heldDecodes = []
-            finished.forEach { $0() }
-        }
+        while t < seconds - 1e-9 { clock.now += step; t += step; musicScheduler.runDue() }
     }
-    func audibleTracks() -> [AnimalPairsMusicTrack] { music.deckVolumes.filter { $0.playing && $0.volume > 0.001 }.compactMap(\.track) }
-    check(music.availableTracks == Set(AnimalPairsMusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
-    check(allPlayerNodes.count == 2, "two music decks, got \(allPlayerNodes.count)")
-
-    // Off by default in this AudioManager (tests); switching on starts the menu loop.
-    music.setScene(.menus)
-    advance(1)
-    check(audibleTracks().isEmpty, "music plays while the Music switch is off")
-    audio.musicEnabled = true
-    advance(0.5)
-    check(music.currentTrack == .playground, "home starts music_playground")
-    advance(1.5)
-    check(audibleTracks() == [.playground], "only the home loop: \(audibleTracks())")
-    guard music.deckVolumes.contains(where: { $0.track == .playground && $0.playing }) else {
-        print("FAIL: no music is playing on Home (the track never started)")
-        print("SIMULATION FAILED")
-        return 1
+    func musicPlayers(_ track: AnimalPairsMusicTrack) -> [AVAudioPlayer] { allPlayers.filter { $0.name == track.rawValue } }
+    func plays(_ track: AnimalPairsMusicTrack) -> Int { startedLog.filter { $0 == track.rawValue }.count }
+    func audible() -> [AnimalPairsMusicTrack] {
+        AnimalPairsMusicTrack.allCases.filter { t in musicPlayers(t).contains { $0.isPlaying && $0.volume > 0.001 } }
     }
-    let homeVolume = music.deckVolumes.first { $0.track == .playground }!.volume
-    check(abs(homeVolume - base) < 0.001, "home loop at the base level, got \(homeVolume)")
-    let node = allPlayerNodes.first { $0.isPlaying }!
-    check(node.loops, "scheduled to loop")
-    check(Int(node.scheduled!.frameLength) == 1_949_696, "loop trimmed to its exact length: \(node.scheduled!.frameLength)")
-    check(node.scheduled!.floatChannelData![0][0] == 1, "trim starts at the first real sample")
-
-    // Home → choosing a board → a game → a restarted round: the same loop
-    // keeps playing on the same player, never restarted or doubled.
-    let homeLoopNode = allPlayerNodes.first { $0.isPlaying }!
-    let homeLoopPlays = homeLoopNode.playCount
-    for scene in [MusicScene.menus, .game, .game, .menus, .game] {
-        music.setScene(scene)
-        advance(0.5)
-        check(audibleTracks() == [.playground], "\(scene): \(audibleTracks())")
-    }
-    check(homeLoopNode.playCount == homeLoopPlays && homeLoopNode.isPlaying,
-          "navigation restarted the music (\(homeLoopNode.playCount - homeLoopPlays) restarts)")
-
-    // Ducking under an animal clip, then a smooth return.
-    let animal = withClips[0]
-    _ = audio.playMatchClip(for: animal)
-    advance(0.2)
-    let ducked = music.deckVolumes.first { $0.track == .playground }!.volume
-    check(ducked < base * 0.4, "music dips under the animal clip: \(ducked)")
-    advance(4)
-    let restored = music.deckVolumes.first { $0.track == .playground }!.volume
-    check(abs(restored - base) < 0.001, "music restored after the clip: \(restored)")
-
-    // Independent switches.
-    audio.isEnabled = false
-    advance(0.5)
-    check(audibleTracks() == [.playground], "Sound Effects off must not stop the music")
-    check(audio.playMatchClip(for: animal) == nil, "Sound Effects off silences animal clips")
-    audio.isEnabled = true
-    audio.musicEnabled = false
-    advance(0.5)
-    check(audibleTracks().isEmpty, "Music off fades the music out")
     startedLog.removeAll()
-    audio.play(.cardFlip)
-    check(startedLog == ["card_flip"], "Music off keeps sound effects: \(startedLog)")
-    audio.musicEnabled = true
-    advance(2)
-    check(audibleTracks() == [.playground], "Music back on")
+    check(music.availableTracks == Set(AnimalPairsMusicTrack.allCases), "all four tracks bundled: \(music.availableTracks)")
 
-    // Results: the jingle first, music_celebration after 3 s.
-    music.setScene(.results)
-    advance(2)
-    check(music.currentTrack == nil && !audibleTracks().contains(.celebration), "celebration waits for the jingle")
-    advance(3)
-    check(audibleTracks() == [.celebration], "results use music_celebration: \(audibleTracks())")
+    // Switching Music on starts the Home loop.
+    music.setScene(.menus); advance(1)
+    check(audible().isEmpty, "music plays while the Music switch is off")
+    audio.musicEnabled = true; advance(2)
+    guard let home = music.player(of: .playground), home.isPlaying else {
+        print("FAIL: no music is playing on Home"); print("SIMULATION FAILED"); return 1
+    }
+    check(home.numberOfLoops == -1, "the loop repeats forever")
+    check(abs(home.volume - base) < 0.001, "music at its base level, got \(home.volume)")
+    check(musicPlayers(.playground).count == 1, "one player for the Home loop")
 
-    // Background / active keeps one track and its position.
-    music.setScene(.menus); advance(3)
-    let homeNode = allPlayerNodes.first { $0.isPlaying && $0.volume > 0 }!
-    let homePlays = homeNode.playCount
-    music.appDidEnterBackground()
-    music.appDidBecomeActive(); advance(1)
-    check(audibleTracks() == [.playground] && homeNode.playCount == homePlays, "resumed without a new player")
+    // Home → board choice → game → restarted round: same player, never restarted.
+    let homePlays = plays(.playground)
+    for scene in [MusicScene.menus, .game, .game, .menus, .game] {
+        music.setScene(scene); advance(0.5)
+        check(audible() == [.playground], "\(scene): \(audible())")
+    }
+    check(plays(.playground) == homePlays && music.player(of: .playground) === home, "navigation restarted the music")
 
-    // Interruption (a phone call): stops, then resumes the scene's track.
+    // The reported bug: switch apps and return, five times (with and without
+    // iOS reporting the suspension as a never-ending interruption).
+    let activations = sessionActivations
+    for round in 1...5 {
+        home.currentTime = 7.25 * Double(round)
+        let position = home.currentTime
+        audio.appDidEnterBackground()
+        check(!home.isPlaying, "round \(round): paused in the background")
+        music.interruptionBegan(suspended: round.isMultiple(of: 2))
+        audio.appDidBecomeActive(); advance(2)
+        check(home.isPlaying && audible() == [.playground], "round \(round): music did not resume")
+        check(abs(home.currentTime - position) < 0.001, "round \(round): position lost")
+        check(music.player(of: .playground) === home && musicPlayers(.playground).count == 1, "round \(round): a new player")
+    }
+    check(sessionActivations == activations + 5, "one session activation per return: \(sessionActivations - activations)")
+    // The exact old failure: an interruption reported while still active, then
+    // background, then foreground — no "ended" ever arrives.
     music.interruptionBegan()
-    check(audibleTracks().isEmpty, "silent during an interruption")
-    music.setScene(.game)                                  // navigation during the call
-    advance(1)
-    check(audibleTracks().isEmpty, "no music while interrupted")
-    music.interruptionEnded(); advance(2)
-    check(audibleTracks() == [.playground], "resumes with the current scene's track")
+    audio.appDidEnterBackground(); audio.appDidBecomeActive(); advance(2)
+    check(home.isPlaying, "an interruption without an end kept the music off after returning")
 
-    // Headphones unplugged: quiet until the next screen.
+    // Interruptions while in the app.
+    home.currentTime = 20
+    music.interruptionBegan()
+    check(!home.isPlaying, "paused by an interruption")
+    music.interruptionEnded(shouldResume: true); advance(2)
+    check(home.isPlaying && abs(home.currentTime - 20) < 0.001, "resumes where it was when allowed")
+    music.interruptionBegan(); music.interruptionEnded(shouldResume: false); advance(2)
+    check(!home.isPlaying, "stays paused when the system says not to resume")
+    music.setScene(.menus); advance(2)            // the next screen (game → Home)
+    check(home.isPlaying, "resumes at the next screen")
+
+    // Music off survives switching apps.
+    audio.musicEnabled = false; advance(1)
+    check(audible().isEmpty, "Music off silences the music")
+    audio.appDidEnterBackground(); audio.appDidBecomeActive(); advance(2)
+    check(audible().isEmpty && !home.isPlaying, "returning switched music back on")
+    startedLog.removeAll(); audio.play(.cardFlip)
+    check(startedLog == ["card_flip"], "sound effects still play with Music off")
+    audio.musicEnabled = true; advance(2)
+    check(audible() == [.playground], "Music back on")
+
+    // Correct-pair animal sounds dip the music, which keeps playing.
+    for i in 0..<20 {
+        clock.now += 0.5
+        _ = audio.playMatchClip(for: withClips[i % withClips.count])
+        check(home.isPlaying && home.volume < base * 0.4, "music not dipped under an animal sound (\(home.volume))")
+        advance(3)
+        check(home.isPlaying && abs(home.volume - base) < 0.001, "music not restored after an animal sound (\(home.volume))")
+    }
+
+    // Headphones / Bluetooth disconnected: pause in place until the next screen.
+    home.currentTime = 31
     music.outputDeviceRemoved(); advance(1)
-    check(audibleTracks().isEmpty, "music held after headphones were removed")
-    music.setScene(.menus); advance(2)
-    check(audibleTracks() == [.playground], "music returns on the next screen")
+    check(!home.isPlaying, "music paused when headphones went away")
+    music.setScene(.game); advance(2)              // the next screen (Home → game)
+    check(home.isPlaying && abs(home.currentTime - 31) < 0.001, "resumed in place on the next screen")
 
-    // Another app playing audio: no music on top of it, and theirs is never stopped.
+    // Another app playing: silent, then back.
     music.otherAudioChanged(playing: true); advance(1.5)
-    check(audibleTracks().isEmpty, "music stays silent while another app plays")
+    check(audible().isEmpty, "music over another app's audio")
     music.otherAudioChanged(playing: false); advance(2)
-    check(audibleTracks() == [.playground], "music back when the other app stops")
+    check(audible() == [.playground], "back when the other app stops")
 
-    // Opening video: silent.
-    music.setScene(.silent); advance(1.5)
-    check(audibleTracks().isEmpty, "no music during the opening video")
+    // Results: the jingle first, celebration after 3 s; back Home restarts the Home loop.
+    music.setScene(.results); advance(2)
+    check(!audible().contains(.celebration), "celebration waits for the jingle")
+    advance(3)
+    check(audible() == [.celebration], "results use music_celebration: \(audible())")
+    music.setScene(.menus); advance(2)
+    check(audible() == [.playground], "back to the Home loop: \(audible())")
 
-    // Stress: 500 random navigations and toggles never exceed two decks or leave strays.
+    // A track that cannot play: one rebuild, then disabled — no endless retries.
+    failToPlay = ["music_meadow"]; failedPlays.removeAll()
+    for _ in 0..<5 { music.setScene(.parents); advance(1); music.setScene(.menus); advance(1) }
+    check(failedPlays.count <= 2, "retried a failing track \(failedPlays.count) times")
+    check(!music.availableTracks.contains(.meadow), "a failing track is disabled for this launch")
+    check(audible() == [.playground], "other music still plays")
+    failToPlay = []
+
+    // Media services reset: players rebuilt, music back.
+    music.mediaServicesWereReset(); advance(2)
+    check(audible() == [.playground], "music after a media services reset")
+    check(music.player(of: .playground) !== home, "the player was rebuilt")
+
+    // Activation failure: bounded, sounds still try to play.
+    let failing = AudioSessionController(runner: { _, done in done(false) })
+    failing.activate()
+    for _ in 0..<50 { _ = failing.allowsPlayback }
+    check(failing.state == .failed && failing.allowsPlayback && failing.activationCount == 1,
+          "a failed activation must not be retried on its own")
+
+    // Stress: 500 random navigations, switches, matches and app switches.
     var rng = SeededGenerator(seed: 99)
     let scenes: [MusicScene] = [.menus, .game, .results, .parents, .silent]
     for i in 0..<500 {
         switch Int.random(in: 0..<10, using: &rng) {
         case 0: audio.musicEnabled.toggle()
-        case 1: music.appDidEnterBackground(); music.appDidBecomeActive()
+        case 1: audio.appDidEnterBackground(); audio.appDidBecomeActive()
         case 2: _ = audio.playMatchClip(for: withClips[i % withClips.count])
+        case 3: music.interruptionBegan(); music.interruptionEnded(shouldResume: Bool.random(using: &rng))
         default: music.setScene(scenes.randomElement(using: &rng)!)
         }
         advance(Double(Int.random(in: 1...30, using: &rng)) * 0.05)
-        check(audibleTracks().count <= 2, "step \(i): \(audibleTracks())")
+        check(music.playingTracks.count <= 2, "step \(i): \(music.playingTracks)")
     }
     audio.musicEnabled = true
-    music.setScene(.game); advance(5)
-    check(audibleTracks() == [.playground] && allPlayerNodes.filter(\.isPlaying).count == 1,
-          "settles on exactly one track: \(audibleTracks())")
-    check(allPlayerNodes.count == 2, "still only two decks after the stress run")
-    print("music: \(Set(decodedFiles).sorted().joined(separator: ", ")) decoded; navigation, ducking, switches, lifecycle checked")
-
-    // MARK: Session activation and engine restarts
-    audio.isEnabled = true
-    audio.musicEnabled = true
-    music.setScene(.menus); advance(3)
-    let mainEngine = music.engineForNotifications as! AVAudioEngine
-    let startsBefore = music.engineStarts
-    let activations = sessionActivations
-    let mainThreadBefore = sessionMainThreadActivations
-    for scene in [MusicScene.menus, .game, .menus, .game, .results, .menus, .parents, .menus, .game] {
-        music.setScene(scene); advance(1)
-        for _ in 0..<20 { clock.now += 0.4; audio.play(.cardFlip) }
-    }
-    check(sessionActivations == activations, "navigation or flips activated the session")
-    check(music.engineStarts == startsBefore, "navigation restarted the engine \(music.engineStarts - startsBefore) times")
-    // Background and back, five times: one activation each, same player resumes.
-    music.setScene(.game); advance(3)
-    let gameNode = allPlayerNodes.first { $0.isPlaying && $0.volume > 0 }!
-    let gamePlays = gameNode.playCount
-    for _ in 0..<5 {
-        audio.appDidEnterBackground()
-        audio.appDidBecomeActive()
-        advance(1)
-    }
-    check(sessionActivations == activations + 5, "one activation per return from background: \(sessionActivations - activations)")
-    check(gameNode.playCount == gamePlays && audibleTracks() == [.playground], "music resumed on the same player")
-    // An interruption: one reactivation when it ends.
-    music.interruptionBegan()
-    music.interruptionEnded(); advance(2)
-    check(sessionActivations == activations + 6, "one activation after an interruption")
-    check(audibleTracks() == [.playground], "music back after the interruption")
-    // A storm of engine configuration changes: bounded restarts, no new players.
-    for _ in 0..<20 { mainEngine.stop(); music.engineConfigurationChanged(); advance(0.05) }
-    check(music.engineStarts <= startsBefore + 5 + 1 + BackgroundMusicPlayer.maxConfigurationRestarts,
-          "configuration changes restarted the engine too often: \(music.engineStarts - startsBefore)")
-    check(allPlayerNodes.count == 2, "still two music decks")
-    check(sessionActivations == activations + 6, "configuration changes activated the session")
-    music.setScene(.menus); advance(2)
-    check(mainEngine.isRunning && audibleTracks() == [.playground], "music plays again after the storm")
-    check(sessionMainThreadActivations == 0, "\(sessionMainThreadActivations) activations ran on the main thread")
-    print("session: 1 activation at launch, 0 during play and navigation; this section: "
-          + "\(sessionActivations - activations) (5 foreground returns + 1 interruption); "
-          + "main-thread activations overall: \(sessionMainThreadActivations - mainThreadBefore + 0); "
-          + "engine starts this section: \(music.engineStarts - startsBefore)")
+    music.setScene(.game); advance(4)
+    check(audible() == [.playground] && music.playingTracks == [.playground], "settles on one track: \(music.playingTracks)")
+    check(sessionMainThreadActivations == 0, "\(sessionMainThreadActivations) activations on the main thread")
+    print("music: Home loop resumed after 5 app switches at the same position; navigation, interruptions, "
+          + "route loss, Music off, 20 animal-sound dips, failures and 500 random steps checked")
 
     print(failures == 0 ? "SIMULATION OK" : "SIMULATION FAILED: \(failures)")
     return failures == 0 ? 0 : 1

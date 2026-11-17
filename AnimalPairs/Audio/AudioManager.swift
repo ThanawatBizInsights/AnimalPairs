@@ -197,7 +197,8 @@ final class AudioManager {
     init(isEnabled: Bool, voiceEnabled: Bool, musicEnabled: Bool = false, bundle: Bundle = .main,
          clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
          randomSeed: UInt64 = UInt64.random(in: .min ... .max),
-         sessionController: AudioSessionController? = nil) {
+         sessionController: AudioSessionController? = nil,
+         musicScheduler: RoundScheduler? = nil) {
         self.isEnabled = isEnabled
         self.voiceEnabled = voiceEnabled
         self.clock = clock
@@ -207,7 +208,7 @@ final class AudioManager {
         // and activates the session off the main thread (see AudioSessionController).
         let session = sessionController ?? AudioSessionController()
         self.session = session
-        music = BackgroundMusicPlayer(enabled: musicEnabled, bundle: bundle, clock: clock, session: session)
+        music = BackgroundMusicPlayer(enabled: musicEnabled, bundle: bundle, scheduler: musicScheduler, session: session)
         for effect in SoundEffect.allCases {
             guard let (url, name) = Self.resource(for: effect, in: bundle),
                   let player = try? AVAudioPlayer(contentsOf: url) else { continue }

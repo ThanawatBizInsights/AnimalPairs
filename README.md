@@ -346,68 +346,76 @@ bundled, every file is in the app target, and no Thai remains.
 
 ### Background music
 
-History of the silent music:
-
-1. Originally the loops were never bundled and the app had no music player.
-2. The first player (November 2026) never became audible on devices: while a
-   track was being decoded on a background thread its deck sat at volume 0,
-   and the player's tick freed every deck whose fade target was 0 — including
-   that waiting deck, in the same instant. When decoding finished the deck no
-   longer held the track, so playback was dropped every time. The Linux
-   simulation decoded synchronously and missed it. Fixed: the deck holding the
-   wanted track (`front`) is never freed while it waits; the simulation now
-   decodes like a device (results arrive a tick later) and fails on the old code.
-3. The Music setting was not the cause: it is only stored when someone flips
-   it (an old default-off was never written), it defaults to on, and an
-   explicit "off" is kept.
-
 | Screen | Track (`AnimalPairs/Resources/Music/`) | Length |
 | --- | --- | --- |
-| Home, choosing a board **and playing** (one continuous loop — moving between them never restarts it) | `music_playground.m4a` | 40.62 s loop |
-| Results | `music_celebration.m4a`, fading in 3 s after the jingle | 36.27 s loop |
-| Parents area and gate | `music_meadow.m4a` | 40.02 s loop |
+| Home, choosing a board **and playing** (one continuous loop — moving between them never restarts it) | `music_playground.caf` | 40.62 s loop |
+| Results | `music_celebration.caf`, fading in 3 s after the jingle | 36.27 s loop |
+| Parents area and gate | `music_meadow.caf` | 40.02 s loop |
 | Opening video | none (the video has its own soundtrack) | — |
 
-`music_focus.m4a` (39.94 s) is bundled and decodes but is not assigned to a
-screen, because Home, the board choice and gameplay now share one loop.
+`music_focus.caf` (39.94 s) is bundled but not assigned to a screen.
 
-`BackgroundMusicPlayer` (`AnimalPairs/Audio/BackgroundMusicPlayer.swift`, owned by `AudioManager`):
+**Files.** Apple Lossless (ALAC) 16-bit 48 kHz stereo `.caf`, encoded from the
+loop masters. ALAC has no encoder delay, so each file decodes to exactly the
+loop (`music_tracks.json` holds the frame counts; `--bundle` and the app tests
+check them) and `AVAudioPlayer`'s `numberOfLoops = -1` repeats it without a gap.
+About 10.5 MB for the four.
 
-* **Gapless loops**: each track is decoded once into memory (off the main
-  thread — gameplay never waits) and looped sample-exactly by an
-  `AVAudioPlayerNode`; `music_tracks.json` holds each loop's exact frame count
-  and any AAC encoder delay a decoder keeps is trimmed (`LoopTrim`).
-* **One track at a time**: two decks only; a new screen fades the old track out
-  (1 s) while the new one fades in (1.5 s); returning to the same screen or
-  restarting a round keeps the music going without a new player.
-* **Quiet**: 0.3 of full scale (the loops are mastered at −24 LUFS), well under
-  the effects; it dips to 35 % within 0.15 s whenever an animal clip plays and
-  comes back over 0.8 s (`MusicDuck`).
-* **Lifecycle**: paused in the background and resumed (same position) when the
-  app is active again; stopped for interruptions (calls, alarms) and resumed
-  when they end; held after headphones are unplugged until the next screen or
-  the app becomes active; silent while another app is playing audio
-  (`secondaryAudioShouldBeSilencedHint`) and never stops that audio.
-* **Audio session** (`AudioSessionController`): the category is set once and
-  the session is activated on a private background queue — at launch, on
-  returning to the foreground and after an interruption only. Nothing
-  activates it on the main thread: the music engine starts only once the
-  session is active and then keeps running across screens, and sound effects
-  are not started before it is active (`AVAudioPlayer.play()` and
-  `AVAudioEngine.start()` would otherwise activate it implicitly on the main
-  thread, which iOS logs as “This method can lead to UI unresponsiveness…”).
-* **Engine configuration changes**: only this engine's notifications are
-  observed; a change restarts the engine and continues the current track on
-  the same deck, at most three times in ten seconds, so it can never loop.
-  (Earlier, every change — from any engine in the process — rebuilt the music
-  and restarted the engine, which activated the session again on the main
-  thread and could repeat endlessly, logging the warning and keeping the
-  music at the start of its fade-in.)
+**`BackgroundMusicPlayer`** (`AnimalPairs/Audio/BackgroundMusicPlayer.swift`) —
+one persistent controller owned by `AudioManager`, which `AppModel` owns:
+
+* One `AVAudioPlayer` per track, created once and kept; one *current* track.
+  The same track on the next screen changes nothing; a different track fades
+  the old one out (1 s) while the new one fades in (1.5 s).
+* Quiet (0.3 of full scale; loops mastered at −24 LUFS) and dipped to 35 %
+  while an animal clip plays, then restored over 0.8 s.
+* **Background**: paused at once, keeping the position and the intention to
+  play. **Foreground**: the session is reactivated off the main thread and the
+  same player resumes from that position — unless Music is off, another app is
+  playing audio, or an interruption asked not to resume. No background-audio
+  capability: music pauses while another app is in use.
+* **Interruptions** (calls, alarms, Siri): paused; resumed when the end of the
+  interruption carries `shouldResume`, otherwise at the next screen or
+  foreground. iOS can report the app's own suspension as an interruption that
+  never ends — that is ignored, and becoming active clears any stale state.
+* **Route changes**: headphones or Bluetooth disconnecting pause the music in
+  place until the next screen or foreground.
+* **Failures**: a track that cannot load or play after one rebuilt player is
+  disabled for this launch; activation failure is retried only at the next
+  foreground or interruption end (sounds still try to play meanwhile); a media
+  services reset rebuilds the players.
+* Debug builds log transitions, activation failures and recoveries
+  (`AudioDebugLog`, category "Audio"), each repeated message only once.
+
+**Audio session** (`AudioSessionController`, shared by music and effects):
+category `.ambient` + `.mixWithOthers` (Ring/Silent switch respected, other
+apps never stopped), set once. `setActive(true)` runs on a private serial
+queue — at launch, on foreground, after an interruption and after a media
+reset only — so it never blocks the main thread (no "This method can lead to UI
+unresponsiveness…" warning). Requests are coalesced; a result that arrives
+after the app left is discarded and asked for again on return. Music and
+effects only start once the session is active, so nothing activates it
+implicitly on the main thread, and the app never deactivates it — a short
+sound cannot silence the music. (The async `activate` API is not used: a
+background queue gives the same non-blocking behaviour on iOS 17, the
+deployment target.)
+
+**History of the missing music**:
+
+1. Originally the loops were never bundled and the app had no music player.
+2. The first engine-based player dropped each track while it was decoding.
+3. It then looped on audio-engine configuration changes, re-activating the
+   session on the main thread (the repeated warning).
+4. Music did not come back after switching apps: iOS reported the suspension
+   as an interruption, the player marked itself interrupted, and only an
+   interruption "ended" — which never comes for a suspension — cleared it.
+   The engine underneath could also be stopped by the system while its nodes
+   still reported "playing". Replaced by the `AVAudioPlayer` design above.
 
 The masters (`Design/Audio/Music/masters/`) and raw downloads
 (`Design/Audio/Music/raw/`) are kept. `python3 Tools/audio/generate_elevenlabs_music.py
---bundle` re-copies the reviewed loops into the app and rewrites
-`music_tracks.json`; `--verify` decodes them and measures the loop joins.
+--bundle` re-encodes the loops into the app (and checks they are
+sample-identical to the masters); `--verify` measures the loop joins.
 
 ### Generating, reviewing and approving (developer machine only)
 

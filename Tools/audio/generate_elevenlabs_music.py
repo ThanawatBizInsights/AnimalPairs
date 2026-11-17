@@ -231,40 +231,56 @@ def verify_track(track: dict) -> dict:
 
 
 USES = {
-    "music_playground": "Home, Welcome and choosing a board",
-    "music_focus": "During card matching (and the pause menu)",
+    "music_playground": "Home, choosing a board and gameplay (one continuous loop)",
+    "music_focus": "Bundled, not assigned to a screen",
     "music_celebration": "Results screen, fading in 3 s after the jingle",
     "music_meadow": "Parents area and its gate",
 }
 
 
 def bundle(manifest: dict, tracks: list[dict]) -> int:
-    """Approve the reviewed loops and bundle them with their exact loop
-    lengths (the app trims any AAC encoder delay a decoder keeps)."""
+    """Approve the loops and bundle them as Apple Lossless (ALAC) .caf files,
+    encoded from the 24-bit loop masters at 16 bit / 48 kHz. ALAC has no
+    encoder delay, so the decoded file is exactly the loop and AVAudioPlayer's
+    `numberOfLoops = -1` repeats it without a gap. Each file is decoded again
+    and must be sample-identical to the 16-bit master."""
     out = ROOT / "AnimalPairs/Resources/Music"
     out.mkdir(parents=True, exist_ok=True)
     index = {}
     for t in tracks:
-        source = REVIEW / t["file"]
-        if t["status"] not in ("awaiting_review", "approved") or not source.exists():
-            print(f"MISSING {t['name']}: {source.relative_to(ROOT)} ({t['status']})")
+        master = ROOT / t.get("master", "")
+        if t["status"] not in ("awaiting_review", "approved") or not master.is_file():
+            print(f"MISSING {t['name']}: {t.get('master')} ({t['status']})")
             continue
         frames = int(subprocess.run(["ffprobe", "-v", "error", "-show_entries", "stream=duration_ts", "-of",
-                                     "csv=p=0", str(ROOT / t["master"])], capture_output=True, text=True,
+                                     "csv=p=0", str(master)], capture_output=True, text=True,
                                     check=True).stdout.strip())
-        target = out / t["file"]
-        target.write_bytes(source.read_bytes())
+        target = out / f"{t['name']}.caf"
+        subprocess.run(["ffmpeg", "-v", "error", "-y", "-i", str(master), "-c:a", "alac", "-sample_fmt", "s16p",
+                        "-ar", str(RATE), str(target)], check=True)
+        pcm = lambda path: subprocess.run(["ffmpeg", "-v", "error", "-i", str(path), "-f", "s16le", "-ac", "2", "-"],
+                                          capture_output=True, check=True).stdout
+        if pcm(target) != pcm(master):
+            print(f"FAIL {t['name']}: the .caf does not decode to the exact loop")
+            return 1
+        old = out / t["file"]
+        if old.suffix != ".caf" and old.exists():
+            old.unlink()
+        t["file"] = target.name
+        t["format"] = "Apple Lossless (ALAC) 16-bit 48 kHz stereo (.caf)"
+        t["mobile_bytes"] = target.stat().st_size
         t["status"] = "approved"
         t["approved_at"] = t.get("approved_at") or now_iso()
         t["approval_note"] = "Bundled as background music at the user's request."
         t["event"] = USES.get(t["name"], t.get("event", ""))
         index[t["name"]] = {"frames": frames, "sampleRate": RATE}
-        print(f"bundled {t['name']}: {frames} frames ({frames / RATE:.2f} s) -> {target.relative_to(ROOT)}")
+        print(f"bundled {t['name']}: {frames} frames ({frames / RATE:.2f} s), "
+              f"{target.stat().st_size // 1024} KB, sample-identical -> {target.relative_to(ROOT)}")
     (out / "music_tracks.json").write_text(json.dumps(
         {"about": "Background loops bundled with the app. frames: exact loop length at sampleRate.",
          "tracks": dict(sorted(index.items()))}, indent=2) + "\n")
-    manifest["music"]["note"] = ("Four instrumental loops bundled as background music, one per scene; "
-                                 "played by BackgroundMusicPlayer (AVAudioEngine, gapless).")
+    manifest["music"]["note"] = ("Four instrumental loops bundled as Apple Lossless .caf background music; "
+                                 "played by BackgroundMusicPlayer (AVAudioPlayer, numberOfLoops = -1).")
     save_json(MANIFEST, manifest)
     return 0
 

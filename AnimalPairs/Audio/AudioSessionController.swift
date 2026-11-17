@@ -28,6 +28,12 @@ final class AudioSessionController {
     /// How many times `setActive(true)` was actually requested (tests).
     private(set) var activationCount = 0
     private var waiting: [@MainActor () -> Void] = []
+    /// Set when the session is lost (background, interruption) while an
+    /// activation is in flight: its late success must not count.
+    private var invalidated = false
+    /// A request arrived after the in-flight activation was invalidated: run
+    /// a fresh activation when that one returns.
+    private var requestedAgain = false
     private let runner: Runner
     private var configured = false
 
@@ -65,11 +71,13 @@ final class AudioSessionController {
             flush()
             return
         case .activating:
+            if invalidated { requestedAgain = true }
             return                              // coalesced into the request in flight
         case .inactive, .failed:
             break
         }
         state = .activating
+        invalidated = false
         activationCount += 1
         let configure = !configured
         configured = true
@@ -86,13 +94,35 @@ final class AudioSessionController {
             }
         }, { [weak self] ok in
             guard let self else { return }
+            if self.invalidated {
+                // Backgrounded or interrupted meanwhile: this result is stale.
+                self.invalidated = false
+                self.state = .inactive
+                AudioDebugLog.note("audio session activation superseded (app left or was interrupted)")
+                if self.requestedAgain {
+                    self.requestedAgain = false
+                    self.activate()             // the waiting callbacks run after this one
+                } else {
+                    self.waiting = []           // the next foreground / interruption end asks again
+                }
+                return
+            }
             self.state = ok ? .active : .failed
+            AudioDebugLog.note(ok ? "audio session active" : "audio session activation failed; sounds will still try to play, retry at next foreground")
             self.flush()
         })
     }
 
     /// The system deactivated the session (app suspended, interruption began).
     func markInactive() {
+        if state == .activating { invalidated = true } else { state = .inactive }
+    }
+
+    /// The media server restarted: configure the category again on the next
+    /// activation.
+    func reset() {
+        configured = false
+        invalidated = state == .activating
         if state != .activating { state = .inactive }
     }
 

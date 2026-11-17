@@ -5,6 +5,10 @@
 import Foundation
 
 public var startedLog: [String] = []
+/// Failure injection for the simulation.
+public var failToLoad: Set<String> = []
+public var failToPlay: Set<String> = []
+public var failedPlays: [String] = []
 public var allPlayers: [AVAudioPlayer] = []
 
 open class AVAudioPlayer {
@@ -15,19 +19,30 @@ open class AVAudioPlayer {
 
     public init(contentsOf url: URL) throws {
         self.url = url
+        let name = url.deletingPathExtension().lastPathComponent
+        if failToLoad.contains(name) { throw CocoaError(.fileReadCorruptFile) }
         if url.pathExtension == "wav" {
             let data = try Data(contentsOf: url)
             guard data.count > 44 else { throw CocoaError(.fileReadCorruptFile) }
             let byteRate = data[28..<32].enumerated().reduce(0) { $0 | Int($1.element) << (8 * $1.offset) }
             length = Double(data.count - 44) / Double(max(byteRate, 1))
         } else {
-            // .m4a: the clip index next to it records each clip's duration.
-            let index = url.deletingLastPathComponent().appendingPathComponent("animal_clips.json")
-            guard let data = try? Data(contentsOf: index),
-                  let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-                  let clips = json["clips"] as? [String: [String: Any]],
-                  let seconds = clips[url.deletingPathExtension().lastPathComponent]?["duration"] as? Double
-            else { throw CocoaError(.fileReadCorruptFile) }
+            // .m4a clips and .caf music: the index next to the file records the length.
+            guard FileManager.default.fileExists(atPath: url.path) else { throw CocoaError(.fileNoSuchFile) }
+            let folder = url.deletingLastPathComponent()
+            var seconds: Double?
+            if let data = try? Data(contentsOf: folder.appendingPathComponent("animal_clips.json")),
+               let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let clips = json["clips"] as? [String: [String: Any]] {
+                seconds = clips[name]?["duration"] as? Double
+            }
+            if seconds == nil, let data = try? Data(contentsOf: folder.appendingPathComponent("music_tracks.json")),
+               let json = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+               let tracks = json["tracks"] as? [String: [String: Any]],
+               let frames = tracks[name]?["frames"] as? Int {
+                seconds = Double(frames) / 48_000
+            }
+            guard let seconds else { throw CocoaError(.fileReadCorruptFile) }
             length = seconds
         }
         allPlayers.append(self)
@@ -36,7 +51,12 @@ open class AVAudioPlayer {
     open var currentTime: TimeInterval = 0
     open var duration: TimeInterval { length }
     @discardableResult open func prepareToPlay() -> Bool { true }
-    @discardableResult open func play() -> Bool { playing = true; startedLog.append(name); return true }
+    open var numberOfLoops = 0
+    @discardableResult open func play() -> Bool {
+        if failToPlay.contains(name) { failedPlays.append(name); return false }
+        playing = true; startedLog.append(name); return true
+    }
+    open func pause() { playing = false }            // keeps currentTime
     open func stop() { playing = false }
     open func setVolume(_ volume: Float, fadeDuration: TimeInterval) { self.volume = volume }
     open var isPlaying: Bool { playing }

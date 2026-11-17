@@ -2,121 +2,92 @@ import AnimalPairsCore
 import AVFoundation
 import Foundation
 
-/// Background music: one looping track at a time, chosen by `MusicPolicy`
-/// for the current scene.
+/// Background music: one persistent controller (owned by `AudioManager`,
+/// which `AppModel` owns), one looping `AVAudioPlayer` per bundled track,
+/// and at most one track wanted at a time (`MusicPolicy` picks it per scene).
 ///
-/// * Gapless loops: each track is decoded once into memory and scheduled with
-///   `.loops` on an `AVAudioPlayerNode`, so the join is sample-exact
-///   (the loops were cut on whole bars with a crossfade when made).
-/// * Two decks: switching scenes fades the old track out (1 s) while the new
-///   one fades in (1.5 s). There are never more than these two nodes, so
-///   navigation or restarting a round cannot create duplicate players; the
-///   same scene again is a no-op and the music simply continues.
-/// * Quiet by design (`baseVolume`), and dipped further by `MusicDuck` while
-///   an animal clip plays.
-/// * Loading happens off the main thread; gameplay never waits for music.
-///   While a track decodes, its deck stays reserved (`front`) and silent.
-/// * Lifecycle (see BackgroundMusicPlayer+Session.swift): paused in the background,
-///   resumed when active, stopped for interruptions, held after headphones
-///   are unplugged, silent while another app plays audio. The shared session
-///   is `.ambient` + `.mixWithOthers`, so the Ring/Silent switch is respected
-///   and other apps' audio is never stopped.
+/// * Gapless loops: the tracks are Apple Lossless `.caf` files cut on whole
+///   bars, with no encoder delay, looped by `numberOfLoops = -1`.
+/// * One current track. A new screen with the same track (Home → board choice
+///   → game, a restarted round) changes nothing. A different track fades the
+///   old one out (1 s) while the new one fades in (1.5 s).
+/// * Background: paused immediately, keeping its position and the intention
+///   to play. Foreground: the session is reactivated (off the main thread)
+///   and the same player resumes from that position — unless Music is off,
+///   another app is playing, or an interruption asked us not to resume.
+/// * Interruptions: a phone call or alarm pauses the music; it resumes only
+///   when the end of the interruption says it should (`shouldResume`),
+///   otherwise at the next screen or foreground. iOS can report the app's own
+///   suspension as an interruption that never "ends"; that is ignored here,
+///   and becoming active always clears any stale interruption state.
+/// * Route changes: headphones or Bluetooth disconnecting pause the music
+///   (keeping its position) until the next screen or foreground.
+/// * Failures are bounded: a track that cannot be loaded or played after one
+///   rebuild is marked unavailable for this launch; session activation is
+///   retried only at the next foreground, interruption end or media reset.
+/// * The music never activates or deactivates the session itself (see
+///   AudioSessionController), so short sound effects cannot silence it.
 @MainActor
 final class BackgroundMusicPlayer {
-    /// Music level relative to full scale; well under the effects
-    /// (master 0.8) so card sounds and animal clips stay clear.
+    /// Music level; well under the effects (master 0.8) so card sounds and
+    /// animal clips stay clear.
     static let baseVolume: Float = 0.3
     static let fadeIn: TimeInterval = 1.5
     static let fadeOut: TimeInterval = 1.0
-    /// Fade used when music must go quiet quickly (switched off, headphones out).
-    static let quickFade: TimeInterval = 0.4
-    static let tickInterval: TimeInterval = 1.0 / 30
+    static let quickFade: TimeInterval = 0.3
+    /// Share of the music level while an animal clip plays.
+    static let duckLevel: Float = 0.35
+    static let duckAttack: TimeInterval = 0.15
+    static let duckRelease: TimeInterval = 0.8
 
-    struct TrackInfo: Decodable { let frames: Int; let sampleRate: Double }
-
-    private final class Deck {
-        let node = AVAudioPlayerNode()
-        var track: AnimalPairsMusicTrack?
-        var ramp = VolumeRamp.steady(0)
-        var isScheduled = false
-        var token = 0
-    }
-
-    private let engine = AVAudioEngine()
-    private let decks = [Deck(), Deck()]
-    private var front: Deck?               // the deck holding the wanted track
-    private var duckState = MusicDuck()
-    private let clock: () -> TimeInterval
+    let session: AudioSessionController
     private let bundle: Bundle
-    private let index: [String: TrackInfo]
-    private var buffers: [AnimalPairsMusicTrack: AVAudioPCMBuffer] = [:]
-    private var nextToken = 0
-    private var ticker: Task<Void, Never>?
-    private var pendingStart: (track: AnimalPairsMusicTrack, at: TimeInterval)?
+    private let scheduler: RoundScheduler
+    private var players: [AnimalPairsMusicTrack: AVAudioPlayer] = [:]
+    private var rebuilt: Set<AnimalPairsMusicTrack> = []
+    private var failedTracks: Set<AnimalPairsMusicTrack> = []
+    private var pendingStart: (track: AnimalPairsMusicTrack, work: ScheduledWork)?
+    private var stopWork: [AnimalPairsMusicTrack: ScheduledWork] = [:]
+    private var duckRestore: ScheduledWork?
+    private var isDucked = false
 
-    /// Decodes a track and reports the result on the main actor. The app
-    /// decodes on a background task; tests can decode inline or hold the
-    /// completion to imitate a slow device.
-    typealias Decoder = (_ url: URL, _ expectedFrames: Int,
-                         _ done: @escaping @MainActor (MusicBuffer?) -> Void) -> Void
-    var decode: Decoder = BackgroundMusicPlayer.decodeInBackground
-
-    static let decodeInBackground: Decoder = { url, expected, done in
-        Task.detached(priority: .utility) {
-            let box = try? MusicBuffer(url: url, expectedFrames: expected)
-            await MainActor.run { done(box) }
+    /// The track that is playing, or paused and resumable (position kept).
+    private(set) var currentTrack: AnimalPairsMusicTrack?
+    private(set) var scene: MusicScene = .silent
+    var enabled: Bool {
+        didSet {
+            guard enabled != oldValue else { return }
+            AudioDebugLog.note("music switched \(enabled ? "on" : "off")")
+            update(fade: Self.quickFade)
         }
     }
-
-    static let decodeImmediately: Decoder = { url, expected, done in
-        let box = try? MusicBuffer(url: url, expectedFrames: expected)
-        MainActor.assumeIsolated { done(box) }
-    }
-
-    private(set) var scene: MusicScene = .silent
-    var enabled: Bool { didSet { if enabled != oldValue { update(fade: Self.quickFade) } } }
     private(set) var appActive = true
     private(set) var interrupted = false
     private(set) var otherAudioPlaying = false
     private(set) var heldAfterRouteLoss = false
+    private(set) var heldAfterInterruption = false
 
-    /// The shared session: the engine only starts once it is active, so
-    /// starting never activates the session implicitly on the main thread.
-    let session: AudioSessionController
-    /// Recent restarts after engine configuration changes (see
-    /// `engineConfigurationChanged`); bounded so a change can never loop.
-    private var configurationRestarts: [TimeInterval] = []
-    static let maxConfigurationRestarts = 3
-    static let configurationRestartWindow: TimeInterval = 10
-    /// How often the engine was started (tests and diagnostics).
-    private(set) var engineStarts = 0
-
-    /// `session` defaults to nil and is created inside this @MainActor body
-    /// (a main-actor initializer cannot run in a default argument).
-    init(enabled: Bool, bundle: Bundle = .main,
-         clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
+    /// `scheduler` and `session` default to nil and are created inside this
+    /// @MainActor body (default arguments run outside the main actor in Swift 5).
+    init(enabled: Bool, bundle: Bundle = .main, scheduler: RoundScheduler? = nil,
          session: AudioSessionController? = nil) {
         self.enabled = enabled
         self.bundle = bundle
-        self.clock = clock
+        self.scheduler = scheduler ?? TaskRoundScheduler()
         self.session = session ?? AudioSessionController()
-        index = Self.loadIndex(bundle)
-        for deck in decks { engine.attach(deck.node) }
     }
-
-    /// The engine whose configuration-change notifications concern us.
-    var engineForNotifications: AnyObject { engine }
 
     // MARK: State
 
-    /// Tracks actually bundled with the app.
+    /// Tracks bundled with the app that loaded (a failed one is left out).
     var availableTracks: Set<AnimalPairsMusicTrack> {
-        Set(AnimalPairsMusicTrack.allCases.filter { Self.url(for: $0, in: bundle) != nil })
+        Set(AnimalPairsMusicTrack.allCases.filter { Self.url(for: $0, in: bundle) != nil && !failedTracks.contains($0) })
     }
 
     var isAudible: Bool {
         MusicPolicy.isAudible(enabled: enabled, appActive: appActive, interrupted: interrupted,
-                              otherAudioPlaying: otherAudioPlaying, heldAfterRouteLoss: heldAfterRouteLoss)
+                              otherAudioPlaying: otherAudioPlaying,
+                              heldAfterRouteLoss: heldAfterRouteLoss || heldAfterInterruption)
     }
 
     /// The track that should be heard now, if any.
@@ -125,317 +96,298 @@ final class BackgroundMusicPlayer {
         return track
     }
 
-    /// The track currently fading in or playing (nil while silent).
-    var currentTrack: AnimalPairsMusicTrack? { front?.track }
-
-    /// Decks currently producing sound (at most one outside a crossfade).
+    /// Tracks whose player is currently playing (more than one only while a
+    /// previous track fades out).
     var playingTracks: [AnimalPairsMusicTrack] {
-        decks.filter { $0.node.isPlaying && $0.ramp.to > 0 }.compactMap(\.track)
+        players.filter { $0.value.isPlaying }.map(\.key)
     }
 
-    /// The decks' current volumes, for tests and the simulation.
-    var deckVolumes: [(track: AnimalPairsMusicTrack?, volume: Float, playing: Bool)] {
-        decks.map { ($0.track, $0.node.volume, $0.node.isPlaying) }
-    }
+    /// The player of a track, if it has been created (tests, simulation).
+    func player(of track: AnimalPairsMusicTrack) -> AVAudioPlayer? { players[track] }
+
+    private var targetVolume: Float { Self.baseVolume * (isDucked ? Self.duckLevel : 1) }
 
     // MARK: Inputs
 
     func setScene(_ newScene: MusicScene) {
-        if newScene != scene { heldAfterRouteLoss = false; configurationRestarts = [] }
+        if newScene != scene {
+            heldAfterRouteLoss = false        // a new screen is a user action
+            heldAfterInterruption = false
+        }
         scene = newScene
         update(fade: Self.fadeOut)
     }
 
     /// Dips the music while an animal clip plays (`seconds` long), then restores it.
     func duck(for seconds: TimeInterval) {
-        let now = clock()
-        duckState.duck(at: now, until: now + seconds)
-        ensureTicking()
+        guard let track = currentTrack, let player = players[track], player.isPlaying else { return }
+        isDucked = true
+        player.setVolume(targetVolume, fadeDuration: Self.duckAttack)
+        duckRestore?.cancel()
+        duckRestore = scheduler.schedule(after: seconds) { [weak self] in
+            guard let self else { return }
+            self.isDucked = false
+            if let track = self.currentTrack, let player = self.players[track], player.isPlaying {
+                player.setVolume(self.targetVolume, fadeDuration: Self.duckRelease)
+            }
+        }
+    }
+
+    /// The session became active: start or resume whatever should play.
+    func sessionDidActivate() {
+        update(fade: Self.fadeOut)
     }
 
     func appDidEnterBackground() {
         appActive = false
-        pendingStart = nil
-        engine.pause()           // keeps each deck's position; nothing renders in the background
-        session.markInactive()   // the system deactivates it while the app is suspended
+        cancelPendingStart()
+        // Pause at once (no fade: nothing is rendered in the background) and
+        // keep the position; `currentTrack` remembers the intention to play.
+        for (track, player) in players where player.isPlaying {
+            player.pause()
+            if track != currentTrack { player.currentTime = 0 }   // a fade-out in progress just ends
+        }
+        session.markInactive()
+        AudioDebugLog.note("background: music paused at \(positionText)")
     }
 
     func appDidBecomeActive() {
         appActive = true
-        heldAfterRouteLoss = false
-        configurationRestarts = []
-        // Reactivate the session off the main thread, then resume the paused
-        // deck where it was (same player) or start the scene's track.
-        session.activate { [weak self] in
-            guard let self, self.appActive else { return }
-            if self.decks.contains(where: { $0.track != nil && $0.isScheduled }) { self.startEngineIfNeeded() }
-            self.update(fade: Self.fadeOut)
-        }
-    }
-
-    func interruptionBegan() {
-        interrupted = true
-        pendingStart = nil
-        session.markInactive()   // the system deactivated it
-        stopAllDecks()           // and has already stopped the engine
-    }
-
-    func interruptionEnded() {
+        // Stale states from while the app was away: a suspension reported as
+        // an interruption never "ends", and returning is a user action.
         interrupted = false
-        // Reactivate (off the main thread), then resume.
+        heldAfterInterruption = false
+        heldAfterRouteLoss = false
+        AudioDebugLog.note("foreground: restoring the session")
         session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
     }
 
-    /// Headphones (or another output) were removed: go quiet until the next
-    /// screen or until the app becomes active again.
+    /// An interruption began. `suspended`: iOS reports that the app itself was
+    /// suspended (no matching "ended" will come) — handled by the foreground
+    /// path instead.
+    func interruptionBegan(suspended: Bool = false) {
+        guard appActive, !suspended else {
+            AudioDebugLog.note("interruption ignored (app suspended)")
+            return
+        }
+        interrupted = true
+        cancelPendingStart()
+        session.markInactive()
+        // The system has already paused the players; record it so a resume
+        // continues from here.
+        for player in players.values where player.isPlaying { player.pause() }
+        AudioDebugLog.note("interruption began: music paused at \(positionText)")
+    }
+
+    /// An interruption ended. Resume only if the system says it should;
+    /// otherwise wait for the next screen or foreground.
+    func interruptionEnded(shouldResume: Bool = true) {
+        guard interrupted else { return }
+        interrupted = false
+        guard shouldResume else {
+            heldAfterInterruption = true
+            AudioDebugLog.note("interruption ended without resume: waiting for the next screen")
+            return
+        }
+        AudioDebugLog.note("interruption ended: resuming")
+        session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
+    }
+
+    /// Headphones or a Bluetooth device were disconnected: pause (keeping the
+    /// position) until the next screen or until the app becomes active again.
     func outputDeviceRemoved() {
         heldAfterRouteLoss = true
+        AudioDebugLog.note("audio route lost: music paused")
         update(fade: Self.quickFade)
     }
 
     /// Another app started or stopped playing audio.
     func otherAudioChanged(playing: Bool) {
+        guard playing != otherAudioPlaying else { return }
         otherAudioPlaying = playing
         update(fade: Self.fadeOut)
     }
 
-    /// Our engine's configuration changed (e.g. the output route) and it
-    /// stopped. Restart it and continue the current track on the same deck —
-    /// no new player, no new session activation. Ignored when the engine is
-    /// still running; at most `maxConfigurationRestarts` within
-    /// `configurationRestartWindow`, so a change that keeps recurring can
-    /// never turn into a restart loop (the next screen or foreground retries).
-    func engineConfigurationChanged() {
-        guard !engine.isRunning else { return }
-        let now = clock()
-        configurationRestarts = configurationRestarts.filter { now - $0 < Self.configurationRestartWindow }
-        guard configurationRestarts.count < Self.maxConfigurationRestarts else { return }
-        configurationRestarts.append(now)
-        for deck in decks where deck !== front { reset(deck) }
-        if !restartFrontIfStalled() { update(fade: Self.fadeOut) }
-    }
-
-    /// If the current track's deck has stopped (engine stopped by a
-    /// configuration change or interruption), reschedule its decoded loop on
-    /// the same deck and play it again. Returns false when there is no
-    /// decoded current track to restart.
-    @discardableResult
-    private func restartFrontIfStalled() -> Bool {
-        guard let front, let track = front.track, front.isScheduled else { return false }
-        if engine.isRunning && front.node.isPlaying { return true }
-        guard let buffer = buffers[track] else { return false }
-        front.node.stop()
-        front.node.scheduleBuffer(buffer, at: nil, options: .loops)
-        guard startEngineIfNeeded() else { return true }     // continues in sessionDidActivate
-        front.node.play()
-        ensureTicking()
-        return true
-    }
-
-    /// The session became active (launch, foreground, end of an
-    /// interruption): start whatever has been waiting for it.
-    func sessionDidActivate() {
-        if let front, front.track == wantedTrack, restartFrontIfStalled() {
-            front.ramp = front.ramp.retargeted(to: 1, at: clock(), duration: Self.fadeIn)
-            ensureTicking()
-            return
-        }
-        update(fade: Self.fadeOut)
+    /// The media server restarted: every player is invalid. Rebuild.
+    func mediaServicesWereReset() {
+        AudioDebugLog.note("media services reset: rebuilding music players")
+        cancelPendingStart()
+        stopWork.values.forEach { $0.cancel() }
+        stopWork = [:]
+        players = [:]
+        rebuilt = []
+        currentTrack = nil
+        session.reset()
+        session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
     }
 
     // MARK: Core
 
-    /// Brings the decks in line with `wantedTrack`.
+    /// Brings playback in line with `wantedTrack`. Idempotent: called on every
+    /// relevant change, it never starts a second player for the same track.
     private func update(fade: TimeInterval) {
-        let now = clock()
         let wanted = wantedTrack
-        pendingStart = nil
-        if let front, front.track == wanted, wanted != nil {
-            // Same track: keep the same deck (never a second player); restart
-            // it in place only if the engine stopped underneath it.
-            restartFrontIfStalled()
-            front.ramp = front.ramp.retargeted(to: 1, at: now, duration: Self.fadeIn)   // e.g. back from a dip-out
-            ensureTicking()
-            return
-        }
-        // Fade out whatever is playing.
-        for deck in decks where deck.track != nil && deck.ramp.to > 0 {
-            deck.ramp = deck.ramp.retargeted(to: 0, at: now, duration: fade)
-        }
-        front = nil
-        if let wanted {
-            let delay = MusicPolicy.startDelay(for: scene)
-            pendingStart = (wanted, now + delay)
-        }
-        ensureTicking()
-        tick(at: now)
-    }
+        if let pending = pendingStart, pending.track != wanted { cancelPendingStart() }
 
-    private func start(_ track: AnimalPairsMusicTrack, at now: TimeInterval) {
-        // Reuse a deck still fading out with the same track (quick back-and-forth).
-        if let same = decks.first(where: { $0.track == track && $0.isScheduled }) {
-            same.ramp = same.ramp.retargeted(to: 1, at: now, duration: Self.fadeIn)
-            front = same
-            startEngineIfNeeded()
-            if !same.node.isPlaying { same.node.play() }
-            return
-        }
-        // Otherwise the quieter deck (silent, or furthest into its fade-out).
-        guard let deck = decks.min(by: { $0.ramp.value(at: now) < $1.ramp.value(at: now) }) else { return }
-        reset(deck)
-        nextToken += 1
-        deck.token = nextToken
-        deck.track = track
-        deck.ramp = .steady(0)
-        front = deck
-        let token = deck.token
-        if let buffer = buffers[track] {
-            play(buffer, on: deck, at: now)
-        } else if let url = Self.url(for: track, in: bundle) {
-            // The deck waits (silent, marked `front`) until its track is decoded.
-            decode(url, index[track.rawValue]?.frames ?? 0) { [weak self] box in
-                guard let self, let box, deck.token == token, deck.track == track else { return }
-                self.store(box.buffer, for: track)
-                self.play(box.buffer, on: deck, at: self.clock())
+        if let current = currentTrack {
+            if current == wanted {
+                resume(current)
+                return
             }
+            if enabled, MusicPolicy.track(for: scene) == current {
+                pause(current, fade: fade)       // blocked for now: keep the position
+                return
+            }
+            fadeOutAndStop(current, fade: fade)
+            currentTrack = nil
+        }
+        guard let wanted, pendingStart == nil else { return }
+        let delay = MusicPolicy.startDelay(for: scene)
+        if delay == 0 {
+            begin(wanted)
+        } else {
+            let work = scheduler.schedule(after: delay) { [weak self] in
+                self?.pendingStart = nil
+                self?.begin(wanted)
+            }
+            pendingStart = (wanted, work)
         }
     }
 
-    private func play(_ buffer: AVAudioPCMBuffer, on deck: Deck, at now: TimeInterval) {
-        guard front === deck, wantedTrack == deck.track else { return }   // superseded while loading
-        engine.connect(deck.node, to: engine.mainMixerNode, format: buffer.format)
-        deck.node.volume = 0
-        deck.node.scheduleBuffer(buffer, at: nil, options: .loops)
-        deck.isScheduled = true
-        guard startEngineIfNeeded() else { return }
-        deck.node.play()
-        deck.ramp = VolumeRamp(from: 0, to: 1, start: now, duration: Self.fadeIn)
-        ensureTicking()
-    }
-
-    private func store(_ buffer: AVAudioPCMBuffer, for track: AnimalPairsMusicTrack) {
-        // Keep at most two decoded tracks (the ones on the decks).
-        let onDecks = Set(decks.compactMap(\.track))
-        buffers = buffers.filter { onDecks.contains($0.key) }
-        buffers[track] = buffer
-    }
-
-    /// Starts the engine once the session is active. While it is not, asks
-    /// the session controller to activate (off the main thread) and continues
-    /// in `sessionDidActivate`. The engine then keeps running while music may
-    /// play, so navigation and track changes never restart it.
-    @discardableResult
-    private func startEngineIfNeeded() -> Bool {
-        guard appActive, !interrupted else { return false }
-        if engine.isRunning { return true }
+    /// Makes `track` the current track and starts it from the beginning (or
+    /// lets it continue if it is still fading out from a moment ago).
+    private func begin(_ track: AnimalPairsMusicTrack) {
+        guard wantedTrack == track, currentTrack == nil || currentTrack == track else { return }
         guard session.allowsPlayback else {
-            session.activate { [weak self] in self?.sessionDidActivate() }
+            session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
+            return
+        }
+        guard let player = player(for: track) else { return }
+        stopWork[track]?.cancel()
+        stopWork[track] = nil
+        currentTrack = track
+        if !player.isPlaying {
+            player.currentTime = 0
+            player.volume = 0
+            guard start(player, track: track) else { return }
+        }
+        player.setVolume(targetVolume, fadeDuration: Self.fadeIn)
+        AudioDebugLog.note("music started: \(track.rawValue)")
+    }
+
+    /// Continues the current track from its position (after background, an
+    /// interruption, a route change…). Does nothing if it is already playing.
+    private func resume(_ track: AnimalPairsMusicTrack) {
+        stopWork[track]?.cancel()
+        stopWork[track] = nil
+        guard let player = players[track] else {
+            currentTrack = nil
+            begin(track)
+            return
+        }
+        if player.isPlaying {
+            player.setVolume(targetVolume, fadeDuration: Self.fadeIn)   // e.g. back from a fade-out
+            return
+        }
+        guard session.allowsPlayback else {
+            session.activate { [weak self] in self?.update(fade: Self.fadeOut) }
+            return
+        }
+        player.volume = 0
+        guard start(player, track: track) else { return }
+        player.setVolume(targetVolume, fadeDuration: Self.fadeIn)
+        AudioDebugLog.note("music resumed: \(track.rawValue) at \(positionText)")
+    }
+
+    /// `play()`, with one rebuild of the player if it fails; after that the
+    /// track is unavailable for this launch (no endless retries).
+    private func start(_ player: AVAudioPlayer, track: AnimalPairsMusicTrack) -> Bool {
+        if player.play() { return true }
+        AudioDebugLog.note("music play() failed: \(track.rawValue)")
+        let position = player.currentTime
+        players[track] = nil
+        guard !rebuilt.contains(track), let fresh = self.player(for: track) else {
+            markFailed(track)
             return false
         }
-        do {
-            try engine.start()
-            engineStarts += 1
+        rebuilt.insert(track)
+        fresh.currentTime = position
+        fresh.volume = 0
+        if fresh.play() {
+            AudioDebugLog.note("music recovered with a new player: \(track.rawValue)")
             return true
+        }
+        markFailed(track)
+        return false
+    }
+
+    private func pause(_ track: AnimalPairsMusicTrack, fade: TimeInterval) {
+        guard let player = players[track], player.isPlaying else { return }
+        player.setVolume(0, fadeDuration: fade)
+        stopWork[track]?.cancel()
+        stopWork[track] = scheduler.schedule(after: fade) { [weak self] in
+            guard let self, self.wantedTrack != track else { return }
+            player.pause()                              // position kept
+            self.stopWork[track] = nil
+        }
+    }
+
+    private func fadeOutAndStop(_ track: AnimalPairsMusicTrack, fade: TimeInterval) {
+        guard let player = players[track] else { return }
+        guard player.isPlaying else {
+            player.stop()
+            player.currentTime = 0
+            return
+        }
+        player.setVolume(0, fadeDuration: fade)
+        stopWork[track]?.cancel()
+        stopWork[track] = scheduler.schedule(after: fade) { [weak self] in
+            guard let self, self.currentTrack != track else { return }
+            player.stop()
+            player.currentTime = 0
+            self.stopWork[track] = nil
+        }
+    }
+
+    private func cancelPendingStart() {
+        pendingStart?.work.cancel()
+        pendingStart = nil
+    }
+
+    /// The track's player, created once and kept for the app's lifetime.
+    private func player(for track: AnimalPairsMusicTrack) -> AVAudioPlayer? {
+        if let existing = players[track] { return existing }
+        guard !failedTracks.contains(track), let url = Self.url(for: track, in: bundle) else { return nil }
+        do {
+            let player = try AVAudioPlayer(contentsOf: url)
+            player.numberOfLoops = -1                   // seamless loop of the whole file
+            player.volume = 0
+            player.prepareToPlay()
+            players[track] = player
+            return player
         } catch {
-            return false
+            AudioDebugLog.note("music file could not be loaded: \(track.rawValue) (\(error.localizedDescription))")
+            markFailed(track)
+            return nil
         }
     }
 
-    private func reset(_ deck: Deck) {
-        deck.node.stop()
-        deck.track = nil
-        deck.isScheduled = false
-        deck.ramp = .steady(0)
-        deck.node.volume = 0
+    private func markFailed(_ track: AnimalPairsMusicTrack) {
+        failedTracks.insert(track)
+        players[track] = nil
+        if currentTrack == track { currentTrack = nil }
+        AudioDebugLog.note("music track disabled for this launch: \(track.rawValue)")
     }
 
-    private func stopAllDecks() {
-        for deck in decks { reset(deck) }
-        front = nil
-        duckState.reset()
-    }
-
-    /// Applies fades and the duck at `now`; starts pending tracks; stops decks
-    /// whose fade-out finished; pauses the engine when nothing plays.
-    func tick(at now: TimeInterval) {
-        if let pending = pendingStart, now >= pending.at {
-            pendingStart = nil
-            if wantedTrack == pending.track { start(pending.track, at: now) }
-        }
-        let duck = duckState.level(at: now)
-        for deck in decks where deck.track != nil {
-            let level = deck.ramp.value(at: now)
-            deck.node.volume = Self.baseVolume * level * duck
-            // Free a deck once its fade-out has finished. Never the front deck:
-            // it may still be waiting (silent) for its track to be decoded.
-            if deck !== front && deck.ramp.to == 0 && deck.ramp.isFinished(at: now) { reset(deck) }
-        }
-        // Pause only when music can't be heard at all (switched off, another
-        // app playing…), not between tracks or screens.
-        if !isAudible && decks.allSatisfy({ $0.track == nil }) && pendingStart == nil && engine.isRunning {
-            engine.pause()
-        }
-    }
-
-    private var needsTicking: Bool {
-        pendingStart != nil || duckState.isActive(at: clock())
-            || decks.contains { $0.track != nil && !$0.ramp.isFinished(at: clock()) }
-            || decks.contains { $0 !== front && $0.track != nil && $0.ramp.to == 0 }
-    }
-
-    private func ensureTicking() {
-        guard ticker == nil else { return }
-        ticker = Task { @MainActor [weak self] in
-            while let self, self.needsTicking {
-                self.tick(at: self.clock())
-                try? await Task.sleep(nanoseconds: UInt64(Self.tickInterval * 1_000_000_000))
-            }
-            if let self {
-                self.tick(at: self.clock())
-                self.ticker = nil
-            }
-        }
+    private var positionText: String {
+        guard let track = currentTrack, let player = players[track] else { return "—" }
+        return "\(track.rawValue) \(String(format: "%.1f", player.currentTime)) s"
     }
 
     // MARK: Files
 
     static func url(for track: AnimalPairsMusicTrack, in bundle: Bundle) -> URL? {
-        bundle.url(forResource: track.rawValue, withExtension: "m4a")
-            ?? bundle.url(forResource: track.rawValue, withExtension: "m4a", subdirectory: "Music")
-    }
-
-    private static func loadIndex(_ bundle: Bundle) -> [String: TrackInfo] {
-        struct Index: Decodable { let tracks: [String: TrackInfo] }
-        guard let url = bundle.url(forResource: "music_tracks", withExtension: "json")
-                ?? bundle.url(forResource: "music_tracks", withExtension: "json", subdirectory: "Music"),
-              let data = try? Data(contentsOf: url),
-              let index = try? JSONDecoder().decode(Index.self, from: data) else { return [:] }
-        return index.tracks
-    }
-}
-
-/// A whole track decoded into memory, trimmed to its exact loop length.
-/// Created off the main thread, then handed to the main actor.
-final class MusicBuffer: @unchecked Sendable {
-    let buffer: AVAudioPCMBuffer
-
-    init(url: URL, expectedFrames: Int) throws {
-        let file = try AVAudioFile(forReading: url)
-        guard let full = AVAudioPCMBuffer(pcmFormat: file.processingFormat,
-                                          frameCapacity: AVAudioFrameCount(file.length)) else {
-            throw CocoaError(.fileReadCorruptFile)
-        }
-        try file.read(into: full)
-        guard let range = LoopTrim.range(decodedFrames: Int(full.frameLength), expectedFrames: expectedFrames),
-              let trimmed = AVAudioPCMBuffer(pcmFormat: full.format, frameCapacity: AVAudioFrameCount(range.count)),
-              let source = full.floatChannelData, let target = trimmed.floatChannelData else {
-            buffer = full
-            return
-        }
-        for channel in 0..<Int(full.format.channelCount) {
-            target[channel].update(from: source[channel].advanced(by: range.lowerBound), count: range.count)
-        }
-        trimmed.frameLength = AVAudioFrameCount(range.count)
-        buffer = trimmed
+        bundle.url(forResource: track.rawValue, withExtension: "caf")
+            ?? bundle.url(forResource: track.rawValue, withExtension: "caf", subdirectory: "Music")
     }
 }
