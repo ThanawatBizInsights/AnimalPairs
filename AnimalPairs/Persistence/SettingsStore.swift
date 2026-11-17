@@ -12,7 +12,8 @@ final class SettingsStore {
         static let music = "settings.musicEnabled"
         static let mode = "settings.lastMode"
         static let board = "settings.lastBoard"
-        static let welcome = "settings.hasSeenWelcome"
+        /// Retired: the first-launch Welcome page was removed. Deleted on launch.
+        static let retiredWelcome = "settings.hasSeenWelcome"
     }
 
     private let defaults: UserDefaults
@@ -25,7 +26,6 @@ final class SettingsStore {
     /// install; a choice the family already made is kept (the key only exists
     /// once someone has set it).
     var musicEnabled: Bool { didSet { defaults.set(musicEnabled, forKey: Key.music) } }
-    var hasSeenWelcome: Bool { didSet { defaults.set(hasSeenWelcome, forKey: Key.welcome) } }
     var lastConfiguration: GameConfiguration {
         didSet {
             defaults.set(lastConfiguration.mode.rawValue, forKey: Key.mode)
@@ -41,6 +41,6 @@ final class SettingsStore {
         let mode = defaults.string(forKey: Key.mode).flatMap(GameMode.init(rawValue:)) ?? .classic
         let board = BoardSize(rawValue: defaults.integer(forKey: Key.board)) ?? .six
         lastConfiguration = GameConfiguration(mode: mode, boardSize: board)
-        hasSeenWelcome = defaults.bool(forKey: Key.welcome)
+        defaults.removeObject(forKey: Key.retiredWelcome)
     }
 }

@@ -22,7 +22,6 @@ final class MusicAppTests: XCTestCase {
 
     func testOneSceneAndTrackPerScreen() {
         XCTAssertEqual(AppModel.musicScene(for: .home), .menus)
-        XCTAssertEqual(AppModel.musicScene(for: .welcome), .menus)
         XCTAssertEqual(AppModel.musicScene(for: .setup), .menus)
         XCTAssertEqual(AppModel.musicScene(for: .game), .game)
         XCTAssertEqual(AppModel.musicScene(for: .parents), .parents)

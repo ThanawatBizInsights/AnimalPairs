@@ -26,8 +26,6 @@ struct RootView: View {
             switch model.route {
             case .opening:
                 OpeningVideoView().transition(.opacity)
-            case .welcome:
-                WelcomeView().transition(.opacity)
             case .home:
                 HomeView().transition(.opacity)
             case .setup:

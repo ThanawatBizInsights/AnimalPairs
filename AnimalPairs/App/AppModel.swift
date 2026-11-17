@@ -6,8 +6,6 @@ import SwiftUI
 enum Route: Equatable {
     /// The opening video, once per app launch.
     case opening
-    /// First launch only.
-    case welcome
     case home
     case setup
     case game
@@ -65,10 +63,11 @@ final class AppModel {
         self.configuration = configuration
         // The opening video plays once per launch (never when returning from a
         // board); without the file, the app goes straight on.
+        // Every launch (first launch included) then goes straight to Home.
         if playsOpeningVideo && OpeningVideo.url(in: contentBundle) != nil {
             route = .opening
         } else {
-            route = settings.hasSeenWelcome ? .home : .welcome
+            route = .home
         }
         localizer = Localizer()
         purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
@@ -112,7 +111,7 @@ final class AppModel {
     static func musicScene(for route: Route) -> MusicScene {
         switch route {
         case .opening: .silent                       // the video has its own soundtrack
-        case .welcome, .home, .setup: .menus
+        case .home, .setup: .menus
         case .game: .game
         case .results: .results
         case .parentGate, .parents: .parents
@@ -152,10 +151,10 @@ final class AppModel {
     /// The opening video's audio plays only if Sound Effects or Music is on.
     var openingVideoAudible: Bool { settings.soundEnabled || settings.musicEnabled }
 
-    /// Leaves the opening video for Home (or Welcome on first launch).
+    /// Leaves the opening video for Home.
     func finishOpening() {
         guard route == .opening else { return }
-        route = settings.hasSeenWelcome ? .home : .welcome
+        route = .home
         refreshResumableRound()
     }
 
@@ -172,13 +171,6 @@ final class AppModel {
         audio.play(.back)
         leaveGameIfNeeded()
         parentAccess.revoke()
-        route = .home
-        refreshResumableRound()
-    }
-
-    func finishWelcome() {
-        audio.play(.buttonTap)
-        settings.hasSeenWelcome = true
         route = .home
         refreshResumableRound()
     }

@@ -39,10 +39,10 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 | --- | --- | --- |
 | App icon (1024 px) | `AppIcon.appiconset` ← `Design/Reference/Supplied/ui_app_icon.png` | final art supplied. Delivered with white pre-rounded corners; `build_ui_graphics.py` fills them from the surrounding art (iPadOS applies its own mask). Sign-off pending — ideally request a square, unrounded master from the designer |
 | “Animal Pairs” wordmark | `UI/brand_wordmark` ← `ui_wordmark.png` | final art supplied — background haze removed |
-| Group illustration (all ten) | `UI/home_group_animals` ← `ui_group_animals.png` | final art supplied — used on Welcome and Home only, never as a card image |
+| Group illustration (all ten) | `UI/home_group_animals` ← `ui_group_animals.png` | final art supplied — **currently not shown** (it was only on the removed introduction page); still bundled, never a card image |
 | Trophy badge | `UI/results_trophy` ← `ui_trophy_badge.png` | final art supplied — localized “Well done!” is drawn on the ribbon by the app |
 | Card back | `UI/card_back` ← `ui_card_back.webp` | final art supplied — used on every card; the board uses its 0.735 width:height ratio so it is never stretched |
-| Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Welcome, Home and Results, never on the game board |
+| Floral corner accents | `UI/decor_corner_*` ← `ui_floral_corners.png` | final art supplied — split into four corners; used on Home and Results, never on the game board |
 | ElevenLabs batch 1 (8 core sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled |
 | ElevenLabs batch 2 (11 interface & reward sounds) | `AnimalPairs/Resources/Sounds/` | **approved**, bundled; `star_earn`, `badge_reveal`, `new_best` unused (no stars, badges or best scores) |
 | Reward sound revisions (`star_earn_v2`, `badge_reveal_v2`, `new_best_v2`, `try_again_v2`) | `Design/Audio/Review/` | **awaiting your review**; approving one replaces the bundled file of the same name |

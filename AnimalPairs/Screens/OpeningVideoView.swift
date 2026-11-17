@@ -19,8 +19,8 @@ enum OpeningVideo {
     }
 }
 
-/// Plays the opening video once per app launch, then hands over to Home (or
-/// Welcome on first launch). Always skippable; any failure simply continues.
+/// Plays the opening video once per app launch, then hands over to Home.
+/// Always skippable; any failure simply continues.
 struct OpeningVideoView: View {
     @Environment(AppModel.self) private var model
     @State private var player: AVPlayer?

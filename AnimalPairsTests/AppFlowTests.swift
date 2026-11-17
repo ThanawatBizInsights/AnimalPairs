@@ -95,11 +95,10 @@ final class AppFlowTests: XCTestCase {
         let model = AppTestSupport.makeModel(defaults: defaults, playsOpeningVideo: true)
         XCTAssertEqual(model.route, .opening)
         model.finishOpening()
-        XCTAssertEqual(model.route, .welcome, "first launch continues to Welcome")
+        XCTAssertEqual(model.route, .home, "first launch goes straight to Home after the video")
         model.finishOpening()
-        XCTAssertEqual(model.route, .welcome, "finishing twice is harmless")
+        XCTAssertEqual(model.route, .home, "finishing twice is harmless")
 
-        model.finishWelcome()
         try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six))
         model.goHome()
         XCTAssertEqual(model.route, .home, "returning from a board never replays the video")
@@ -111,11 +110,11 @@ final class AppFlowTests: XCTestCase {
     }
 
     func testBackgroundingDuringTheVideoContinuesToHome() {
-        let defaults = AppTestSupport.isolatedDefaults()
-        defaults.set(true, forKey: "settings.hasSeenWelcome")
-        let model = AppTestSupport.makeModel(defaults: defaults, playsOpeningVideo: true)
+        let model = AppTestSupport.makeModel(playsOpeningVideo: true)
         model.scenePhaseChanged(.background)
         XCTAssertEqual(model.route, .home)
+        model.scenePhaseChanged(.active)
+        XCTAssertEqual(model.route, .home, "returning from the background stays on Home")
     }
 
     func testOpeningVideoAudioFollowsSoundAndMusicSettings() {
@@ -163,14 +162,20 @@ final class AppFlowTests: XCTestCase {
         XCTAssertTrue(audio.loadedVoiceLines.isEmpty, "no voice recordings are bundled")
     }
 
-    func testWelcomeShowsOnFirstLaunchOnly() {
+    func testEveryLaunchOpensHomeWithoutAnIntroductionPage() {
+        // Fresh install (empty settings), ordinary relaunch, and an install
+        // that still carries the old "seen the introduction" flag.
         let defaults = AppTestSupport.isolatedDefaults()
-        let first = AppTestSupport.makeModel(defaults: defaults)
-        XCTAssertEqual(first.route, .welcome)
-        first.finishWelcome()
-        XCTAssertEqual(first.route, .home)
-        let second = AppTestSupport.makeModel(defaults: defaults)
-        XCTAssertEqual(second.route, .home)
+        let fresh = AppTestSupport.makeModel(defaults: defaults)
+        XCTAssertEqual(fresh.route, .home)
+        XCTAssertEqual(AppTestSupport.makeModel(defaults: defaults).route, .home)
+        let upgraded = AppTestSupport.isolatedDefaults()
+        upgraded.set(false, forKey: "settings.hasSeenWelcome")
+        XCTAssertEqual(AppTestSupport.makeModel(defaults: upgraded).route, .home)
+        XCTAssertNil(upgraded.object(forKey: "settings.hasSeenWelcome"), "the retired flag is cleaned up")
+        let afterVideo = AppTestSupport.makeModel(defaults: AppTestSupport.isolatedDefaults(), playsOpeningVideo: true)
+        afterVideo.finishOpening()
+        XCTAssertEqual(afterVideo.route, .home)
     }
 
     func testStarterCanStartFreeBoardsButNotPremium() throws {

@@ -26,25 +26,6 @@ struct Wordmark: View {
     }
 }
 
-/// All ten friends together. Bobs very gently unless Reduce Motion is on.
-struct GroupIllustration: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @State private var lifted = false
-
-    var body: some View {
-        Image(BrandGraphic.groupAnimals)
-            .resizable()
-            .interpolation(.high)
-            .scaledToFit()
-            .offset(y: lifted && !reduceMotion ? -6 : 0)
-            .accessibilityHidden(true)
-            .onAppear {
-                guard !reduceMotion else { return }
-                withAnimation(.easeInOut(duration: 2.2).repeatForever(autoreverses: true)) { lifted = true }
-            }
-    }
-}
-
 /// Trophy badge with a short localized message on its ribbon.
 struct TrophyBadge: View {
     let ribbonText: String

@@ -88,7 +88,7 @@ a link or product works.
 AnimalPairs.xcodeproj         Xcode 16 project; shared scheme with StoreKit config
 AnimalPairs/                  SwiftUI app (synchronized folder)
   App/                        App entry, AppModel (routing, lifecycle), configuration
-  Screens/                    Welcome, Home, Setup, Game board, Pause/Results, Parental gate, Parents
+  Screens/                    Home, Setup, Game board, Pause/Results, Parental gate, Parents
   Game/                       GameSession (wraps the engine), sounds
   Persistence/                SwiftData history (versioned schema), settings
   Purchases/                  StoreKit 2 PurchaseManager
@@ -287,7 +287,8 @@ Settings, each remembered between launches:
 ### Opening video
 
 `AnimalPairs/Resources/Video/opening_video.mp4` (720×1280 portrait, 8 s, H.264 +
-AAC) plays **once per app launch**, before Welcome (first launch) or Home. It
+AAC) plays **once per app launch**, then hands over to Home (there is no separate
+introduction page, on first launch or ever). It
 never replays when returning from a board. It is aspect-fit on a matching
 backdrop so no animal is cropped, has a native **Skip** button, and moves on by
 itself when it ends, fails to load, runs longer than 15 s, or the app goes to
@@ -362,7 +363,7 @@ History of the silent music:
 
 | Screen | Track (`AnimalPairs/Resources/Music/`) | Length |
 | --- | --- | --- |
-| Home, Welcome, choosing a board **and playing** (one continuous loop — moving between them never restarts it) | `music_playground.m4a` | 40.62 s loop |
+| Home, choosing a board **and playing** (one continuous loop — moving between them never restarts it) | `music_playground.m4a` | 40.62 s loop |
 | Results | `music_celebration.m4a`, fading in 3 s after the jingle | 36.27 s loop |
 | Parents area and gate | `music_meadow.m4a` | 40.02 s loop |
 | Opening video | none (the video has its own soundtrack) | — |
