@@ -51,7 +51,49 @@ public struct RoundSnapshot: Codable, Equatable, Sendable {
     /// Validates the snapshot against the current content and access level and
     /// rebuilds the round. Never crashes on bad data; throws instead.
     public func restore(catalog: ContentCatalog, policy: ContentAccessPolicy) throws -> RoundState {
-        try validate(catalog: catalog, policy: policy)
+        let snapshot = migratingRetiredPoses(catalog: catalog, policy: policy)
+        try snapshot.validate(catalog: catalog, policy: policy)
+        return snapshot.rebuild()
+    }
+
+    /// Replaces pictures whose pose has been retired from the catalogue (e.g.
+    /// Stretch) with another pose of the same animal, so a round saved before
+    /// the change still resumes. Both cards of a pair get the same replacement,
+    /// matched pairs stay matched, and the replacement is a pose that is
+    /// installed, available at this access level, not already on the board
+    /// and — in Exact Pose — not a look-alike of that animal's other pose.
+    /// Deterministic (first suitable pose in catalogue order). Anything that
+    /// cannot be migrated is left for `validate` to reject as before.
+    public func migratingRetiredPoses(catalog: ContentCatalog, policy: ContentAccessPolicy) -> RoundSnapshot {
+        let keys = Set(tiles.map(\.pairKey))
+        let retired = keys.filter { catalog.artwork($0) == nil }.sorted()
+        guard !retired.isEmpty else { return self }
+        var used = keys.subtracting(retired)
+        var replacement: [PairKey: PairKey] = [:]
+        for key in retired {
+            let parts = key.rawValue.split(separator: ".", maxSplits: 1)
+            guard parts.count == 2 else { continue }
+            let animal = CharacterID(rawValue: String(parts[0]))
+            let definition = catalog.manifest.character(animal)
+            let others = used.compactMap(catalog.artwork).filter { $0.characterID == animal }
+            let candidate = catalog.manifest.artworks(for: animal).first { art in
+                !used.contains(art.assetID) && catalog.installedAssets.contains(art.assetID) && policy.isAvailable(art)
+                    && (configuration.mode == .classic
+                        ? others.isEmpty
+                        : others.allSatisfy { definition?.canShareBoard($0.poseID, art.poseID) ?? ($0.poseID != art.poseID) })
+            }
+            guard let candidate else { continue }
+            replacement[key] = candidate.assetID
+            used.insert(candidate.assetID)
+        }
+        var migrated = self
+        migrated.tiles = tiles.map { tile in
+            TileRecord(id: tile.id, pairKey: replacement[tile.pairKey] ?? tile.pairKey, face: tile.face)
+        }
+        return migrated
+    }
+
+    private func rebuild() -> RoundState {
         let restoredTiles = tiles.map { Tile(id: $0.id, pairKey: $0.pairKey, face: $0.face) }
         let phase: RoundPhase = openTileID.map { .oneRevealed($0) } ?? .ready
         return RoundState(roundID: roundID, configuration: configuration, tiles: restoredTiles, phase: phase,

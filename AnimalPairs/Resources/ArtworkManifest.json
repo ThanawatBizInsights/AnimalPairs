@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "manifestVersion": "2026.11.2",
+  "manifestVersion": "2026.11.3",
   "characters": [
     {
       "id": "momo",
@@ -12,10 +12,6 @@
           "signature",
           "wave",
           "celebrate"
-        ],
-        [
-          "play",
-          "stretch"
         ]
       ]
     },
@@ -85,8 +81,7 @@
       "lookalikePoseGroups": [
         [
           "signature",
-          "wave",
-          "stretch"
+          "wave"
         ],
         [
           "play",
@@ -116,8 +111,7 @@
         [
           "signature",
           "wave",
-          "celebrate",
-          "stretch"
+          "celebrate"
         ]
       ]
     },
@@ -127,10 +121,6 @@
       "speciesKey": "character.rusty.species",
       "defaultPoseID": "signature",
       "lookalikePoseGroups": [
-        [
-          "signature",
-          "stretch"
-        ],
         [
           "wave",
           "celebrate"
@@ -146,7 +136,6 @@
         [
           "signature",
           "wave",
-          "stretch",
           "celebrate"
         ]
       ]
@@ -194,22 +183,42 @@
       "status": "final"
     },
     {
-      "assetID": "momo.stretch",
-      "characterID": "momo",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "momo_stretch",
-      "accessibilityKey": "art.momo.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "momo.celebrate",
       "characterID": "momo",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "momo_celebrate",
       "accessibilityKey": "art.momo.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.football",
+      "characterID": "momo",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "momo_football",
+      "accessibilityKey": "art.momo.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.golf",
+      "characterID": "momo",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "momo_golf",
+      "accessibilityKey": "art.momo.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "momo.cooking",
+      "characterID": "momo",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "momo_cooking",
+      "accessibilityKey": "art.momo.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -254,22 +263,42 @@
       "status": "final"
     },
     {
-      "assetID": "iris.stretch",
-      "characterID": "iris",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "iris_stretch",
-      "accessibilityKey": "art.iris.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "iris.celebrate",
       "characterID": "iris",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "iris_celebrate",
       "accessibilityKey": "art.iris.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "iris.football",
+      "characterID": "iris",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "iris_football",
+      "accessibilityKey": "art.iris.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "iris.golf",
+      "characterID": "iris",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "iris_golf",
+      "accessibilityKey": "art.iris.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "iris.cooking",
+      "characterID": "iris",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "iris_cooking",
+      "accessibilityKey": "art.iris.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -314,22 +343,42 @@
       "status": "final"
     },
     {
-      "assetID": "nori.stretch",
-      "characterID": "nori",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "nori_stretch",
-      "accessibilityKey": "art.nori.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "nori.celebrate",
       "characterID": "nori",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "nori_celebrate",
       "accessibilityKey": "art.nori.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.football",
+      "characterID": "nori",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "nori_football",
+      "accessibilityKey": "art.nori.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.golf",
+      "characterID": "nori",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "nori_golf",
+      "accessibilityKey": "art.nori.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "nori.cooking",
+      "characterID": "nori",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "nori_cooking",
+      "accessibilityKey": "art.nori.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -374,22 +423,42 @@
       "status": "final"
     },
     {
-      "assetID": "sprout.stretch",
-      "characterID": "sprout",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "sprout_stretch",
-      "accessibilityKey": "art.sprout.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "sprout.celebrate",
       "characterID": "sprout",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "sprout_celebrate",
       "accessibilityKey": "art.sprout.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.football",
+      "characterID": "sprout",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "sprout_football",
+      "accessibilityKey": "art.sprout.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.golf",
+      "characterID": "sprout",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "sprout_golf",
+      "accessibilityKey": "art.sprout.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sprout.cooking",
+      "characterID": "sprout",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "sprout_cooking",
+      "accessibilityKey": "art.sprout.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -434,22 +503,42 @@
       "status": "final"
     },
     {
-      "assetID": "mochi.stretch",
-      "characterID": "mochi",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "mochi_stretch",
-      "accessibilityKey": "art.mochi.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "mochi.celebrate",
       "characterID": "mochi",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "mochi_celebrate",
       "accessibilityKey": "art.mochi.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.football",
+      "characterID": "mochi",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "mochi_football",
+      "accessibilityKey": "art.mochi.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.golf",
+      "characterID": "mochi",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "mochi_golf",
+      "accessibilityKey": "art.mochi.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "mochi.cooking",
+      "characterID": "mochi",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "mochi_cooking",
+      "accessibilityKey": "art.mochi.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -494,22 +583,42 @@
       "status": "final"
     },
     {
-      "assetID": "sunny.stretch",
-      "characterID": "sunny",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "sunny_stretch",
-      "accessibilityKey": "art.sunny.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "sunny.celebrate",
       "characterID": "sunny",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "sunny_celebrate",
       "accessibilityKey": "art.sunny.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.football",
+      "characterID": "sunny",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "sunny_football",
+      "accessibilityKey": "art.sunny.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.golf",
+      "characterID": "sunny",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "sunny_golf",
+      "accessibilityKey": "art.sunny.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "sunny.cooking",
+      "characterID": "sunny",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "sunny_cooking",
+      "accessibilityKey": "art.sunny.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -554,22 +663,42 @@
       "status": "final"
     },
     {
-      "assetID": "maple.stretch",
-      "characterID": "maple",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "maple_stretch",
-      "accessibilityKey": "art.maple.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "maple.celebrate",
       "characterID": "maple",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "maple_celebrate",
       "accessibilityKey": "art.maple.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.football",
+      "characterID": "maple",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "maple_football",
+      "accessibilityKey": "art.maple.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.golf",
+      "characterID": "maple",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "maple_golf",
+      "accessibilityKey": "art.maple.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "maple.cooking",
+      "characterID": "maple",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "maple_cooking",
+      "accessibilityKey": "art.maple.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -614,22 +743,42 @@
       "status": "final"
     },
     {
-      "assetID": "clover.stretch",
-      "characterID": "clover",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "clover_stretch",
-      "accessibilityKey": "art.clover.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "clover.celebrate",
       "characterID": "clover",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "clover_celebrate",
       "accessibilityKey": "art.clover.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.football",
+      "characterID": "clover",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "clover_football",
+      "accessibilityKey": "art.clover.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.golf",
+      "characterID": "clover",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "clover_golf",
+      "accessibilityKey": "art.clover.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "clover.cooking",
+      "characterID": "clover",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "clover_cooking",
+      "accessibilityKey": "art.clover.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -674,22 +823,42 @@
       "status": "final"
     },
     {
-      "assetID": "rusty.stretch",
-      "characterID": "rusty",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "rusty_stretch",
-      "accessibilityKey": "art.rusty.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "rusty.celebrate",
       "characterID": "rusty",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "rusty_celebrate",
       "accessibilityKey": "art.rusty.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.football",
+      "characterID": "rusty",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "rusty_football",
+      "accessibilityKey": "art.rusty.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.golf",
+      "characterID": "rusty",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "rusty_golf",
+      "accessibilityKey": "art.rusty.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "rusty.cooking",
+      "characterID": "rusty",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "rusty_cooking",
+      "accessibilityKey": "art.rusty.cooking",
       "tier": "premium",
       "status": "final"
     },
@@ -734,22 +903,42 @@
       "status": "final"
     },
     {
-      "assetID": "pebble.stretch",
-      "characterID": "pebble",
-      "poseID": "stretch",
-      "version": 1,
-      "resourceName": "pebble_stretch",
-      "accessibilityKey": "art.pebble.stretch",
-      "tier": "premium",
-      "status": "final"
-    },
-    {
       "assetID": "pebble.celebrate",
       "characterID": "pebble",
       "poseID": "celebrate",
       "version": 1,
       "resourceName": "pebble_celebrate",
       "accessibilityKey": "art.pebble.celebrate",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.football",
+      "characterID": "pebble",
+      "poseID": "football",
+      "version": 1,
+      "resourceName": "pebble_football",
+      "accessibilityKey": "art.pebble.football",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.golf",
+      "characterID": "pebble",
+      "poseID": "golf",
+      "version": 1,
+      "resourceName": "pebble_golf",
+      "accessibilityKey": "art.pebble.golf",
+      "tier": "premium",
+      "status": "final"
+    },
+    {
+      "assetID": "pebble.cooking",
+      "characterID": "pebble",
+      "poseID": "cooking",
+      "version": 1,
+      "resourceName": "pebble_cooking",
+      "accessibilityKey": "art.pebble.cooking",
       "tier": "premium",
       "status": "final"
     }

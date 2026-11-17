@@ -172,4 +172,54 @@ final class SnapshotTests: XCTestCase {
         }
         XCTAssertLessThanOrEqual(store.quarantinedFiles.count, RoundSnapshotStore.maxQuarantinedFiles)
     }
+
+    // MARK: Retired poses (e.g. Stretch)
+
+    /// A board dealt while Stretch existed, saved, then restored with a
+    /// catalogue that no longer has it.
+    private func savedRoundWithStretch(_ mode: GameMode, seed: UInt64) throws -> (RoundSnapshot, Set<PairKey>) {
+        let old = Fixtures.manifest(poses: ["signature", "play", "nap", "stretch"])
+        var rng = SeededGenerator(seed: seed)
+        var tiles: [Tile] = []
+        repeat {   // deal until a Stretch picture is on the board
+            tiles = try DeckBuilder.makeBoard(configuration: GameConfiguration(mode: mode, boardSize: .twelve),
+                                              catalog: Fixtures.catalog(old), policy: Fixtures.full, using: &rng)
+        } while !tiles.contains { $0.pairKey.rawValue.hasSuffix(".stretch") }
+        var state = RoundState(configuration: GameConfiguration(mode: mode, boardSize: .twelve), tiles: tiles)
+        // Match the Stretch pair, so a matched retired pair must stay matched.
+        // (A board may hold Stretch pictures of two animals: match one pair.)
+        let key = try XCTUnwrap(state.tiles.first { $0.pairKey.rawValue.hasSuffix(".stretch") }?.pairKey)
+        let pair = state.tiles.filter { $0.pairKey == key }
+        _ = state.tap(pair[0].id)
+        if case .revealedSecond(let r) = state.tap(pair[1].id) { _ = state.finishResolution(token: r.token) }
+        XCTAssertEqual(state.matchedPairs, 1)
+        let snapshot = try XCTUnwrap(RoundSnapshot(state: state, manifestVersion: "old"))
+        return (snapshot, [key])
+    }
+
+    func testRoundsSavedWithARetiredPoseStillResume() throws {
+        let current = Fixtures.catalog(Fixtures.manifest(poses: ["signature", "play", "nap", "football"]))
+        for mode in GameMode.allCases {
+            for seed in 1...25 as ClosedRange<UInt64> {
+                let (snapshot, retired) = try savedRoundWithStretch(mode, seed: seed)
+                let restored = try snapshot.restore(catalog: current, policy: Fixtures.full)
+                XCTAssertFalse(restored.tiles.contains { $0.pairKey.rawValue.hasSuffix(".stretch") }, "no Stretch left")
+                XCTAssertEqual(restored.tiles.map(\.id), snapshot.tiles.map(\.id), "same layout")
+                XCTAssertEqual(restored.matchedPairs, 1, "the matched pair stays matched")
+                let byKey = Dictionary(grouping: restored.tiles, by: \.pairKey)
+                XCTAssertTrue(byKey.values.allSatisfy { $0.count == 2 }, "both cards of a pair share one picture")
+                // Same animal as before.
+                let oldAnimal = retired.first!.rawValue.split(separator: ".")[0]
+                let migrated = restored.tiles.first { $0.face == .matched }!.pairKey
+                XCTAssertEqual(migrated.rawValue.split(separator: ".")[0], oldAnimal)
+                XCTAssertNotNil(current.artwork(migrated))
+            }
+        }
+    }
+
+    func testRoundsWithoutRetiredPosesAreUnchanged() throws {
+        let state = try midGameState()
+        let snapshot = try XCTUnwrap(RoundSnapshot(state: state, manifestVersion: "test"))
+        XCTAssertEqual(snapshot.migratingRetiredPoses(catalog: Fixtures.catalog(), policy: Fixtures.full), snapshot)
+    }
 }

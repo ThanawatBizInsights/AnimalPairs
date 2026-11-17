@@ -109,10 +109,12 @@ backend/                      Optional FastAPI service (not used by the app)
 random generator: every pair key (the exact `AssetID`) appears exactly twice;
 Classic uses distinct animals; Exact Pose uses at least two animals in two
 poses each (for 3 pairs: two poses of one animal plus one other). Each animal
-has six poses (signature, play, nap, wave, stretch, celebrate); Exact Pose never
+has eight poses (signature, play, nap, wave, celebrate, football, golf, cooking); Exact Pose never
 deals two poses of one animal that the manifest marks as look-alikes
 (`lookalikePoseGroups`), so the difference is always clear. Both cards of a
 pair are the same picture, and a card's picture never changes during a round.
+A round saved with a pose that has since been retired (Stretch) resumes with
+another pose of the same animal instead of being discarded.
 `RoundState` is the serial state machine `ready → oneRevealed → resolving →
 ready/completed` with an orthogonal pause flag; it rejects taps on matched
 cards, on the open card, and during resolution, counts one attempt per second
@@ -159,7 +161,7 @@ API used (UserDefaults).
 | --- | --- |
 | Classic mode | **Exact Pose** mode |
 | 6- and 12-card boards | **16- and 20-card** boards |
-| The 10 default animal pictures | **50 more pictures**: every friend playing, napping, waving, stretching and celebrating (see ASSET_CHECKLIST) |
+| The 10 default animal pictures | **70 more pictures**: every friend playing, napping, waving, celebrating, playing football, playing golf and cooking (see ASSET_CHECKLIST) |
 | Sounds, animal clips, hints, progress, Parents | — |
 
 Nothing that was free before is locked. Unlocking, restoring or redeeming never
@@ -213,7 +215,7 @@ Change it in three places: `PRODUCT_BUNDLE_IDENTIFIER`, `AP_FULL_UNLOCK_PRODUCT_
    **Non-Consumable**, reference name **Full Game Unlock**, the product ID above.
 3. Availability (all territories you sell in), a price, Family Sharing (on in
    the local config), an English localization (display name "Full Game",
-   description "Adds Exact Pose, the 16- and 20-card boards and 50 more animal
+   description "Adds Exact Pose, the 16- and 20-card boards and 70 more animal
    pictures."), a review screenshot of the Parents section and review notes
    (the adult gate asks a multiplication question written in words before Parents opens).
 4. Submit the in-app purchase **with an app version** (a first in-app purchase is

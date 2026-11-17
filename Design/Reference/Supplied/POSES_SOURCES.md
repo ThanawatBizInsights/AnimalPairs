@@ -57,3 +57,44 @@ Copied unchanged from the supplied ZIP files; the app's image sets are built fro
 | `Alternates/rusty_nap_alternate.png` | Play_and_Nap.zip | Rusty's Cozy Red Panda Nap-6.png |
 
 Rusty had two nap illustrations. `rusty_nap.png` ("Sleeping red panda cutout-11") is used: it is on the same 1254 × 1254 canvas as every other pose and shows Rusty's face clearly. The other ("Rusty's Cozy Red Panda Nap-6", 1536 × 1024) is kept in `Alternates/` and not used.
+
+## Football, Golf and Cooking (added 17 November 2026)
+
+| File | From | Original filename |
+| --- | --- | --- |
+| `momo_football.png` | Animal_Pairs_Football.zip | momo_football.png |
+| `iris_football.png` | Animal_Pairs_Football.zip | iris_football.png |
+| `nori_football.png` | Animal_Pairs_Football.zip | nori_football.png |
+| `sprout_football.png` | Animal_Pairs_Football.zip | sprout_football.png |
+| `mochi_football.png` | Animal_Pairs_Football.zip | mochi_football.png |
+| `sunny_football.png` | Animal_Pairs_Football.zip | sunny_football.png |
+| `maple_football.png` | Animal_Pairs_Football.zip | maple_football.png |
+| `clover_football.png` | Animal_Pairs_Football.zip | clover_football.png |
+| `rusty_football.png` | Animal_Pairs_Football.zip | rusty_football.png |
+| `pebble_football.png` | Animal_Pairs_Football.zip | pebble_football.png |
+| `momo_golf.png` | Animal_Pairs_Golf.zip | momo_golf.png |
+| `iris_golf.png` | Animal_Pairs_Golf.zip | iris_golf.png |
+| `nori_golf.png` | Animal_Pairs_Golf.zip | nori_golf.png |
+| `sprout_golf.png` | Animal_Pairs_Golf.zip | sprout_golf.png |
+| `mochi_golf.png` | Animal_Pairs_Golf.zip | mochi_golf.png |
+| `sunny_golf.png` | Animal_Pairs_Golf.zip | sunny_golf.png |
+| `maple_golf.png` | Animal_Pairs_Golf.zip | maple_golf.png |
+| `clover_golf.png` | Animal_Pairs_Golf.zip | clover_golf.png |
+| `rusty_golf.png` | Animal_Pairs_Golf.zip | rusty_golf.png |
+| `pebble_golf.png` | Animal_Pairs_Golf.zip | pebble_golf.png |
+| `momo_cooking.png` | Animal_Pairs_Cooking.zip | momo_cooking.png |
+| `iris_cooking.png` | Animal_Pairs_Cooking.zip | iris_cooking.png |
+| `nori_cooking.png` | Animal_Pairs_Cooking.zip | nori_cooking.png |
+| `sprout_cooking.png` | Animal_Pairs_Cooking.zip | sprout_cooking.png |
+| `mochi_cooking.png` | Animal_Pairs_Cooking.zip | mochi_cooking.png |
+| `sunny_cooking.png` | Animal_Pairs_Cooking.zip | sunny_cooking.png |
+| `maple_cooking.png` | Animal_Pairs_Cooking.zip | maple_cooking.png |
+| `clover_cooking.png` | Animal_Pairs_Cooking.zip | clover_cooking.png |
+| `rusty_cooking.png` | Animal_Pairs_Cooking.zip | rusty_cooking.png |
+| `pebble_cooking.png` | Animal_Pairs_Cooking.zip | pebble_cooking.png |
+
+No earlier or corrected versions of these 30 existed in the project, so nothing was overwritten.
+
+## Retired: Stretch
+
+The 10 `<animal>_stretch.png` sources were moved to `Retired/` when Stretch was removed from the game. They are not used by the app.

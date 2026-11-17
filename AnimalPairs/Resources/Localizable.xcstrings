@@ -56,6 +56,39 @@
         }
       }
     },
+    "art.clover.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.clover.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, kicking a football"
+          }
+        }
+      }
+    },
+    "art.clover.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Clover the turtle, playing golf"
+          }
+        }
+      }
+    },
     "art.clover.nap": {
       "extractionState": "manual",
       "localizations": {
@@ -89,17 +122,6 @@
         }
       }
     },
-    "art.clover.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Clover the turtle, stretching the neck forward"
-          }
-        }
-      }
-    },
     "art.clover.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -118,6 +140,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Iris the kitten, standing and cheering, paws up"
+          }
+        }
+      }
+    },
+    "art.iris.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.iris.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, kicking a football"
+          }
+        }
+      }
+    },
+    "art.iris.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Iris the kitten, playing golf"
           }
         }
       }
@@ -155,17 +210,6 @@
         }
       }
     },
-    "art.iris.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Iris the kitten, stretching with front paws forward"
-          }
-        }
-      }
-    },
     "art.iris.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -184,6 +228,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Maple the bear, cheering with both paws up"
+          }
+        }
+      }
+    },
+    "art.maple.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.maple.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, kicking a football"
+          }
+        }
+      }
+    },
+    "art.maple.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Maple the bear, playing golf"
           }
         }
       }
@@ -221,17 +298,6 @@
         }
       }
     },
-    "art.maple.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Maple the bear, standing and stretching up tall"
-          }
-        }
-      }
-    },
     "art.maple.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -250,6 +316,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Mochi the rabbit, leaping with paws up"
+          }
+        }
+      }
+    },
+    "art.mochi.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.mochi.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, kicking a football"
+          }
+        }
+      }
+    },
+    "art.mochi.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Mochi the rabbit, playing golf"
           }
         }
       }
@@ -287,17 +386,6 @@
         }
       }
     },
-    "art.mochi.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Mochi the rabbit, stretching both arms up"
-          }
-        }
-      }
-    },
     "art.mochi.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -316,6 +404,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Momo the puppy, cheering with both paws up"
+          }
+        }
+      }
+    },
+    "art.momo.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.momo.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, kicking a football"
+          }
+        }
+      }
+    },
+    "art.momo.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Momo the puppy, playing golf"
           }
         }
       }
@@ -353,17 +474,6 @@
         }
       }
     },
-    "art.momo.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Momo the puppy, stretching long and low, tail up"
-          }
-        }
-      }
-    },
     "art.momo.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -382,6 +492,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Nori the elephant, trumpeting with a big smile"
+          }
+        }
+      }
+    },
+    "art.nori.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.nori.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, playing football by a goal"
+          }
+        }
+      }
+    },
+    "art.nori.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Nori the elephant, playing golf"
           }
         }
       }
@@ -419,17 +562,6 @@
         }
       }
     },
-    "art.nori.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Nori the elephant, stretching with front legs forward"
-          }
-        }
-      }
-    },
     "art.nori.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -448,6 +580,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Pebble the penguin, hopping with flippers up"
+          }
+        }
+      }
+    },
+    "art.pebble.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.pebble.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, kicking a football"
+          }
+        }
+      }
+    },
+    "art.pebble.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Pebble the penguin, playing golf"
           }
         }
       }
@@ -485,17 +650,6 @@
         }
       }
     },
-    "art.pebble.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Pebble the penguin, stretching both flippers up"
-          }
-        }
-      }
-    },
     "art.pebble.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -514,6 +668,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Rusty the red panda, cheering with both paws up"
+          }
+        }
+      }
+    },
+    "art.rusty.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.rusty.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, kicking a football"
+          }
+        }
+      }
+    },
+    "art.rusty.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Rusty the red panda, playing golf"
           }
         }
       }
@@ -551,17 +738,6 @@
         }
       }
     },
-    "art.rusty.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Rusty the red panda, stretching long, tail up"
-          }
-        }
-      }
-    },
     "art.rusty.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -580,6 +756,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sprout the dinosaur, jumping for joy"
+          }
+        }
+      }
+    },
+    "art.sprout.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.sprout.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, kicking a football"
+          }
+        }
+      }
+    },
+    "art.sprout.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sprout the dinosaur, playing golf"
           }
         }
       }
@@ -617,17 +826,6 @@
         }
       }
     },
-    "art.sprout.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sprout the dinosaur, stretching both arms up high"
-          }
-        }
-      }
-    },
     "art.sprout.wave": {
       "extractionState": "manual",
       "localizations": {
@@ -646,6 +844,39 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sunny the duckling, hopping with a happy kick"
+          }
+        }
+      }
+    },
+    "art.sunny.cooking": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, cooking in a chef’s hat"
+          }
+        }
+      }
+    },
+    "art.sunny.football": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, kicking a football"
+          }
+        }
+      }
+    },
+    "art.sunny.golf": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Sunny the duckling, playing golf"
           }
         }
       }
@@ -679,17 +910,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "Sunny the duckling, standing with wings open"
-          }
-        }
-      }
-    },
-    "art.sunny.stretch": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Sunny the duckling, stretching both wings wide"
           }
         }
       }
@@ -1866,7 +2086,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "“Full Game Unlock” is a one-time purchase. It adds Exact Pose mode, the 16- and 20-card boards, and 50 more animal pictures: every friend playing, napping, waving, stretching and celebrating. Classic mode with 6 and 12 cards stays free. No ads and no subscriptions."
+            "value": "“Full Game Unlock” is a one-time purchase. It adds Exact Pose mode, the 16- and 20-card boards, and 70 more animal pictures: every friend playing, napping, waving, celebrating, playing football, playing golf and cooking. Classic mode with 6 and 12 cards stays free. No ads and no subscriptions."
           }
         }
       }
@@ -1899,7 +2119,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Exact Pose mode, the 16- and 20-card boards and all 60 animal pictures are unlocked for this Apple Account. Thank you!"
+            "value": "Exact Pose mode, the 16- and 20-card boards and all 80 animal pictures are unlocked for this Apple Account. Thank you!"
           }
         }
       }

@@ -17,14 +17,15 @@ final class ManifestTests: XCTestCase {
     func testBundledManifestIsValidAndComplete() throws {
         let manifest = try ArtworkManifest.decode(try bundledManifestData())
         XCTAssertEqual(manifest.characters.count, 10)
-        XCTAssertEqual(manifest.artworks.count, 60, "10 animals × 6 poses")
+        XCTAssertEqual(manifest.artworks.count, 80, "10 animals × 8 poses")
         XCTAssertEqual(manifest.artworks.filter { $0.tier == .free }.count, 10)
         XCTAssertEqual(Set(manifest.characters.map(\.id.rawValue)),
                        ["momo", "iris", "nori", "sprout", "mochi", "sunny", "maple", "clover", "rusty", "pebble"])
-        let poses: Set<PoseID> = ["signature", "play", "nap", "wave", "stretch", "celebrate"]
+        let poses: Set<PoseID> = ["signature", "play", "nap", "wave", "celebrate", "football", "golf", "cooking"]
         for character in manifest.characters {
             let arts = manifest.artworks(for: character.id)
             XCTAssertEqual(Set(arts.map(\.poseID)), poses, "\(character.id)")
+            XCTAssertFalse(arts.contains { $0.poseID == "stretch" }, "Stretch is retired")
             for art in arts {
                 XCTAssertEqual(art.resourceName, "\(character.id.rawValue)_\(art.poseID.rawValue)", "consistent identifiers")
                 XCTAssertEqual(art.tier, art.poseID == character.defaultPoseID ? .free : .premium)
@@ -100,7 +101,8 @@ final class ManifestTests: XCTestCase {
                 }
             }
         }
-        XCTAssertEqual(posesSeen.count, 60, "every imported pose can be dealt")
+        XCTAssertEqual(posesSeen.count, 80, "every imported pose can be dealt")
+        XCTAssertFalse(posesSeen.contains { $0.rawValue.hasSuffix(".stretch") }, "Stretch is never dealt")
     }
 
     func testValidationCatchesStructuralProblems() {
@@ -124,7 +126,7 @@ final class ManifestTests: XCTestCase {
 
     func testPairKeyIsTheArtworkIdentity() throws {
         let manifest = try ArtworkManifest.decode(try bundledManifestData())
-        XCTAssertEqual(Set(manifest.artworks.map(\.assetID)).count, 60)
-        XCTAssertEqual(Set(manifest.artworks.map(\.resourceName)).count, 60, "one saved resource per pair key")
+        XCTAssertEqual(Set(manifest.artworks.map(\.assetID)).count, 80)
+        XCTAssertEqual(Set(manifest.artworks.map(\.resourceName)).count, 80, "one saved resource per pair key")
     }
 }

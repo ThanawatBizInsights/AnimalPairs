@@ -9,7 +9,8 @@ final class AppFlowTests: XCTestCase {
     func testBundledContentIsCompleteAndLoaded() {
         let model = AppTestSupport.makeModel()
         XCTAssertNil(model.contentError)
-        XCTAssertEqual(model.catalog.manifest.artworks.count, 60)
+        XCTAssertEqual(model.catalog.manifest.artworks.count, 80)
+        XCTAssertFalse(model.catalog.manifest.artworks.contains { $0.poseID == "stretch" }, "Stretch is retired")
         XCTAssertTrue(model.catalog.missingArtworks.isEmpty, "every manifest resource is in the asset catalog")
         XCTAssertTrue(model.catalog.manifest.placeholderArtworks.isEmpty, "no development placeholders")
     }

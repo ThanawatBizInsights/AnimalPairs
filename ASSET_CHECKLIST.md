@@ -1,28 +1,30 @@
 # Asset checklist
 
-Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.2`) and other shipped media. **No development placeholders remain:** all 60 animal pictures are supplied artwork. `ManifestTests.testNoDevelopmentPlaceholdersRemain` and the backend's production publish check fail if a placeholder ever comes back.
+Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (manifest `2026.11.3`) and other shipped media. **No development placeholders remain:** all 80 animal pictures are supplied artwork. `ManifestTests.testNoDevelopmentPlaceholdersRemain` and the backend's production publish check fail if a placeholder ever comes back.
 
-## Animal pictures (60 — 10 animals × 6 poses)
+## Animal pictures (80 — 10 animals × 8 poses)
 
-`signature` is each animal's default card and is free; the other five poses are part of **Full Game Unlock**. Image sets in `AnimalPairs/Assets.xcassets/Artwork/` are named `<animal>_<pose>`; asset IDs (used by saved rounds) are `<animal>.<pose>`. Sources, with the original supplied filenames, are in `Design/Reference/Supplied/` (`POSES_SOURCES.md`).
+`signature` is each animal's default card and is free; the other seven poses are part of **Full Game Unlock**. Image sets in `AnimalPairs/Assets.xcassets/Artwork/` are named `<animal>_<pose>`; asset IDs (used by saved rounds) are `<animal>.<pose>`. Sources, with the original supplied filenames, are in `Design/Reference/Supplied/` (`POSES_SOURCES.md`).
 
-| Animal | signature (free) | play | nap | wave | stretch | celebrate | Look-alike poses (never dealt together in Exact Pose) |
-| --- | --- | --- | --- | --- | --- | --- | --- |
-| Momo (puppy) | `momo_signature` | `momo_play` | `momo_nap` | `momo_wave` | `momo_stretch` | `momo_celebrate` | signature ≈ wave ≈ celebrate; play ≈ stretch |
-| Iris (kitten) | `iris_signature` | `iris_play` | `iris_nap` | `iris_wave` | `iris_stretch` | `iris_celebrate` | signature ≈ wave |
-| Nori (elephant) | `nori_signature` | `nori_play` | `nori_nap` | `nori_wave` | `nori_stretch` | `nori_celebrate` | signature ≈ wave ≈ celebrate ≈ play |
-| Sprout (dinosaur) | `sprout_signature` | `sprout_play` | `sprout_nap` | `sprout_wave` | `sprout_stretch` | `sprout_celebrate` | signature ≈ wave; play ≈ celebrate |
-| Mochi (bunny) | `mochi_signature` | `mochi_play` | `mochi_nap` | `mochi_wave` | `mochi_stretch` | `mochi_celebrate` | signature ≈ wave; play ≈ celebrate |
-| Sunny (duckling) | `sunny_signature` | `sunny_play` | `sunny_nap` | `sunny_wave` | `sunny_stretch` | `sunny_celebrate` | signature ≈ wave ≈ stretch; play ≈ celebrate |
-| Maple (bear cub) | `maple_signature` | `maple_play` | `maple_nap` | `maple_wave` | `maple_stretch` | `maple_celebrate` | signature ≈ wave ≈ celebrate |
-| Clover (turtle) | `clover_signature` | `clover_play` | `clover_nap` | `clover_wave` | `clover_stretch` | `clover_celebrate` | signature ≈ wave ≈ celebrate ≈ stretch |
-| Rusty (red panda) | `rusty_signature` | `rusty_play` | `rusty_nap` | `rusty_wave` | `rusty_stretch` | `rusty_celebrate` | signature ≈ stretch; wave ≈ celebrate |
-| Pebble (penguin) | `pebble_signature` | `pebble_play` | `pebble_nap` | `pebble_wave` | `pebble_stretch` | `pebble_celebrate` | signature ≈ wave ≈ stretch ≈ celebrate |
+| Animal | signature (free) | play | nap | wave | celebrate | football | golf | cooking | Look-alike poses (never dealt together in Exact Pose) |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Momo (puppy) | `momo_signature` | `momo_play` | `momo_nap` | `momo_wave` | `momo_celebrate` | `momo_football` | `momo_golf` | `momo_cooking` | signature ≈ wave ≈ celebrate |
+| Iris (kitten) | `iris_signature` | `iris_play` | `iris_nap` | `iris_wave` | `iris_celebrate` | `iris_football` | `iris_golf` | `iris_cooking` | signature ≈ wave |
+| Nori (elephant) | `nori_signature` | `nori_play` | `nori_nap` | `nori_wave` | `nori_celebrate` | `nori_football` | `nori_golf` | `nori_cooking` | signature ≈ wave ≈ celebrate ≈ play |
+| Sprout (dinosaur) | `sprout_signature` | `sprout_play` | `sprout_nap` | `sprout_wave` | `sprout_celebrate` | `sprout_football` | `sprout_golf` | `sprout_cooking` | signature ≈ wave; play ≈ celebrate |
+| Mochi (bunny) | `mochi_signature` | `mochi_play` | `mochi_nap` | `mochi_wave` | `mochi_celebrate` | `mochi_football` | `mochi_golf` | `mochi_cooking` | signature ≈ wave; play ≈ celebrate |
+| Sunny (duckling) | `sunny_signature` | `sunny_play` | `sunny_nap` | `sunny_wave` | `sunny_celebrate` | `sunny_football` | `sunny_golf` | `sunny_cooking` | signature ≈ wave; play ≈ celebrate |
+| Maple (bear cub) | `maple_signature` | `maple_play` | `maple_nap` | `maple_wave` | `maple_celebrate` | `maple_football` | `maple_golf` | `maple_cooking` | signature ≈ wave ≈ celebrate |
+| Clover (turtle) | `clover_signature` | `clover_play` | `clover_nap` | `clover_wave` | `clover_celebrate` | `clover_football` | `clover_golf` | `clover_cooking` | signature ≈ wave ≈ celebrate |
+| Rusty (red panda) | `rusty_signature` | `rusty_play` | `rusty_nap` | `rusty_wave` | `rusty_celebrate` | `rusty_football` | `rusty_golf` | `rusty_cooking` | wave ≈ celebrate |
+| Pebble (penguin) | `pebble_signature` | `pebble_play` | `pebble_nap` | `pebble_wave` | `pebble_celebrate` | `pebble_football` | `pebble_golf` | `pebble_cooking` | signature ≈ wave ≈ celebrate |
 
-* All supplied: Play and Nap (21 files, one spare), Wave (10), Stretch (10), Celebrate (10). Nothing is missing.
-* **Duplicate:** Rusty had two nap pictures. `rusty_nap` uses “Sleeping red panda cutout-11” (same 1254 px canvas as the others, face clearly visible); “Rusty's Cozy Red Panda Nap-6” is kept unused in `Design/Reference/Supplied/Alternates/`.
-* Processing (`python3 Tools/artwork/build_artwork.py`): transparent background kept, only specks under 0.05 % of the body removed (Nori's water drops, Sunny's splash and Iris's yarn are kept), trimmed, centred on 1024 × 1024, and no pose fills more than 45 % of the card so compact poses (e.g. Rusty curled up) don't look bigger than tall ones. Never stretched, enlarged past its fit or cropped.
-* The look-alike groups are a judgement call made from the pictures; adjust `lookalikePoseGroups` in the manifest if you see it differently. Art-director sign-off on the processed images is still welcome.
+* **Supplied:** Play and Nap (21 files, one spare), Wave, Celebrate, Football, Golf and Cooking (10 each). Nothing is missing.
+* **Stretch was retired (17 November 2026):** removed from the manifest, the app's image sets and the VoiceOver text; it is never dealt. Its 10 sources are kept in `Design/Reference/Supplied/Retired/`. A round saved with a Stretch card resumes with another pose of the same animal (`RoundSnapshot.migratingRetiredPoses`).
+* **Football, Golf, Cooking (17 November 2026):** no earlier versions existed in the project, so nothing was overwritten. `iris_golf` and `momo_football` arrived with a faint semi-transparent background haze reaching the canvas edges; the builder removes it (the animals and props are untouched).
+* **Duplicate:** Rusty had two nap pictures. `rusty_nap` uses “Sleeping red panda cutout-11”; “Rusty's Cozy Red Panda Nap-6” is kept unused in `Design/Reference/Supplied/Alternates/`.
+* Processing (`python3 Tools/artwork/build_artwork.py`): transparent background kept, only specks under 0.05 % of the body removed (balls, golf clubs, bowls, spoons, Nori's goal net, water drops and splashes are kept), trimmed, centred on 1024 × 1024, and no pose fills more than 45 % of the card. Never stretched, enlarged past its fit or cropped.
+* The look-alike groups are a judgement call made from the pictures; adjust `lookalikePoseGroups` in the manifest if you see it differently.
 
 ## Adding or replacing a picture
 
