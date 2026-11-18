@@ -3,21 +3,23 @@ import Foundation
 /// What the player may access. Purchases map onto this; the engine never
 /// talks to StoreKit directly.
 public enum AccessLevel: String, Codable, Sendable {
+    /// Free: Classic with 6 cards.
     case starter
+    /// "Animal Pairs Plus" (an active subscription).
     case fullGame
 }
 
-/// Free-starter vs full-game rules.
+/// Free vs Animal Pairs Plus.
 ///
-/// Starter: Classic mode, 6- and 12-card boards, every character's default pose.
-/// Full game: adds Exact Pose, 16- and 20-card boards and all poses.
+/// Free: Classic mode, 6-card board, every character's default picture.
+/// Plus: adds the 12-, 16- and 20-card boards, Exact Pose and every pose.
 public struct ContentAccessPolicy: Sendable, Equatable {
     public var level: AccessLevel
 
     public init(level: AccessLevel) { self.level = level }
 
     public static let starterModes: Set<GameMode> = [.classic]
-    public static let starterBoards: Set<BoardSize> = [.six, .twelve]
+    public static let starterBoards: Set<BoardSize> = [.six]
 
     public func isAvailable(_ mode: GameMode) -> Bool {
         level == .fullGame || Self.starterModes.contains(mode)

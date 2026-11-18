@@ -23,7 +23,7 @@ enum AppTestSupport {
                           defaults: UserDefaults? = nil,
                           playsOpeningVideo: Bool = false) -> AppModel {
         AppModel(settings: SettingsStore(defaults: defaults ?? isolatedDefaults()),
-                 configuration: AppConfiguration(fullUnlockProductID: AppConfiguration.placeholderProductID,
+                 configuration: AppConfiguration(plusProductID: AppConfiguration.placeholderProductID,
                                                  privacyPolicyURL: nil, supportURL: nil),
                  history: history ?? SwiftDataCompletionStore.inMemory(),
                  snapshots: RoundSnapshotStore(directory: snapshotDirectory ?? temporaryDirectory()),

@@ -28,24 +28,25 @@ struct EntitlementCacheStore {
     }
 }
 
-/// StoreKit 2 handling for the single non-consumable "Full Game Unlock".
+/// StoreKit 2 handling for "Animal Pairs Plus", one auto-renewable monthly
+/// subscription (product ID from `AppConfiguration`, i.e. the build setting
+/// `AP_PLUS_PRODUCT_ID`).
 ///
-/// Verified StoreKit 2 transactions are the only source of ownership; the
-/// small cache below only bridges the moment before StoreKit answers (and
-/// offline launches) and is replaced by every completed StoreKit scan.
-///
-/// * Ways to own it: buy it, redeem an Apple offer code (gift code) in the
-///   App Store's own sheet — inside the app or outside it — or Restore.
-///   All three arrive as the same verified transaction for `productID`.
-/// * Entitlements are re-read at launch, on returning to the foreground,
-///   after a purchase, after the redeem sheet closes and on Restore, and
-///   `StoreKit.Transaction.updates` is observed for the app's lifetime.
-/// * Closing the redeem sheet never unlocks anything by itself.
-/// * Prices come from `Product.displayPrice` (localized by the App Store).
-/// * Access is delivered before a verified transaction is finished.
-/// * Unverified transactions never grant access.
-/// * Revocations (refunds) remove access; `StoreKit.Transaction.updates` is observed
-///   for the lifetime of the app.
+/// * Plus access comes only from verified StoreKit transactions whose
+///   subscription period has not ended, or a verified status of "subscribed"
+///   / "in billing grace period" (`EntitlementResolver`). Unverified
+///   transactions never grant access; refunds and revocations remove it.
+/// * Re-read at launch, on returning to the foreground, after a purchase,
+///   after Restore, after the offer-code sheet, whenever
+///   `StoreKit.Transaction.updates` reports a change (renewals, purchases on
+///   another device, Ask to Buy approvals, refunds) and when the current
+///   period ends while the app is open.
+/// * Works on every device signed in to the purchasing Apple Account
+///   (StoreKit syncs the entitlement); Restore Purchases forces a sync.
+/// * A cached verified period bridges offline launches until that period's
+///   end — never longer. A completed StoreKit scan is authoritative.
+/// * Prices and the billing period come from StoreKit (`displayPrice`,
+///   `subscriptionPeriod`), never from the app.
 /// * Resetting game progress never touches this state.
 @MainActor
 @Observable
@@ -65,6 +66,16 @@ final class PurchaseManager {
     private let cacheStore: EntitlementCacheStore
     private var cache: CachedEntitlement?
     @ObservationIgnored private var updatesTask: Task<Void, Never>?
+    @ObservationIgnored private var expiryTask: Task<Void, Never>?
+    /// What Parents shows about the active subscription (nil when inactive).
+    private(set) var plan: PlanStatus?
+
+    struct PlanStatus: Equatable {
+        /// End of the current paid period (renewal date when it auto-renews).
+        var periodEnd: Date?
+        var willAutoRenew: Bool
+        var inGracePeriod: Bool
+    }
 
     #if DEBUG
     /// DEBUG-only simulated unlock for UI work without StoreKit. This
@@ -77,9 +88,10 @@ final class PurchaseManager {
     init(productID: String, cacheStore: EntitlementCacheStore = EntitlementCacheStore()) {
         self.productID = productID
         self.cacheStore = cacheStore
-        let cached = cacheStore.load()
+        // Until StoreKit answers, honour a previously *verified* period only,
+        // and only until that period ends.
+        let cached = cacheStore.load().flatMap { $0.isValid(at: Date()) ? $0 : nil }
         self.cache = cached
-        // Until StoreKit answers, honour a previously *verified* unlock only.
         self.verifiedLevel = cached == nil ? .starter : .fullGame
         #if DEBUG
         self.debugMockUnlocked = UserDefaults.standard.bool(forKey: "debug.mockUnlocked")
@@ -107,6 +119,7 @@ final class PurchaseManager {
         Task {
             await refreshEntitlements()
             await loadProduct()
+            await refreshEntitlements()     // again with the subscription status
         }
     }
 
@@ -124,14 +137,16 @@ final class PurchaseManager {
         }
     }
 
-    /// Scans current entitlements and applies the pure resolver.
+    /// Scans current entitlements (and, when the product is loaded, the
+    /// verified subscription status) and applies the pure resolver.
     func refreshEntitlements() async {
         var evidence: [EntitlementEvidence] = []
         for await result in StoreKit.Transaction.currentEntitlements {
             switch result {
             case .verified(let transaction) where Self.isUnlock(transaction, productID: productID):
+                guard !transaction.isUpgraded else { continue }     // superseded by another transaction
                 evidence.append(transaction.revocationDate == nil
-                                ? .verifiedActive(transactionID: transaction.id)
+                                ? .verifiedActive(transactionID: transaction.id, expiresAt: transaction.expirationDate)
                                 : .verifiedRevoked(transactionID: transaction.id))
             case .unverified(let transaction, _) where transaction.productID == productID:
                 evidence.append(.unverified)
@@ -139,12 +154,45 @@ final class PurchaseManager {
                 continue
             }
         }
-        apply(EntitlementResolver.resolve(evidence: evidence, scanCompleted: true, cached: cache))
+        // The renewal status adds the billing grace period and the "renews /
+        // ends on" details. A network failure here is not evidence of anything.
+        var states: [SubscriptionRenewalState] = []
+        var newPlan: PlanStatus?
+        if let statuses = try? await product?.subscription?.status {
+            for status in statuses {
+                guard case .verified(let renewal) = status.renewalInfo,
+                      case .verified(let transaction) = status.transaction,
+                      transaction.productID == productID else { continue }
+                let state = Self.renewalState(status.state)
+                states.append(state)
+                if state == .subscribed || state == .inGracePeriod {
+                    newPlan = PlanStatus(periodEnd: transaction.expirationDate, willAutoRenew: renewal.willAutoRenew,
+                                         inGracePeriod: state == .inGracePeriod)
+                }
+            }
+        }
+        apply(EntitlementResolver.resolve(evidence: evidence, renewalStates: states, scanCompleted: true, cached: cache))
+        if verifiedLevel == .fullGame {
+            plan = newPlan ?? plan ?? PlanStatus(periodEnd: cache?.expiresAt, willAutoRenew: true, inGracePeriod: false)
+        } else {
+            plan = nil
+        }
+    }
+
+    nonisolated static func renewalState(_ state: Product.SubscriptionInfo.RenewalState) -> SubscriptionRenewalState {
+        switch state {
+        case .subscribed: .subscribed
+        case .inGracePeriod: .inGracePeriod
+        case .inBillingRetryPeriod: .inBillingRetry
+        case .revoked: .revoked
+        default: .expired
+        }
     }
 
     /// Runs a purchase through SwiftUI's `PurchaseAction` so StoreKit can
     /// present its sheet in the right scene.
     func purchase(using action: PurchaseAction) async {
+        guard !flowState.isBusy else { return }        // one request at a time
         guard let product else {
             flowState = .productUnavailable
             return
@@ -169,7 +217,8 @@ final class PurchaseManager {
             }
             deliver(transaction)
             await transaction.finish()
-            flowState = .purchased
+            await refreshEntitlements()                 // renewal details for Parents
+            flowState = verifiedLevel == .fullGame ? .purchased : .verificationFailed
         case .success(.unverified):
             // Not finished: StoreKit may redeliver it once verifiable.
             flowState = .verificationFailed
@@ -183,6 +232,7 @@ final class PurchaseManager {
     }
 
     func restore() async {
+        guard !flowState.isBusy else { return }        // one request at a time
         flowState = .restoring
         do {
             try await AppStore.sync()
@@ -251,13 +301,10 @@ final class PurchaseManager {
     /// can deliver them again once they verify.
     private func handle(update: VerificationResult<StoreKit.Transaction>, productID: String) async {
         guard case .verified(let transaction) = update, Self.isUnlock(transaction, productID: productID) else { return }
-        if transaction.revocationDate != nil {
-            apply(EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: transaction.id)],
-                                              scanCompleted: true, cached: cache))
-            // Another, still valid transaction (e.g. a later purchase) may exist.
-            await refreshEntitlements()
-        } else {
-            deliver(transaction)
+        // Re-read everything rather than trusting this one transaction: an
+        // update may be an old renewal, a refund, or a newer period.
+        await refreshEntitlements()
+        if transaction.revocationDate == nil, verifiedLevel == .fullGame {
             switch flowState {
             case .pendingApproval: flowState = .purchased
             case .redeeming, .checkingRedemption:
@@ -268,9 +315,9 @@ final class PurchaseManager {
         await transaction.finish()
     }
 
-    /// The unlock is the configured non-consumable and nothing else.
+    /// Plus is the configured auto-renewable subscription and nothing else.
     nonisolated static func isUnlock(_ transaction: StoreKit.Transaction, productID: String) -> Bool {
-        transaction.productID == productID && transaction.productType == .nonConsumable
+        transaction.productID == productID && transaction.productType == .autoRenewable
     }
 
     nonisolated static func isNetworkProblem(_ error: Error) -> Bool {
@@ -292,13 +339,28 @@ final class PurchaseManager {
     }
 
     private func deliver(_ transaction: StoreKit.Transaction) {
-        apply(EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: transaction.id)],
-                                          scanCompleted: true, cached: cache))
+        apply(EntitlementResolver.resolve(
+            evidence: [.verifiedActive(transactionID: transaction.id, expiresAt: transaction.expirationDate)],
+            scanCompleted: true, cached: cache))
     }
 
     private func apply(_ decision: EntitlementDecision) {
         verifiedLevel = decision.level
         cache = decision.cache
         cacheStore.save(decision.cache)
+        scheduleExpiryCheck()
+    }
+
+    /// Re-checks when the current period ends while the app is open (a
+    /// renewal arrives through `updates`; an expiry has no event of its own).
+    private func scheduleExpiryCheck() {
+        expiryTask?.cancel()
+        guard let end = cache?.expiresAt, end > Date() else { return }
+        let delay = end.timeIntervalSinceNow + 2
+        expiryTask = Task { [weak self] in
+            try? await Task.sleep(nanoseconds: UInt64(min(delay, 86_400 * 40) * 1_000_000_000))
+            guard !Task.isCancelled else { return }
+            await self?.refreshEntitlements()
+        }
     }
 }

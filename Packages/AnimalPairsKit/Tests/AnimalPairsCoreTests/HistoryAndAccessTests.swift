@@ -81,6 +81,55 @@ final class EntitlementResolverTests: XCTestCase {
         XCTAssertNil(d.cache)
     }
 
+    // MARK: Subscription periods
+
+    let now = Date(timeIntervalSince1970: 1_000_000)
+
+    func testActiveSubscriptionUnlocksUntilItsPeriodEnds() {
+        let end = now.addingTimeInterval(86_400)
+        let d = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 3, expiresAt: end)],
+                                            scanCompleted: true, cached: nil, now: now)
+        XCTAssertEqual(d.level, .fullGame)
+        XCTAssertEqual(d.cache?.expiresAt, end)
+        let after = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 3, expiresAt: end)],
+                                                scanCompleted: true, cached: d.cache, now: end.addingTimeInterval(1))
+        XCTAssertEqual(after.level, .starter, "an expired period never unlocks")
+    }
+
+    func testTheLatestRenewalIsCached() {
+        let d = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 1, expiresAt: now.addingTimeInterval(10)),
+                                                       .verifiedActive(transactionID: 2, expiresAt: now.addingTimeInterval(99))],
+                                            scanCompleted: true, cached: nil, now: now)
+        XCTAssertEqual(d.cache?.transactionID, 2)
+    }
+
+    func testGracePeriodKeepsAccessBillingRetryDoesNot() {
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.inGracePeriod],
+                                                   scanCompleted: true, cached: nil, now: now).level, .fullGame)
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.inBillingRetry],
+                                                   scanCompleted: true, cached: nil, now: now).level, .starter)
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.expired],
+                                                   scanCompleted: true, cached: nil, now: now).level, .starter)
+    }
+
+    func testOfflineKeepsAccessForThePaidPeriodOnly() {
+        let paid = CachedEntitlement(transactionID: 5, verifiedAt: now, expiresAt: now.addingTimeInterval(3_600))
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], scanCompleted: false, cached: paid,
+                                                   now: now.addingTimeInterval(60)).level, .fullGame,
+                       "a temporary network failure does not remove access")
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], scanCompleted: false, cached: paid,
+                                                   now: now.addingTimeInterval(7_200)).level, .starter,
+                       "nor does it extend it past the paid period")
+    }
+
+    func testRefundOfASubscriptionLocks() {
+        let paid = CachedEntitlement(transactionID: 5, verifiedAt: now, expiresAt: now.addingTimeInterval(3_600))
+        let d = EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: 5)], renewalStates: [.revoked],
+                                            scanCompleted: true, cached: paid, now: now)
+        XCTAssertEqual(d.level, .starter)
+        XCTAssertNil(d.cache)
+    }
+
     func testClosingTheRedeemSheetAloneNeverUnlocks() {
         XCTAssertEqual(RedemptionOutcome.resolve(unlockedBefore: false, verifiedUnlockedNow: false,
                                                  sheetFailedForNetwork: false), .redeemFoundNothing)
@@ -103,10 +152,10 @@ final class EntitlementResolverTests: XCTestCase {
     func testFullGameUnlocksExactlyThePremiumFeatures() {
         let starter = ContentAccessPolicy(level: .starter)
         let full = ContentAccessPolicy(level: .fullGame)
-        // Free for everyone: Classic mode on the 6- and 12-card boards.
+        // Free for everyone: Classic mode with 6 cards.
         XCTAssertEqual(Set(GameMode.allCases.filter { starter.isAvailable($0) }), [.classic])
-        XCTAssertEqual(Set(BoardSize.allCases.filter { starter.isAvailable($0) }), [.six, .twelve])
-        // Full Game: everything.
+        XCTAssertEqual(Set(BoardSize.allCases.filter { starter.isAvailable($0) }), [.six])
+        // Animal Pairs Plus: everything.
         XCTAssertEqual(Set(GameMode.allCases.filter { full.isAvailable($0) }), Set(GameMode.allCases))
         XCTAssertEqual(Set(BoardSize.allCases.filter { full.isAvailable($0) }), Set(BoardSize.allCases))
     }
@@ -114,7 +163,7 @@ final class EntitlementResolverTests: XCTestCase {
     func testAccessPolicy() {
         let starter = ContentAccessPolicy(level: .starter)
         XCTAssertTrue(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .six)))
-        XCTAssertTrue(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .twelve)))
+        XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .twelve)))
         XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .sixteen)))
         XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .exactPose, boardSize: .six)))
         let full = ContentAccessPolicy(level: .fullGame)

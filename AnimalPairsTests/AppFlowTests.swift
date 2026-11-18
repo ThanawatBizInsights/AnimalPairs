@@ -178,14 +178,21 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(afterVideo.route, .home)
     }
 
-    func testStarterCanStartFreeBoardsButNotPremium() throws {
+    func testFreePlayersCanStartClassicSixButNothingElse() throws {
         let model = AppTestSupport.makeModel()
-        guard !model.purchases.isUnlocked else { throw XCTSkip("simulator already holds the unlock") }
-        XCTAssertNoThrow(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .twelve)))
+        guard !model.purchases.isUnlocked else { throw XCTSkip("simulator already holds a subscription") }
+        XCTAssertNoThrow(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six)))
         XCTAssertEqual(model.route, .game)
-        XCTAssertEqual(model.session?.state.tiles.count, 12)
-        XCTAssertThrowsError(try model.startNewGame(GameConfiguration(mode: .exactPose, boardSize: .six)))
-        XCTAssertThrowsError(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .twenty)))
+        XCTAssertEqual(model.session?.state.tiles.count, 6)
+        // Locked options never start a game (and never open a purchase sheet:
+        // Setup shows the "ask a grown-up" message instead).
+        for config in [GameConfiguration(mode: .classic, boardSize: .twelve),
+                       GameConfiguration(mode: .classic, boardSize: .twenty),
+                       GameConfiguration(mode: .exactPose, boardSize: .six)] {
+            XCTAssertThrowsError(try model.startNewGame(config)) { error in
+                XCTAssertEqual(error as? AppModel.StartError, .locked)
+            }
+        }
     }
 
     func testBackgroundPausesSavesAndResumesWithoutReshuffle() throws {

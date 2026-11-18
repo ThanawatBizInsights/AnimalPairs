@@ -1,26 +1,45 @@
 import Foundation
 
-/// What StoreKit reported for the full-unlock product, reduced to facts the
-/// pure resolver can reason about.
+/// What StoreKit reported for the Animal Pairs Plus subscription, reduced to
+/// facts the pure resolver can reason about.
 public enum EntitlementEvidence: Equatable, Sendable {
-    /// A cryptographically verified, non-revoked transaction.
-    case verifiedActive(transactionID: UInt64)
+    /// A cryptographically verified, non-revoked transaction. `expiresAt` is
+    /// the subscription period's end (nil for a non-expiring product).
+    case verifiedActive(transactionID: UInt64, expiresAt: Date? = nil)
     /// A verified transaction that has been refunded or revoked.
     case verifiedRevoked(transactionID: UInt64)
     /// StoreKit returned a transaction that failed verification.
     case unverified
 }
 
-/// The last access granted from a verified transaction, kept so a previously
-/// verified unlock remains usable before StoreKit has finished answering.
+/// The subscription's renewal state from StoreKit's subscription status
+/// (verified), mirrored so the resolver stays pure.
+public enum SubscriptionRenewalState: Equatable, Sendable {
+    case subscribed
+    /// Billing failed, but Apple's grace period still gives access.
+    case inGracePeriod
+    /// Billing failed and the grace period (if any) is over: no access.
+    case inBillingRetry
+    case expired
+    case revoked
+}
+
+/// The last access granted from a verified transaction, kept so a verified
+/// subscription remains usable before StoreKit has answered (e.g. an offline
+/// launch) — but never past the end of the period it was verified for.
 public struct CachedEntitlement: Codable, Equatable, Sendable {
     public let transactionID: UInt64
     public let verifiedAt: Date
+    /// End of the verified subscription period (nil: does not expire).
+    public let expiresAt: Date?
 
-    public init(transactionID: UInt64, verifiedAt: Date) {
+    public init(transactionID: UInt64, verifiedAt: Date, expiresAt: Date? = nil) {
         self.transactionID = transactionID
         self.verifiedAt = verifiedAt
+        self.expiresAt = expiresAt
     }
+
+    public func isValid(at now: Date) -> Bool { expiresAt.map { $0 > now } ?? true }
 }
 
 public struct EntitlementDecision: Equatable, Sendable {
@@ -29,24 +48,38 @@ public struct EntitlementDecision: Equatable, Sendable {
 }
 
 /// Decides access without ever inventing a purchase:
-/// * any verified active transaction → full game (cache refreshed)
-/// * a verified revocation (and nothing active) → starter (cache cleared)
-/// * only unverified transactions → keep a previously verified cache, else starter
-/// * a completed scan with no transactions → starter (cache cleared)
-/// * StoreKit could not be scanned yet → keep the cache
+/// * a verified, non-revoked transaction whose period has not ended → Plus
+///   (cache refreshed with that period's end)
+/// * StoreKit's status says subscribed or in the billing grace period → Plus
+/// * a verified revocation (refund) and nothing active → free (cache cleared)
+/// * StoreKit could not be scanned yet, or only unverified transactions →
+///   keep a cached verified period while it lasts, else free
+/// * a completed scan with nothing active → free (cache cleared): expired,
+///   cancelled-and-lapsed or billing retry without grace
+/// Being offline never removes access early (the cache covers the paid
+/// period) and never extends it (the cache ends with the period).
 public enum EntitlementResolver {
-    public static func resolve(evidence: [EntitlementEvidence], scanCompleted: Bool,
-                               cached: CachedEntitlement?, now: Date = Date()) -> EntitlementDecision {
+    public static func resolve(evidence: [EntitlementEvidence], renewalStates: [SubscriptionRenewalState] = [],
+                               scanCompleted: Bool, cached: CachedEntitlement?,
+                               now: Date = Date()) -> EntitlementDecision {
+        var best: CachedEntitlement?
         for item in evidence {
-            if case .verifiedActive(let id) = item {
-                return EntitlementDecision(level: .fullGame, cache: CachedEntitlement(transactionID: id, verifiedAt: now))
+            guard case .verifiedActive(let id, let expiresAt) = item, expiresAt.map({ $0 > now }) ?? true else { continue }
+            let candidate = CachedEntitlement(transactionID: id, verifiedAt: now, expiresAt: expiresAt)
+            if best == nil || (candidate.expiresAt ?? .distantFuture) > (best?.expiresAt ?? .distantFuture) {
+                best = candidate
             }
+        }
+        if let best { return EntitlementDecision(level: .fullGame, cache: best) }
+        if renewalStates.contains(where: { $0 == .subscribed || $0 == .inGracePeriod }) {
+            return EntitlementDecision(level: .fullGame, cache: cached)
         }
         if evidence.contains(where: { if case .verifiedRevoked = $0 { return true } else { return false } }) {
             return EntitlementDecision(level: .starter, cache: nil)
         }
         if !scanCompleted || evidence.contains(.unverified) {
-            return EntitlementDecision(level: cached == nil ? .starter : .fullGame, cache: cached)
+            guard let cached, cached.isValid(at: now) else { return EntitlementDecision(level: .starter, cache: nil) }
+            return EntitlementDecision(level: .fullGame, cache: cached)
         }
         return EntitlementDecision(level: .starter, cache: nil)
     }

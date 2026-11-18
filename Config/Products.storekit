@@ -1,30 +1,43 @@
 {
   "identifier": "5E1A8C2B",
   "nonRenewingSubscriptions": [],
-  "products": [
-    {
-      "displayPrice": "2.99",
-      "familyShareable": true,
-      "internalID": "6740000001",
-      "localizations": [
-        {
-          "description": "Adds Exact Pose, the 16- and 20-card boards and 70 more animal pictures.",
-          "displayName": "Full Game",
-          "locale": "en_US"
-        }
-      ],
-      "productID": "com.example.animalpairs.fullgame",
-      "referenceName": "Full Game Unlock",
-      "type": "NonConsumable"
-    }
-  ],
+  "products": [],
   "settings": {
     "_failTransactionsEnabled": false,
     "_locale": "en_US",
     "_storefront": "USA",
     "_storeKitErrors": []
   },
-  "subscriptionGroups": [],
+  "subscriptionGroups": [
+    {
+      "id": "21500001",
+      "localizations": [],
+      "name": "Animal Pairs Plus",
+      "subscriptions": [
+        {
+          "adHocOffers": [],
+          "codeOffers": [],
+          "displayPrice": "1.99",
+          "familyShareable": false,
+          "groupNumber": 1,
+          "internalID": "6740000002",
+          "introductoryOffer": null,
+          "localizations": [
+            {
+              "description": "More card counts and Exact Pose mode, renewed monthly.",
+              "displayName": "Animal Pairs Plus",
+              "locale": "en_US"
+            }
+          ],
+          "productID": "com.example.animalpairs.plus.monthly",
+          "recurringSubscriptionPeriod": "P1M",
+          "referenceName": "Animal Pairs Plus Monthly",
+          "subscriptionGroupID": "21500001",
+          "type": "RecurringSubscription"
+        }
+      ]
+    }
+  ],
   "version": {
     "major": 4,
     "minor": 0

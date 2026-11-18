@@ -4,7 +4,7 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 
 ## Animal pictures (80 — 10 animals × 8 poses)
 
-`signature` is each animal's default card and is free; the other seven poses are part of **Full Game Unlock**. Image sets in `AnimalPairs/Assets.xcassets/Artwork/` are named `<animal>_<pose>`; asset IDs (used by saved rounds) are `<animal>.<pose>`. Sources, with the original supplied filenames, are in `Design/Reference/Supplied/` (`POSES_SOURCES.md`).
+`signature` is each animal's default card and is free; the other seven poses are part of the **Animal Pairs Plus** subscription. Image sets in `AnimalPairs/Assets.xcassets/Artwork/` are named `<animal>_<pose>`; asset IDs (used by saved rounds) are `<animal>.<pose>`. Sources, with the original supplied filenames, are in `Design/Reference/Supplied/` (`POSES_SOURCES.md`).
 
 | Animal | signature (free) | play | nap | wave | celebrate | football | golf | cooking | Look-alike poses (never dealt together in Exact Pose) |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -54,4 +54,5 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 | Full sound list, prompts, credits and status | `Tools/audio/audio_manifest.json` | source of truth |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |
 | App Store screenshots, preview video, marketing text | — | **missing** |
-| Privacy policy and support pages (URLs) | build settings `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **missing** — the Parents screen explains this until set |
+| Terms of Use, privacy policy and support pages (URLs) | build settings `AP_TERMS_OF_USE_URL`, `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **missing — to supply** (required for the subscription; see APP_STORE.md). The Parents screen says "not set yet" until set |
+| Subscription review screenshot | App Store Connect | **missing** — Parents → Animal Pairs Plus on iPhone (APP_STORE.md) |

@@ -26,7 +26,7 @@ final class AudioSessionTests: XCTestCase {
     func testActivationRunsOnceAndNeverOnTheMainThread() async throws {
         let recorder = Recorder()
         let model = AppModel(settings: SettingsStore(defaults: AppTestSupport.isolatedDefaults()),
-                             configuration: AppConfiguration(fullUnlockProductID: AppConfiguration.placeholderProductID,
+                             configuration: AppConfiguration(plusProductID: AppConfiguration.placeholderProductID,
                                                              privacyPolicyURL: nil, supportURL: nil),
                              history: SwiftDataCompletionStore.inMemory(),
                              snapshots: RoundSnapshotStore(directory: AppTestSupport.temporaryDirectory()),
@@ -41,7 +41,7 @@ final class AudioSessionTests: XCTestCase {
         XCTAssertEqual(recorder.calls, 1, "one activation at launch")
 
         // Navigation and a round with many flips: no further activation.
-        try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .twelve))
+        try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six))
         let session = try XCTUnwrap(model.session)
         for tile in session.state.tiles.prefix(8) { session.tap(tile.id) }
         model.goHome()
