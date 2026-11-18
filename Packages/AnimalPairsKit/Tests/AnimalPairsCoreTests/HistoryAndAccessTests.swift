@@ -213,5 +213,49 @@ final class ParentalGateTests: XCTestCase {
         session.revoke()
         XCTAssertFalse(session.isActive(now: t0))
     }
+
 }
 
+// MARK: Restore and lapsed subscriptions
+
+final class SubscriptionLapseTests: XCTestCase {
+    private let now = Date(timeIntervalSince1970: 1_800_000_000)
+
+    func testNothingToExplainWhenActiveOrNeverSubscribed() {
+        XCTAssertNil(SubscriptionLapseResolver.resolve(isActive: true,
+                                                       latest: .init(expiresAt: now.addingTimeInterval(-60), revokedAt: nil),
+                                                       renewalStates: [.expired], now: now))
+        XCTAssertNil(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [], now: now))
+    }
+
+    func testExpiredSubscriptionReportsItsEndDate() {
+        let end = now.addingTimeInterval(-3600)
+        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: .init(expiresAt: end, revokedAt: nil),
+                                                         renewalStates: [], now: now), .expired(endedOn: end))
+        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [.expired], now: now),
+                       .expired(endedOn: nil))
+    }
+
+    func testRefundWinsOverExpiry() {
+        let refunded = now.addingTimeInterval(-10)
+        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false,
+                                                         latest: .init(expiresAt: now.addingTimeInterval(-5), revokedAt: refunded),
+                                                         renewalStates: [.expired], now: now), .revoked(on: refunded))
+        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [.revoked], now: now),
+                       .revoked(on: nil))
+    }
+
+    func testBillingRetryIsReportedAsAPaymentProblem() {
+        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: .init(expiresAt: now.addingTimeInterval(-60), revokedAt: nil),
+                                                         renewalStates: [.inBillingRetry], now: now), .billingRetry)
+    }
+
+    func testRestoreOutcomes() {
+        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: true, lapse: nil), .restored)
+        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: nil), .restoreFoundNothing)
+        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: .revoked(on: nil)), .restoreFoundLapsed(.revoked(on: nil)))
+        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: .expired(endedOn: now)),
+                       .restoreFoundLapsed(.expired(endedOn: now)))
+        XCTAssertFalse(PurchaseFlowState.restoreFoundLapsed(.billingRetry).isBusy)
+    }
+}

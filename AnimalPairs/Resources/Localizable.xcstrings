@@ -2256,6 +2256,50 @@
         }
       }
     },
+    "plus.lapse.billingRetry": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "The App Store couldn’t take the renewal payment, so Animal Pairs Plus is paused. Check the payment method in Manage Subscription; Plus comes back once the payment goes through."
+          }
+        }
+      }
+    },
+    "plus.lapse.expired": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animal Pairs Plus has ended. Subscribe again any time; the free game keeps working."
+          }
+        }
+      }
+    },
+    "plus.lapse.expiredOn": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animal Pairs Plus ended on %@. Subscribe again any time; the free game keeps working."
+          }
+        }
+      }
+    },
+    "plus.lapse.revoked": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Animal Pairs Plus was refunded or cancelled by Apple, so it is off. The free game keeps working."
+          }
+        }
+      }
+    },
     "plus.manage": {
       "extractionState": "manual",
       "localizations": {
@@ -2564,13 +2608,24 @@
         }
       }
     },
+    "purchase.restoreLapsed": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore finished. No active subscription was found. %@"
+          }
+        }
+      }
+    },
     "purchase.restoreNothing": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "No active Animal Pairs Plus subscription was found for this Apple Account."
+            "value": "Restore finished. No Animal Pairs Plus subscription was found for this Apple Account. If you subscribed with a different Apple Account, sign in with it and try again."
           }
         }
       }

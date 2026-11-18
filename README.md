@@ -48,7 +48,7 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 
 | Suite | Where | How |
 | --- | --- | --- |
-| `AnimalPairsCoreTests` (94 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
+| `AnimalPairsCoreTests` (99 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
 | `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** subscription states (subscribe, relaunch, Ask to Buy pending, cancel, failure, expiry, refund, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
 | Backend (18 tests) | `backend/` | see [backend/README.md](backend/README.md) |
 | String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
@@ -188,8 +188,15 @@ Pairs Plus**:
   and how to cancel;
 * **Subscribe** (`Product.purchase` through SwiftUI's `PurchaseAction`), disabled
   while a request is running so it cannot be sent twice;
-* **Restore Purchases** (`AppStore.sync()`) with "restored" / "nothing to
-  restore" / error messages;
+* **Restore Purchases**: `AppStore.sync()` (which may ask for the Apple
+  Account password, so it is never called anywhere else), then a fresh read
+  of verified entitlements. Messages: restored; no subscription for this Apple
+  Account; it ended on *date*; it was refunded; the App Store couldn't take
+  the payment; cancelled; no connection. A failed or cancelled restore leaves
+  access as it was. Subscribers rarely need it: launch and returning to the
+  app already re-read entitlements, without any prompt;
+* when Plus is off but the account had it, a short note says why (ended on
+  *date*, refunded, payment problem) — Parents only, never changes access;
 * **Manage Subscription** (`manageSubscriptionsSheet`) and, when not subscribed,
   **Redeem Offer Code** (Apple's sheet);
 * **Terms of Use** and **Privacy Policy** links (`AP_TERMS_OF_USE_URL`,
@@ -229,8 +236,8 @@ Everything is set in one place — the **AnimalPairs** target's build settings
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` (placeholder) | your bundle ID |
 | `AP_PLUS_PRODUCT_ID` | `com.example.animalpairs.plus.monthly` (placeholder) | suggested **`<bundle ID>.plus.monthly`** |
 | `AP_TERMS_OF_USE_URL` | empty | Terms of Use page (Apple's standard EULA or your own) |
-| `AP_PRIVACY_POLICY_URL` | empty | Little Penguin Studio privacy policy |
-| `AP_SUPPORT_URL` | empty | support page (also needed in App Store Connect) |
+| `AP_PRIVACY_POLICY_URL` | `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` | same (update if the site moves to a custom domain) |
+| `AP_SUPPORT_URL` | `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | same (also needed in App Store Connect) |
 
 Also change `productID` in `Config/Products.storekit` to match
 (`PurchaseTests` fails if they differ). Debug builds show a note in Parents
@@ -241,7 +248,7 @@ created in App Store Connect.
 
 | Where | What it proves | How |
 | --- | --- | --- |
-| **Local StoreKit** — `Config/Products.storekit` (one group, one monthly subscription, in the scheme) and `AnimalPairsTests/PurchaseTests.swift` (`SKTestSession`) | product is monthly auto-renewable with a StoreKit price; free = Classic 6 only; subscribe → relaunch stays Plus; Ask to Buy pending; cancel; failure; expiry locks; refund locks; restore of an existing subscription; restore with nothing; an expired cached period is not honoured; offline launch inside the paid period; a UserDefaults flag never unlocks | Xcode → Product → Test on an iPhone and an iPad simulator. By hand: Debug → StoreKit → Manage Transactions (expire, refund, Ask to Buy); Editor → Subscription Renewal Rate to speed renewals. |
+| **Local StoreKit** — `Config/Products.storekit` (one group, one monthly subscription, in the scheme) and `AnimalPairsTests/PurchaseTests.swift` (`SKTestSession`) | product is monthly auto-renewable with a StoreKit price; free = Classic 6 only; subscribe → relaunch stays Plus; a relaunch/reinstall needs no Restore and shows nothing; Ask to Buy pending; cancel; failure; expiry locks; refund locks; restore of an existing subscription and after a reinstall; restore with nothing; restore after expiry says it ended; restore after a refund says so; Restore tapped twice runs once; cancelled/network restore errors; an expired cached period is not honoured; offline launch inside the paid period; a UserDefaults flag never unlocks | Xcode → Product → Test on an iPhone and an iPad simulator. By hand: Debug → StoreKit → Manage Transactions (expire, refund, Ask to Buy); Editor → Subscription Renewal Rate to speed renewals. |
 | **Sandbox** — a sandbox Apple Account (never a real one) | real App Store sheet and price, renewals, cancel in Manage Subscription, restore on a second device | sign in under Settings → Developer → Sandbox Apple Account; set the scheme's StoreKit Configuration to *None*. |
 | **TestFlight** | the same with the production product | after the subscription is submitted with a build. |
 

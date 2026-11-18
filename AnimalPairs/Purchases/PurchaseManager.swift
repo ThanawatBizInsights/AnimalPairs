@@ -69,6 +69,10 @@ final class PurchaseManager {
     @ObservationIgnored private var expiryTask: Task<Void, Never>?
     /// What Parents shows about the active subscription (nil when inactive).
     private(set) var plan: PlanStatus?
+    /// Why Plus is not active although this Apple Account has had it (ended,
+    /// refunded, payment problem). Parents-only information; never grants or
+    /// removes access by itself.
+    private(set) var lapse: SubscriptionLapse?
 
     struct PlanStatus: Equatable {
         /// End of the current paid period (renewal date when it auto-renews).
@@ -127,13 +131,21 @@ final class PurchaseManager {
         if product != nil { return }
         flowState = .loadingProducts
         do {
-            let products = try await Product.products(for: [productID])
-            product = products.first
+            try await fetchProduct()
             flowState = product == nil ? .productUnavailable : .idle
+        } catch {
+            flowState = Self.isNetworkProblem(error) ? .networkUnavailable : .productUnavailable
+        }
+    }
+
+    /// Loads the product without changing the visible flow state.
+    private func fetchProduct() async throws {
+        do {
+            product = try await Product.products(for: [productID]).first
             lastStoreError = nil
         } catch {
             lastStoreError = error.localizedDescription
-            flowState = Self.isNetworkProblem(error) ? .networkUnavailable : .productUnavailable
+            throw error
         }
     }
 
@@ -174,9 +186,20 @@ final class PurchaseManager {
         apply(EntitlementResolver.resolve(evidence: evidence, renewalStates: states, scanCompleted: true, cached: cache))
         if verifiedLevel == .fullGame {
             plan = newPlan ?? plan ?? PlanStatus(periodEnd: cache?.expiresAt, willAutoRenew: true, inGracePeriod: false)
+            lapse = nil
         } else {
             plan = nil
+            lapse = SubscriptionLapseResolver.resolve(isActive: false, latest: await latestVerifiedTransaction(),
+                                                      renewalStates: states)
         }
+    }
+
+    /// The newest verified transaction for the subscription, including expired
+    /// and refunded ones (`currentEntitlements` leaves those out).
+    private func latestVerifiedTransaction() async -> LatestSubscriptionTransaction? {
+        guard case .verified(let transaction)? = await StoreKit.Transaction.latest(for: productID),
+              Self.isUnlock(transaction, productID: productID) else { return nil }
+        return LatestSubscriptionTransaction(expiresAt: transaction.expirationDate, revokedAt: transaction.revocationDate)
     }
 
     nonisolated static func renewalState(_ state: Product.SubscriptionInfo.RenewalState) -> SubscriptionRenewalState {
@@ -231,13 +254,21 @@ final class PurchaseManager {
         }
     }
 
+    /// A parent's explicit Restore Purchases (Parents area only, behind the
+    /// adult gate): `AppStore.sync()` may ask for the Apple Account password,
+    /// so nothing else in the app calls it. Launch and returning to the app
+    /// only re-read entitlements, which never shows a prompt.
+    ///
+    /// Access changes only from the verified entitlements read afterwards; a
+    /// failed or cancelled sync leaves the current access as it was.
     func restore() async {
         guard !flowState.isBusy else { return }        // one request at a time
         flowState = .restoring
         do {
+            if product == nil { try? await fetchProduct() }    // for the renewal status; optional
             try await AppStore.sync()
             await refreshEntitlements()
-            flowState = verifiedLevel == .fullGame ? .restored : .restoreFoundNothing
+            flowState = RestoreOutcome.resolve(verifiedActive: verifiedLevel == .fullGame, lapse: lapse)
         } catch StoreKitError.userCancelled {
             flowState = .cancelled
         } catch {

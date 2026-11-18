@@ -54,5 +54,6 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 | Full sound list, prompts, credits and status | `Tools/audio/audio_manifest.json` | source of truth |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |
 | App Store screenshots, preview video, marketing text | — | **missing** |
-| Terms of Use, privacy policy and support pages (URLs) | build settings `AP_TERMS_OF_USE_URL`, `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **missing — to supply** (required for the subscription; see APP_STORE.md). The Parents screen says "not set yet" until set |
+| Privacy policy and support pages (URLs) | build settings `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **set** to the Little Penguin Studio workers.dev pages; the policy page is still a draft on the website (APP_STORE.md) |
+| Terms of Use (URL) | build setting `AP_TERMS_OF_USE_URL` | **missing — to supply** (required for the subscription; the website has no Terms page). The Parents screen says "not set yet" until set |
 | Subscription review screenshot | App Store Connect | **missing** — Parents → Animal Pairs Plus on iPhone (APP_STORE.md) |

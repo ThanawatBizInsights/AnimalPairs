@@ -10,12 +10,12 @@ the first release. Nothing here has been submitted or published.
 | **Final bundle ID** | ❗ to supply. The project uses the placeholder `com.example.AnimalPairs` | `PRODUCT_BUNDLE_IDENTIFIER` (AnimalPairs and AnimalPairsTests targets) |
 | **Product ID** | ❗ to confirm. Suggested: **`<bundle ID>.plus.monthly`**. The project uses the placeholder `com.example.animalpairs.plus.monthly` | `AP_PLUS_PRODUCT_ID` build setting and `productID` in `Config/Products.storekit` |
 | **Terms of Use URL** | ❗ to supply; not verified | `AP_TERMS_OF_USE_URL`; App Store Connect → App Information → License Agreement (or your App Description) |
-| **Privacy Policy URL** | ❗ to supply; not verified | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy → Privacy Policy URL |
-| **Support URL** | ❗ to supply; not verified | `AP_SUPPORT_URL`; App Store Connect → version → Support URL |
+| **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (page live; still marked *draft* until the publisher name, effective date, age rating and availability are filled in on the website) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy → Privacy Policy URL |
+| **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` (the URL you gave) | `AP_SUPPORT_URL`; App Store Connect → version → Support URL |
 
-No Little Penguin Studio web page for Animal Pairs could be found or opened
-from the build machine, so no URL has been filled in. Every link is empty, and
-the Parents screen says "not set yet" instead of opening a wrong page. If you
+The Little Penguin Studio website has no Terms of Use page, so that link is
+still empty and the Parents screen says "not set yet" instead of opening a
+wrong page. If you move the site to a custom domain, update both URLs. If you
 use Apple's standard licence instead of your own terms, it is usually
 published at `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`.
 Please open that URL yourself to confirm it before using it.

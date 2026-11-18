@@ -252,4 +252,60 @@ final class PurchaseTests: XCTestCase {
         XCTAssertEqual(manager.flowState, .restored)
         XCTAssertEqual(manager.verifiedLevel, .fullGame)
     }
+
+    // MARK: Restore Purchases outcomes
+
+    func testRestoreAfterExpiryExplainsThatItEnded() async throws {
+        let manager = await makeManager()
+        try await subscribe(manager)
+        try session.expireSubscription(productIdentifier: productID)
+        await manager.restore()
+        XCTAssertEqual(manager.accessLevel, .starter)
+        guard case .restoreFoundLapsed(.expired) = manager.flowState else {
+            return XCTFail("expected an 'ended' restore message, got \(manager.flowState)")
+        }
+        XCTAssertNotNil(manager.lapse, "Parents also shows why Plus is off")
+    }
+
+    func testRestoreAfterARefundExplainsTheRefund() async throws {
+        let manager = await makeManager()
+        try await subscribe(manager)
+        let transaction = try XCTUnwrap(session.allTransactions().first { $0.productIdentifier == productID })
+        try session.refundTransaction(identifier: transaction.identifier)
+        await manager.restore()
+        XCTAssertEqual(manager.accessLevel, .starter)
+        guard case .restoreFoundLapsed(.revoked) = manager.flowState else {
+            return XCTFail("expected a 'refunded' restore message, got \(manager.flowState)")
+        }
+    }
+
+    func testRestoreTappedTwiceRunsOnce() async throws {
+        try session.buyProduct(productIdentifier: productID)
+        let manager = PurchaseManager(productID: productID,
+                                      cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        async let first: Void = manager.restore()
+        async let second: Void = manager.restore()     // ignored: a restore is already running
+        _ = await (first, second)
+        XCTAssertEqual(manager.flowState, .restored)
+        XCTAssertEqual(manager.verifiedLevel, .fullGame)
+    }
+
+    func testSubscriberRelaunchNeedsNoRestore() async throws {
+        let manager = await makeManager()
+        try await subscribe(manager)
+        // A relaunch, a reinstall, or another iPhone or iPad with the same
+        // Apple Account: launch re-reads verified entitlements, no prompt.
+        let relaunched = PurchaseManager(productID: productID,
+                                         cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        await relaunched.refreshEntitlements()
+        XCTAssertEqual(relaunched.verifiedLevel, .fullGame)
+        XCTAssertEqual(relaunched.flowState, .idle, "nothing was shown or asked")
+    }
+
+    func testRestoreErrorsBecomeParentMessages() {
+        XCTAssertEqual(PurchaseManager.flowState(for: StoreKitError.userCancelled), .cancelled)
+        XCTAssertEqual(PurchaseManager.flowState(for: StoreKitError.networkError(URLError(.notConnectedToInternet))),
+                       .networkUnavailable)
+        XCTAssertEqual(PurchaseManager.flowState(for: URLError(.timedOut)), .networkUnavailable)
+    }
 }

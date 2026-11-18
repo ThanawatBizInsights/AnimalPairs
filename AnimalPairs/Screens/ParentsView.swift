@@ -109,6 +109,11 @@ struct ParentsView: View {
                         .foregroundStyle(Palette.brownSoft)
                 }
                 #endif
+                if let lapse = purchases.lapse, !isLapseMessageShowing(purchases.flowState) {
+                    Label(lapseText(lapse), systemImage: "info.circle")
+                        .font(.rounded(.callout))
+                        .foregroundStyle(Palette.brown)
+                }
                 Text(t["plus.free"]).font(.rounded(.body))
             }
             VStack(alignment: .leading, spacing: 8) {
@@ -201,6 +206,25 @@ struct ParentsView: View {
     }
 
     /// "Renews automatically on 18 Dec 2026" / "Ends on …".
+    /// Why Plus is off, for parents: ended (with the date), refunded, or a
+    /// payment the App Store could not take.
+    private func lapseText(_ lapse: SubscriptionLapse) -> String {
+        let t = model.localizer
+        switch lapse {
+        case .expired(let endedOn?):
+            return t("plus.lapse.expiredOn", endedOn.formatted(Date.FormatStyle(date: .long, time: .omitted).locale(t.locale)))
+        case .expired(nil): return t["plus.lapse.expired"]
+        case .revoked: return t["plus.lapse.revoked"]
+        case .billingRetry: return t["plus.lapse.billingRetry"]
+        }
+    }
+
+    /// The restore result already explains the lapse; don't say it twice.
+    private func isLapseMessageShowing(_ state: PurchaseFlowState) -> Bool {
+        if case .restoreFoundLapsed = state { return true }
+        return false
+    }
+
     private func planText(_ plan: PurchaseManager.PlanStatus) -> String {
         let t = model.localizer
         guard let end = plan.periodEnd else { return t["plus.renews.unknown"] }
@@ -374,6 +398,7 @@ struct ParentsView: View {
         case .verificationFailed: return t["purchase.verificationFailed"]
         case .restoring: return t["purchase.restoring"]
         case .restoreFoundNothing: return t["purchase.restoreNothing"]
+        case .restoreFoundLapsed(let lapse): return t("purchase.restoreLapsed", lapseText(lapse))
         case .restored: return t["purchase.restored"]
         case .failed(let detail): return t("purchase.failed", detail)
         }

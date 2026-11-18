@@ -97,7 +97,12 @@ public enum PurchaseFlowState: Equatable, Sendable {
     case cancelled
     case verificationFailed
     case restoring
+    /// Restore finished and the Apple Account has never had an Animal Pairs
+    /// Plus subscription (or uses a different Apple Account).
     case restoreFoundNothing
+    /// Restore finished: there was a subscription, but it is not active
+    /// (ended, refunded, or the App Store could not take the payment).
+    case restoreFoundLapsed(SubscriptionLapse)
     case restored
     /// Apple's offer-code (gift code) sheet is open.
     case redeeming
@@ -118,6 +123,57 @@ public enum PurchaseFlowState: Equatable, Sendable {
         case .purchasing, .restoring, .redeeming, .checkingRedemption: true
         default: false
         }
+    }
+}
+
+/// Why Animal Pairs Plus is not active although the Apple Account has had
+/// it. Shown to parents only; never changes access by itself.
+public enum SubscriptionLapse: Equatable, Sendable {
+    /// The subscription ended (cancelled, or not renewed) on this date.
+    case expired(endedOn: Date?)
+    /// Apple refunded or revoked it.
+    case revoked(on: Date?)
+    /// The App Store could not take the renewal payment and is retrying
+    /// (after any grace period). Plus is off until the payment succeeds.
+    case billingRetry
+}
+
+/// The latest verified transaction for the subscription product, reduced to
+/// the facts that matter (from `Transaction.latest(for:)`, which also returns
+/// expired and revoked transactions).
+public struct LatestSubscriptionTransaction: Equatable, Sendable {
+    public var expiresAt: Date?
+    public var revokedAt: Date?
+
+    public init(expiresAt: Date?, revokedAt: Date?) {
+        self.expiresAt = expiresAt
+        self.revokedAt = revokedAt
+    }
+}
+
+public enum SubscriptionLapseResolver {
+    /// Explains a missing subscription. `nil` when Plus is active or the
+    /// account has never subscribed (nothing to explain). Only verified
+    /// StoreKit data may be passed in.
+    public static func resolve(isActive: Bool, latest: LatestSubscriptionTransaction?,
+                               renewalStates: [SubscriptionRenewalState], now: Date = Date()) -> SubscriptionLapse? {
+        guard !isActive else { return nil }
+        if let revokedAt = latest?.revokedAt { return .revoked(on: revokedAt) }
+        if renewalStates.contains(.revoked) { return .revoked(on: nil) }
+        if renewalStates.contains(.inBillingRetry) { return .billingRetry }
+        if let end = latest?.expiresAt, end <= now { return .expired(endedOn: end) }
+        if renewalStates.contains(.expired) { return .expired(endedOn: latest?.expiresAt) }
+        return nil
+    }
+}
+
+/// What a parent's Restore Purchases ended with, once `AppStore.sync()`
+/// succeeded and verified entitlements were read again.
+public enum RestoreOutcome {
+    public static func resolve(verifiedActive: Bool, lapse: SubscriptionLapse?) -> PurchaseFlowState {
+        if verifiedActive { return .restored }
+        if let lapse { return .restoreFoundLapsed(lapse) }
+        return .restoreFoundNothing
     }
 }
 
