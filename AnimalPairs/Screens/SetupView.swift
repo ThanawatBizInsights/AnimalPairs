@@ -7,6 +7,7 @@ struct SetupView: View {
     @State private var board: BoardSize = .six
     @State private var lockedMessageVisible = false
     @State private var startError: String?
+    @ScaledMetric(relativeTo: .title2) private var stickerSize: CGFloat = 32
 
     var body: some View {
         let t = model.localizer
@@ -26,14 +27,14 @@ struct SetupView: View {
 
             ScrollView {
                 VStack(alignment: .leading, spacing: 28) {
-                    section(t["setup.mode"]) {
+                    section(t["setup.mode"], sticker: .star) {
                         ViewThatFits(in: .horizontal) {
                             HStack(spacing: 16) { modeCards(policy) }
                             VStack(spacing: 16) { modeCards(policy) }
                         }
                     }
 
-                    section(t["setup.board"]) {
+                    section(t["setup.board"], sticker: .heart) {
                         LazyVGrid(columns: [GridItem(.adaptive(minimum: 150), spacing: 16)], spacing: 16) {
                             ForEach(BoardSize.allCases) { size in
                                 BoardOption(size: size, selected: board == size, locked: !policy.isAvailable(size),
@@ -44,7 +45,7 @@ struct SetupView: View {
                         }
                     }
 
-                    section(t["setup.animals"]) {
+                    section(t["setup.animals"], sticker: .flower) {
                         let characters = model.catalog.playableCharacters(for: policy)
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: 12) {
@@ -122,11 +123,18 @@ struct SetupView: View {
         }
     }
 
-    private func section<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
+    private func section<Content: View>(_ title: String, sticker: BrandGraphic.Sticker? = nil,
+                                        @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title)
-                .font(.rounded(.title2, weight: .bold))
-                .accessibilityAddTraits(.isHeader)
+            HStack(spacing: 10) {
+                // Small decorative clay sticker beside the heading (hidden from VoiceOver).
+                if let sticker {
+                    StickerArt(sticker: sticker).frame(width: stickerSize, height: stickerSize)
+                }
+                Text(title)
+                    .font(.rounded(.title2, weight: .bold))
+                    .accessibilityAddTraits(.isHeader)
+            }
             content()
         }
     }

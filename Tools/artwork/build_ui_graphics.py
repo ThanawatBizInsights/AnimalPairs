@@ -13,6 +13,8 @@ Sources (kept untouched) in ``Design/Reference/Supplied/``:
 * ``ui_trophy_badge.png``   → ``UI/results_trophy``      (Results)
 * ``ui_floral_corners.png`` → ``UI/decor_corner_*``      (four corner accents)
 * ``ui_card_back.webp``     → ``UI/card_back``          (back of every card)
+* Little Penguin Studio brand art (promo, mascot poses, stickers): see
+  ``build_brand_art`` below.
 
 Processing:
 
@@ -118,11 +120,131 @@ def build_transparent() -> None:
     print("ui graphics   wordmark, group, trophy, 4 floral corners, card back")
 
 
+# --- Little Penguin Studio brand art (mascot, stickers, promo) -------------
+#
+# Sources (kept untouched) in ``Design/Reference/Supplied/``:
+#
+# * ``ui_promo_penguin_cards.png`` → ``UI/promo_penguin_cards`` (Parents banner)
+# * ``ui_mascot_poses.png``        → ``UI/mascot_{wave,star,peek,reading}``
+# * ``ui_sticker_sheet.png``       → ``UI/sticker_*`` (only the stickers in use)
+# * ``ui_pastel_card_set.png``     → not built: its faces don't match the game's
+#                                    characters (see ASSET_CHECKLIST.md)
+#
+# The penguin is the studio mascot, not Pebble (Pebble's card art is unchanged).
+
+# Sheet layouts, row by row.
+MASCOT_GRID = [["mascot_wave", "mascot_star"],
+               ["mascot_peek", "mascot_reading"]]
+STICKER_GRID = [["sticker_star", "sticker_cloud_blue", "sticker_flower", "sticker_ring"],
+                ["sticker_leaf", "sticker_squiggle", "sticker_heart", "sticker_sparkles"],
+                ["sticker_cloud_lilac", "sticker_bubbles", "sticker_rainbow", "sticker_confetti"]]
+# Stickers bundled in the app today; the rest stay as sources until needed.
+STICKERS_IN_USE = {"sticker_star", "sticker_heart", "sticker_flower", "sticker_sparkles",
+                   "sticker_confetti", "sticker_rainbow", "sticker_bubbles", "sticker_cloud_lilac"}
+
+PAD_FRACTION = 0.06      # equal transparent margin around every extracted item
+SPECK_PIXELS = 40        # components smaller than this are noise, not artwork
+
+
+def require_transparency(image: Image.Image, name: str) -> None:
+    """Fail unless the source really has an alpha channel with transparent areas."""
+    if "A" not in image.getbands():
+        raise SystemExit(f"{name}: no alpha channel — a dark/black preview background is not transparency")
+    clear = float((np.array(image.getchannel("A")) < 10).mean())
+    if clear < 0.05:
+        raise SystemExit(f"{name}: only {clear:.1%} transparent — expected a cut-out sheet")
+
+
+def padded(image: Image.Image) -> Image.Image:
+    """Trim to the artwork and add the same transparent margin on every side."""
+    item = trimmed(image)
+    pad = round(max(item.size) * PAD_FRACTION)
+    canvas = Image.new("RGBA", (item.width + 2 * pad, item.height + 2 * pad), (0, 0, 0, 0))
+    canvas.paste(item, (pad, pad))
+    return canvas
+
+
+def split_sheet(sheet: Image.Image, grid: list[list[str]], name: str) -> dict[str, Image.Image]:
+    """Cut a sprite sheet into one image per grid cell.
+
+    Every connected piece of artwork (motion lines, sparkle clusters and
+    bubbles included) is assigned to the cell holding its centre. A piece that
+    reaches well into a neighbouring cell stops the build, so no item can pick
+    up part of its neighbour. Other cells' pixels are cleared from each crop.
+    """
+    rgba = np.array(sheet.convert("RGBA"))
+    h, w = rgba.shape[:2]
+    rows, cols = len(grid), len(grid[0])
+    cell_w, cell_h = w / cols, h / rows
+
+    present = rgba[..., 3] > 8
+    # Join anti-aliased fringes of one piece without merging separate items.
+    labels, count = ndimage.label(ndimage.binary_dilation(present, iterations=2))
+    labels = np.where(present, labels, 0)
+    owner = np.full(count + 1, -1, dtype=np.int32)
+    for index, box in enumerate(ndimage.find_objects(labels), start=1):
+        if box is None or int((labels[box] == index).sum()) < SPECK_PIXELS:
+            continue  # stray speck: belongs to nothing and is dropped
+        cy = (box[0].start + box[0].stop) / 2
+        cx = (box[1].start + box[1].stop) / 2
+        row, col = min(int(cy // cell_h), rows - 1), min(int(cx // cell_w), cols - 1)
+        slack_x, slack_y = cell_w * 0.12, cell_h * 0.12
+        if (box[1].start < col * cell_w - slack_x or box[1].stop > (col + 1) * cell_w + slack_x
+                or box[0].start < row * cell_h - slack_y or box[0].stop > (row + 1) * cell_h + slack_y):
+            raise SystemExit(f"{name}: a piece at x={box[1].start}-{box[1].stop}, y={box[0].start}-{box[0].stop} "
+                             f"crosses into a neighbouring cell — the sheet layout does not match {rows}×{cols}")
+        owner[index] = row * cols + col
+
+    items: dict[str, Image.Image] = {}
+    for row in range(rows):
+        for col in range(cols):
+            mine = owner[labels] == row * cols + col
+            if not mine.any():
+                raise SystemExit(f"{name}: cell {row},{col} ({grid[row][col]}) is empty")
+            cell = rgba.copy()
+            cell[..., 3] = np.where(mine, cell[..., 3], 0)
+            items[grid[row][col]] = Image.fromarray(cell, "RGBA")
+    return items
+
+
+def extracted(item: Image.Image) -> Image.Image:
+    """Speck cleanup that keeps small real details (motion lines, confetti dots)."""
+    return padded(clean_rgba(item, min_fraction=0.0, min_pixels=SPECK_PIXELS, fill_holes=False))
+
+
+def build_brand_art(source: Path = SUPPLIED) -> dict[str, Image.Image]:
+    """Build the brand art image sets; returns them (name → image) for previews."""
+    out: dict[str, Image.Image] = {}
+
+    promo_src = Image.open(source / "ui_promo_penguin_cards.png")
+    require_transparency(promo_src, "ui_promo_penguin_cards.png")
+    out["promo_penguin_cards"] = fit(extracted(promo_src), 1600)
+
+    poses_src = Image.open(source / "ui_mascot_poses.png")
+    require_transparency(poses_src, "ui_mascot_poses.png")
+    for item_name, item in split_sheet(poses_src, MASCOT_GRID, "ui_mascot_poses.png").items():
+        out[item_name] = fit(extracted(item), 1024)
+
+    stickers_src = Image.open(source / "ui_sticker_sheet.png")
+    require_transparency(stickers_src, "ui_sticker_sheet.png")
+    for item_name, item in split_sheet(stickers_src, STICKER_GRID, "ui_sticker_sheet.png").items():
+        if item_name in STICKERS_IN_USE:
+            out[item_name] = fit(extracted(item), 512)
+
+    # Checked for transparency only; deliberately not added to the catalog.
+    require_transparency(Image.open(source / "ui_pastel_card_set.png"), "ui_pastel_card_set.png")
+    return out
+
+
 def main() -> None:
     UI.mkdir(parents=True, exist_ok=True)
     (UI / "Contents.json").write_text(json.dumps({"info": {"author": "xcode", "version": 1}}, indent=2) + "\n")
     build_icon()
     build_transparent()
+    brand = build_brand_art()
+    for item_name, image in brand.items():
+        write_imageset(item_name, image)
+    print(f"brand art     {', '.join(sorted(brand))}")
 
 
 if __name__ == "__main__":

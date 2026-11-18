@@ -9,7 +9,68 @@ enum BrandGraphic {
     static let cardBack = "card_back"
     static let corners = ["decor_corner_top_left", "decor_corner_top_right",
                           "decor_corner_bottom_left", "decor_corner_bottom_right"]
-    static var all: [String] { [wordmark, groupAnimals, trophy, cardBack] + corners }
+    /// Little Penguin Studio promo: the mascot waving beside animal cards (Parents banner).
+    static let promoPenguinCards = "promo_penguin_cards"
+
+    /// Little Penguin Studio mascot poses. The mascot is the studio's penguin,
+    /// not Pebble: Pebble's card artwork is separate and unchanged.
+    enum Mascot: String, CaseIterable {
+        case wave = "mascot_wave"        // grown-ups gate (welcome)
+        case star = "mascot_star"        // results (reward)
+        case peek = "mascot_peek"        // Parents → Support (help)
+        case reading = "mascot_reading"  // Parents → Privacy (parent information)
+    }
+
+    /// Clay stickers cut from the studio sticker sheet. Decorative only, and
+    /// never placed on the game board or over cards, text or buttons.
+    enum Sticker: String, CaseIterable {
+        case star = "sticker_star", heart = "sticker_heart", flower = "sticker_flower"
+        case sparkles = "sticker_sparkles", confetti = "sticker_confetti", rainbow = "sticker_rainbow"
+        case bubbles = "sticker_bubbles", cloudLilac = "sticker_cloud_lilac"
+    }
+
+    static var all: [String] {
+        [wordmark, groupAnimals, trophy, cardBack, promoPenguinCards] + corners
+            + Mascot.allCases.map(\.rawValue) + Sticker.allCases.map(\.rawValue)
+    }
+}
+
+/// The Little Penguin Studio mascot in one of its poses. Purely decorative:
+/// hidden from VoiceOver and never tappable. The optional gentle bob is off
+/// when Reduce Motion is on.
+struct MascotArt: View {
+    let pose: BrandGraphic.Mascot
+    var bob = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @State private var raised = false
+
+    var body: some View {
+        let moving = bob && !reduceMotion
+        Image(pose.rawValue)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .offset(y: moving && raised ? -6 : 0)
+            .animation(moving ? .easeInOut(duration: 1.6).repeatForever(autoreverses: true) : nil, value: raised)
+            .onAppear { raised = moving }
+            .onChange(of: reduceMotion) { _, reduce in raised = bob && !reduce }
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
+}
+
+/// One clay sticker. Purely decorative: hidden from VoiceOver, never tappable.
+struct StickerArt: View {
+    let sticker: BrandGraphic.Sticker
+
+    var body: some View {
+        Image(sticker.rawValue)
+            .resizable()
+            .interpolation(.high)
+            .scaledToFit()
+            .allowsHitTesting(false)
+            .accessibilityHidden(true)
+    }
 }
 
 /// The "Animal Pairs" wordmark; VoiceOver reads the app name as a heading.

@@ -29,6 +29,7 @@ struct ParentsView: View {
             .padding(.vertical, 12)
 
             List {
+                aboutBanner
                 purchaseSection
                 settingsSection
                 progressSection
@@ -212,19 +213,56 @@ struct ParentsView: View {
         }
     }
 
+    /// Little Penguin Studio promo artwork with the app and studio name. The
+    /// picture is decorative; the caption carries the information.
+    private var aboutBanner: some View {
+        let t = model.localizer
+        return Section {
+            VStack(spacing: 8) {
+                Image(BrandGraphic.promoPenguinCards)
+                    .resizable()
+                    .interpolation(.high)
+                    .scaledToFit()
+                    .frame(maxWidth: 520, maxHeight: 220)
+                    .accessibilityHidden(true)
+                Text(t["parents.about"])
+                    .font(.rounded(.headline))
+                    .foregroundStyle(Palette.brown)
+                    .multilineTextAlignment(.center)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 4)
+            .listRowBackground(Color.clear)
+        }
+    }
+
+    /// Section header with a small decorative mascot on the trailing side,
+    /// outside the tappable rows.
+    private func mascotHeader(_ title: String, pose: BrandGraphic.Mascot) -> some View {
+        HStack(alignment: .bottom) {
+            Text(title)
+            Spacer()
+            MascotArt(pose: pose).frame(width: 64, height: 64)
+        }
+    }
+
     private var privacySection: some View {
         let t = model.localizer
-        return Section(t["parents.privacy"]) {
+        return Section {
             Text(t["parents.privacy.summary"]).font(.rounded(.body))
             externalLink(title: t["parents.privacy.policy"], url: model.configuration.privacyPolicyURL,
                          missingKey: "AP_PRIVACY_POLICY_URL")
+        } header: {
+            mascotHeader(t["parents.privacy"], pose: .reading)
         }
     }
 
     private var supportSection: some View {
         let t = model.localizer
-        return Section(t["parents.support"]) {
+        return Section {
             externalLink(title: t["parents.support.link"], url: model.configuration.supportURL, missingKey: "AP_SUPPORT_URL")
+        } header: {
+            mascotHeader(t["parents.support"], pose: .peek)
         }
     }
 

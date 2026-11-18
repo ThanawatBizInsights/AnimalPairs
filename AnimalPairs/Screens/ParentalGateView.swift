@@ -15,6 +15,7 @@ struct ParentalGateView: View {
     @State private var feedback: String?
     @State private var useKeyboard = false
     @FocusState private var fieldFocused: Bool
+    @ScaledMetric(relativeTo: .largeTitle) private var mascotSize: CGFloat = 120
 
     var body: some View {
         let t = model.localizer
@@ -25,10 +26,9 @@ struct ParentalGateView: View {
                     Spacer()
                 }
 
-                Image(systemName: "person.2.fill")
-                    .font(.system(size: 44))
-                    .foregroundStyle(Palette.lavenderDeep)
-                    .accessibilityHidden(true)
+                // Little Penguin Studio mascot welcoming grown-ups (decorative).
+                MascotArt(pose: .wave)
+                    .frame(width: mascotSize, height: mascotSize)
                 Text(t["gate.title"])
                     .font(.rounded(.largeTitle, weight: .bold))
                     .accessibilityAddTraits(.isHeader)
@@ -90,6 +90,17 @@ struct ParentalGateView: View {
             }
             .padding(24)
             .frame(maxWidth: .infinity)
+        }
+        .background(alignment: .topTrailing) {
+            // Behind the content, in the empty top-right corner (the close
+            // button is top-left), so no control or text is covered.
+            HStack(alignment: .top, spacing: 4) {
+                StickerArt(sticker: .bubbles).frame(width: 44, height: 44).padding(.top, 34)
+                StickerArt(sticker: .cloudLilac).frame(width: 76, height: 60)
+            }
+            .opacity(0.85)
+            .padding(.top, 16)
+            .padding(.trailing, 20)
         }
     }
 

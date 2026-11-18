@@ -60,6 +60,8 @@ struct ResultsView: View {
                     Spacer(minLength: 24)
                     TrophyBadge(ribbonText: t["results.ribbon"])
                         .frame(maxWidth: 420, maxHeight: 360)
+                        .background { ResultsStickers() }
+                        .overlay { ResultsMascot() }
                     Text(t["results.title"])
                         .font(.rounded(.largeTitle, weight: .heavy))
                         .multilineTextAlignment(.center)
@@ -108,6 +110,42 @@ struct ResultsView: View {
             model.audio.play(.confetti, after: 0.4)
             model.audio.narrate(.completed, after: 3.1)
         }
+    }
+}
+
+/// Clay stickers around the trophy's outer edges, drawn behind it. They stay
+/// clear of the ribbon text (centre bottom) and of everything below the trophy.
+private struct ResultsStickers: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let w = proxy.size.width, h = proxy.size.height
+            StickerArt(sticker: .sparkles)
+                .frame(width: w * 0.2, height: w * 0.2)
+                .position(x: w * 0.1, y: h * 0.16)
+            StickerArt(sticker: .confetti)
+                .frame(width: w * 0.22, height: w * 0.22)
+                .position(x: w * 0.9, y: h * 0.14)
+            StickerArt(sticker: .rainbow)
+                .frame(width: w * 0.22, height: w * 0.16)
+                .position(x: w * 0.09, y: h * 0.74)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
+    }
+}
+
+/// The Little Penguin Studio mascot holding a star, at the trophy's lower
+/// right (right of the ribbon). Gentle bob, off under Reduce Motion.
+private struct ResultsMascot: View {
+    var body: some View {
+        GeometryReader { proxy in
+            let w = proxy.size.width, h = proxy.size.height
+            MascotArt(pose: .star, bob: true)
+                .frame(width: w * 0.28, height: w * 0.28)
+                .position(x: w * 0.92, y: h * 0.72)
+        }
+        .allowsHitTesting(false)
+        .accessibilityHidden(true)
     }
 }
 
