@@ -14,7 +14,7 @@ public enum EntitlementEvidence: Equatable, Sendable {
 
 /// The subscription's renewal state from StoreKit's subscription status
 /// (verified), mirrored so the resolver stays pure.
-public enum SubscriptionRenewalState: Equatable, Sendable {
+public enum AppSubscriptionRenewalState: Equatable, Sendable {
     case subscribed
     /// Billing failed, but Apple's grace period still gives access.
     case inGracePeriod
@@ -59,7 +59,7 @@ public struct EntitlementDecision: Equatable, Sendable {
 /// Being offline never removes access early (the cache covers the paid
 /// period) and never extends it (the cache ends with the period).
 public enum EntitlementResolver {
-    public static func resolve(evidence: [EntitlementEvidence], renewalStates: [SubscriptionRenewalState] = [],
+    public static func resolve(evidence: [EntitlementEvidence], renewalStates: [AppSubscriptionRenewalState] = [],
                                scanCompleted: Bool, cached: CachedEntitlement?,
                                now: Date = Date()) -> EntitlementDecision {
         var best: CachedEntitlement?
@@ -156,7 +156,7 @@ public enum SubscriptionLapseResolver {
     /// account has never subscribed (nothing to explain). Only verified
     /// StoreKit data may be passed in.
     public static func resolve(isActive: Bool, latest: LatestSubscriptionTransaction?,
-                               renewalStates: [SubscriptionRenewalState], now: Date = Date()) -> SubscriptionLapse? {
+                               renewalStates: [AppSubscriptionRenewalState], now: Date = Date()) -> SubscriptionLapse? {
         guard !isActive else { return nil }
         if let revokedAt = latest?.revokedAt { return .revoked(on: revokedAt) }
         if renewalStates.contains(.revoked) { return .revoked(on: nil) }

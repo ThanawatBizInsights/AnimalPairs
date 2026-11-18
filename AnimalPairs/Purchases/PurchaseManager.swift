@@ -168,7 +168,7 @@ final class PurchaseManager {
         }
         // The renewal status adds the billing grace period and the "renews /
         // ends on" details. A network failure here is not evidence of anything.
-        var states: [SubscriptionRenewalState] = []
+        var states: [AppSubscriptionRenewalState] = []
         var newPlan: PlanStatus?
         if let statuses = try? await product?.subscription?.status {
             for status in statuses {
@@ -202,7 +202,10 @@ final class PurchaseManager {
         return LatestSubscriptionTransaction(expiresAt: transaction.expirationDate, revokedAt: transaction.revocationDate)
     }
 
-    nonisolated static func renewalState(_ state: Product.SubscriptionInfo.RenewalState) -> SubscriptionRenewalState {
+    /// StoreKit's renewal state (input, fully qualified) mapped to the app's own
+    /// `AppSubscriptionRenewalState` (AnimalPairsCore). Newer SDKs also declare
+    /// `StoreKit.SubscriptionRenewalState`, hence the distinct name.
+    nonisolated static func renewalState(_ state: StoreKit.Product.SubscriptionInfo.RenewalState) -> AppSubscriptionRenewalState {
         switch state {
         case .subscribed: .subscribed
         case .inGracePeriod: .inGracePeriod
