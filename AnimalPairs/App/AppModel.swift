@@ -70,7 +70,7 @@ final class AppModel {
             route = .home
         }
         localizer = Localizer()
-        purchases = PurchaseManager(productID: configuration.plusProductID)
+        purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
         audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled,
                              musicEnabled: settings.musicEnabled, sessionController: audioSession)
 

@@ -341,7 +341,7 @@
 		A10000000000000000000311 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AP_PLUS_PRODUCT_ID = com.example.animalpairs.plus.monthly;
+				AP_FULL_UNLOCK_PRODUCT_ID = com.littlepenguinstudio.animalpairs.fullgame;
 				AP_PRIVACY_POLICY_URL = "https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/";
 				AP_SUPPORT_URL = "https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/";
 				AP_TERMS_OF_USE_URL = "";
@@ -381,7 +381,7 @@
 		A10000000000000000000312 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				AP_PLUS_PRODUCT_ID = com.example.animalpairs.plus.monthly;
+				AP_FULL_UNLOCK_PRODUCT_ID = com.littlepenguinstudio.animalpairs.fullgame;
 				AP_PRIVACY_POLICY_URL = "https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/";
 				AP_SUPPORT_URL = "https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/";
 				AP_TERMS_OF_USE_URL = "";

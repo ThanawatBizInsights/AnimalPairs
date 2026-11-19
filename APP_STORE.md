@@ -1,98 +1,118 @@
-# App Store release: Animal Pairs Plus
+# App Store release: Full Game Unlock (one-time purchase)
 
-Values for App Store Connect, App Review notes and what is still open before
-the first release. Nothing here has been submitted or published.
+Values for App Store Connect, App Review notes, listing text and what is still
+open before the first release. Nothing here has been created, submitted or
+published by Claude: every App Store Connect step below is yours to do.
 
 ## Still needed from you
 
 | Item | Status | Where it goes |
 | --- | --- | --- |
-| **Final bundle ID** | ❗ to supply. The project uses the placeholder `com.example.AnimalPairs` | `PRODUCT_BUNDLE_IDENTIFIER` (AnimalPairs and AnimalPairsTests targets) |
-| **Product ID** | ❗ to confirm. Suggested: **`<bundle ID>.plus.monthly`**. The project uses the placeholder `com.example.animalpairs.plus.monthly` | `AP_PLUS_PRODUCT_ID` build setting and `productID` in `Config/Products.storekit` |
-| **Terms of Use URL** | ❗ to supply; not verified | `AP_TERMS_OF_USE_URL`; App Store Connect → App Information → License Agreement (or your App Description) |
-| **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (page live; still marked *draft* until the publisher name, effective date, age rating and availability are filled in on the website) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy → Privacy Policy URL |
-| **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` (the URL you gave) | `AP_SUPPORT_URL`; App Store Connect → version → Support URL |
+| **Final bundle ID** | ❗ to supply. The project still uses the placeholder `com.example.AnimalPairs` | `PRODUCT_BUNDLE_IDENTIFIER` (AnimalPairs and AnimalPairsTests targets) |
+| **Product ID** | set in the project: **`com.littlepenguinstudio.animalpairs.fullgame`**. It does **not** exist in App Store Connect until you create it (below). To use a different ID, change `AP_FULL_UNLOCK_PRODUCT_ID` and `productID` in `Config/Products.storekit` together | build setting + StoreKit file |
+| **Price** | ❗ your decision. The local StoreKit test file uses US$2.99 for simulator testing only; the app always shows the price StoreKit returns | App Store Connect → the in-app purchase → Price Schedule |
+| **Family Sharing** | ❗ your decision (off in the local test file). Once turned on in App Store Connect it cannot be turned off | the in-app purchase → Family Sharing |
+| **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (the page is still a website *draft* until the publisher name, effective date, age rating and availability are filled in) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy |
+| **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | `AP_SUPPORT_URL`; version page → Support URL |
+| **Terms of Use** | optional for a one-time purchase. With no URL, Apple's standard EULA applies and the Parents screen shows no Terms link | `AP_TERMS_OF_USE_URL` (optional) |
 
-The Little Penguin Studio website has no Terms of Use page, so that link is
-still empty and the Parents screen says "not set yet" instead of opening a
-wrong page. If you move the site to a custom domain, update both URLs. If you
-use Apple's standard licence instead of your own terms, it is usually
-published at `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`.
-Please open that URL yourself to confirm it before using it.
+## App Store Connect: the in-app purchase
 
-After setting the bundle ID and product ID, run the test action: `PurchaseTests`
-fails if the build setting and the StoreKit file disagree.
-
-## App Store Connect: subscription
-
-**Business → Agreements, Tax and Banking:** the **Paid Apps** agreement must be
-active first.
-
-**Apps → Animal Pairs → Monetization → Subscriptions**
+1. **Business → Agreements, Tax and Banking:** the **Paid Apps** agreement must be active.
+2. **Apps → Animal Pairs → Monetization → In-App Purchases → +**
 
 | Field | Value |
 | --- | --- |
-| Subscription group reference name | **Animal Pairs Plus** |
-| Group display name (English, U.S.) | **Animal Pairs Plus** |
-| Subscription reference name | **Animal Pairs Plus Monthly** |
-| Product ID | **`<your bundle ID>.plus.monthly`** (must equal `AP_PLUS_PRODUCT_ID`) |
-| Subscription duration | **1 month** |
-| Price | **USD 1.99** for the United States, with Apple's equalized prices for the other storefronts. The app shows StoreKit's localized price and never hard-codes it |
-| Availability | all countries or regions where the app is sold (the app is English only) |
-| Family Sharing | **Off** (matches `Config/Products.storekit`) |
-| Localization: English (U.S.), display name | **Animal Pairs Plus** |
-| Localization: English (U.S.), description | **More card counts and Exact Pose mode, renewed monthly.** (54 characters; the limit is 55) |
-| Introductory offers / promotional offers | none |
-| Review screenshot | Parents → **Animal Pairs Plus** section on iPhone, showing the price, the Subscribe button and the renewal terms. Take it from a simulator run with the local StoreKit file, or from a sandbox build |
+| Type | **Non-Consumable** |
+| Reference name | **Full Game Unlock** |
+| Product ID | **`com.littlepenguinstudio.animalpairs.fullgame`** (must equal `AP_FULL_UNLOCK_PRODUCT_ID`; a product ID can never be reused) |
+| Availability | the countries or regions where the app is sold (the app is English only) |
+| Price | your choice (see above) |
+| Family Sharing | your choice (see above) |
+| Localization, English (U.S.): display name | **Full Game Unlock** |
+| Localization, English (U.S.): description | **Classic 16 & 20 cards, Exact Pose, 70 more pictures.** (52 characters; the limit is 55) |
+| Review screenshot | Parents → **Full Game Unlock** on iPhone, showing "One-time purchase", what it unlocks, the price and the Buy button. Take it from a simulator run with the local StoreKit file, or a sandbox build |
 | Review notes | see below |
 
-Submit the subscription **together with the app version**: a first
-subscription is reviewed with a new build. On the version page, under
-*In-App Purchases and Subscriptions*, add **Animal Pairs Plus Monthly**.
+3. **Submit it with the app version.** A first in-app purchase must be reviewed
+   together with a new app version: on the version page, under *In-App
+   Purchases and Subscriptions*, select **Full Game Unlock** before *Add for
+   Review*.
+4. **The old subscription:** "Animal Pairs Plus" (`com.example.animalpairs.plus.monthly`)
+   existed only in the local StoreKit test file and was never sold. If you
+   created it in App Store Connect anyway, do not attach it to the version and
+   remove it from sale (or delete it while it has never been submitted).
 
-Also check these on the app's version page:
-
-* the Privacy Policy URL is set;
-* the Terms of Use link is in the App Description, or a custom EULA is set;
-* App Privacy says no data is collected (no accounts, analytics or ads);
-* if you choose the Kids category, the adult gate below covers every purchase
-  and external link.
-
-## App Review notes (paste into "Notes" for the version and the subscription)
+## App Review notes (paste into "Notes" for the version and the in-app purchase)
 
 ```
-Animal Pairs is free to play: Classic mode with 6 cards. An optional monthly
-auto-renewable subscription, "Animal Pairs Plus", adds the 12, 16 and 20 card
-boards, Exact Pose mode and 70 more animal pictures. There are no ads and no
-accounts.
+Animal Pairs is free to play with no time limit: Classic mode with 6 or 12
+cards. One optional one-time, non-consumable in-app purchase, "Full Game
+Unlock", adds Classic with 16 and 20 cards, Exact Pose mode at every board
+size, and 70 more animal pictures. There are no subscriptions, ads or accounts.
 
-Parental gate: every purchase, Restore Purchases, Manage Subscription and
-external link (Terms of Use, Privacy Policy, Support) is behind an adult gate.
-On the Home screen tap the gear button (top corner, "Parents and settings").
-The gate asks a multiplication question written in words (for example "What
-is seven times eight?"); enter the answer on the number pad and tap Check.
+Parental gate: every purchase, Restore Purchases, offer codes and external
+link (Privacy Policy, Support) is behind an adult gate. On the Home screen tap
+the gear button (top corner, "Parents and settings"). The gate asks a
+multiplication question written in words (for example "What is seven times
+eight?"); enter the answer on the number pad and tap Check.
 
-Purchase screen: after the gate, the Parents screen opens. The "Animal Pairs
-Plus" section lists what is included, the price and period from the App Store,
-the auto-renewal and cancellation terms, Subscribe, Restore Purchases, Manage
-Subscription, Redeem Offer Code, Terms of Use and Privacy Policy.
+Purchase screen: after the gate, the Parents screen opens. The "Full Game
+Unlock" section shows "One-time purchase", what it unlocks, the price from the
+App Store, Buy, Restore Purchases, Redeem Offer Code and the Privacy Policy.
 
-Locked features: from Home, tap Play to reach the board choice. The 12, 16 and
-20 card boards and Exact Pose show a lock. Tapping one shows a short message
-for the child with an "Ask a grown-up" button, which opens the same parental
-gate. A child can never start a purchase from there.
+Locked features: from Home, tap Play. Classic with 16 or 20 cards and Exact
+Pose show a lock. Tapping one shows a short message for the child with an
+"Ask a grown-up" button that opens the same parental gate. A child can never
+start a purchase from the game.
 
-Restore: Parents → Animal Pairs Plus → Restore Purchases. A message confirms
-that the subscription was restored, or that none was found for this Apple
-Account.
+Restore: Parents → Full Game Unlock → Restore Purchases. A message confirms the
+purchase was restored, or that none was found for this Apple Account.
 ```
+
+## App Store listing draft (English)
+
+**Subtitle** (30 characters max): `A gentle animal memory game` (27)
+
+**Promotional text:**
+Ten soft animal friends hide under the cards. Classic matching with 6 or 12
+cards is free to play, as often as you like.
+
+**Description:**
+```
+Turn over two cards, remember where everyone is, and find the matching pairs.
+Ten friendly animals — Momo, Iris, Nori, Sprout, Mochi, Sunny, Maple, Clover,
+Rusty and Pebble — make a happy sound when their pair is found.
+
+• No timers, no lives, no failure screens
+• Unlimited gentle hints
+• Large cards and simple controls, made for young children
+• Works offline; no accounts, no ads, no tracking
+• VoiceOver, Larger Text and Reduce Motion support
+
+FREE TO PLAY
+Classic mode with 6 or 12 cards, with unlimited play.
+
+FULL GAME UNLOCK — ONE-TIME PURCHASE
+One optional in-app purchase, bought once by a grown-up in the Parents area
+(behind a grown-ups check). It adds:
+• Classic mode with 16 and 20 cards
+• Exact Pose mode with 6, 12, 16 and 20 cards: match the same animal in the
+  same pose
+• 70 more animal pictures: every friend in seven more poses
+It is not a subscription and never expires. Restore Purchases brings it back on
+any iPhone or iPad signed in to the same Apple Account.
+```
+
+**In-App Purchases** list on the product page is generated by Apple from the
+in-app purchase's display name and price.
 
 ## Release checklist
 
-- [ ] Final bundle ID set, product ID set in both places, tests pass in Xcode
-- [ ] Terms of Use, Privacy Policy and Support URLs set and opened on a device
-- [ ] Build and test on an iPhone and an iPad simulator (`xcodebuild … build test`, see README)
-- [ ] Sandbox check with a sandbox Apple Account: subscribe, cancel in Manage Subscription, expiry, Restore on a second device
-- [ ] Subscription created as above, with a review screenshot; attached to the version
-- [ ] App Store screenshots, description and marketing text (still missing; see ASSET_CHECKLIST)
+- [ ] Final bundle ID set; product ID created in App Store Connect exactly as above
+- [ ] Price and Family Sharing chosen
+- [ ] Build and test on an iPhone and an iPad simulator (`xcodebuild … build test`, see README), including `PurchaseTests`
+- [ ] Sandbox check with a sandbox Apple Account: buy, Restore on a second device, refund (Debug → StoreKit or sandbox)
+- [ ] Review screenshot of Parents → Full Game Unlock; in-app purchase attached to the version
+- [ ] App Store screenshots, description and promotional text (draft above)
 - [ ] Release signing and a TestFlight round before submitting

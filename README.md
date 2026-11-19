@@ -6,11 +6,11 @@ Clover, Rusty and Pebble — hide under lavender cards. No timers, no lives, no
 failure screens, no ads, no accounts, and it works fully offline.
 
 * **Classic**: match two cards of the same animal (one pose per animal).
-* **Exact Pose** (Animal Pairs Plus): the board mixes several poses of the same
+* **Exact Pose** (Full Game Unlock): the board mixes several poses of the same
   animal; a pair must be the same animal *and* the same pose.
 * Boards: 6 (3×2), 12 (4×3), 16 (4×4) and 20 (5×4) cards. Classic with 6
-  cards is free; the rest is part of the optional monthly subscription
-  **Animal Pairs Plus** (see [below](#animal-pairs-plus-monthly-subscription)).
+  and 12 cards is free, with unlimited play; the rest is part of the optional
+  one-time purchase **Full Game Unlock** (see [below](#full-game-unlock-one-time-purchase)).
 * Unlimited gentle hints, VoiceOver, Dynamic Type and
   Reduce Motion support.
 
@@ -29,8 +29,8 @@ failure screens, no ads, no accounts, and it works fully offline.
 2. Select the **AnimalPairs** target → *Signing & Capabilities* → choose your
    team. Change the bundle identifier (`com.example.AnimalPairs`) to one you own.
 3. Choose the shared **AnimalPairs** scheme and an iPad simulator, then Run.
-   The scheme's Run action uses `Config/Products.storekit`, so Animal Pairs
-   Plus can be subscribed to locally (no money, no Apple Account, no App Store
+   The scheme's Run action uses `Config/Products.storekit`, so Full Game
+   Unlock can be bought locally (no money, no Apple Account, no App Store
    Connect setup).
 
 Command line:
@@ -48,8 +48,8 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
 
 | Suite | Where | How |
 | --- | --- | --- |
-| `AnimalPairsCoreTests` (99 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
-| `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** subscription states (subscribe, relaunch, Ask to Buy pending, cancel, failure, expiry, refund, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPad simulator |
+| `AnimalPairsCoreTests` (93 tests) — deck cardinality and mode rules, exact image vs same-animal/different-pose, rapid taps, stale callbacks, hint accounting, pause/normalize, snapshot corruption/migration/restore, history de-duplication and trimming, entitlement decisions, parental gate | `Packages/AnimalPairsKit` | `swift test` in that folder (macOS or Linux), or Xcode test action |
+| `AnimalPairsTests` — SwiftData history, background → save → relaunch → resume without reshuffle, corrupt snapshot vs history, reset keeps purchases, parent-access expiry, VoiceOver labels never reveal covered cards, English-only text and bundle, **StoreKitTest** one-time purchase states (purchase, relaunch, other device, Ask to Buy pending, cancel, failure, refund, restore) | `AnimalPairsTests/` (hosted by the app) | Xcode test action on an iPhone and an iPad simulator |
 | Backend (18 tests) | `backend/` | see [backend/README.md](backend/README.md) |
 | String Catalog coverage (every key used has English text) | `Tools/localization/check_strings.py` | `python3 Tools/localization/check_strings.py` |
 
@@ -59,13 +59,13 @@ xcodebuild -project AnimalPairs.xcodeproj -scheme AnimalPairs \
    it as the run destination, and run with your signing team.
 2. **Local StoreKit on device:** the scheme's StoreKit configuration also
    applies to device runs launched from Xcode.
-3. **Sandbox purchases:** create the subscription in App Store Connect with the
+3. **Sandbox purchases:** create the non-consumable in App Store Connect with the
    product ID you configure (see [APP_STORE.md](APP_STORE.md)), add a Sandbox tester (Users and Access →
    Sandbox), sign in on the iPad under Settings → App Store → Sandbox Account, then
    run with the scheme's StoreKit configuration set to *None*
    (Edit Scheme → Run → Options).
 4. Things worth checking by hand: Ask to Buy (Family Sharing child account),
-   refund and expiry via Sandbox, Restore Purchases on a second device, VoiceOver with the
+   refund via Sandbox, Restore Purchases on a second device, VoiceOver with the
    rotor, Larger Text, Reduce Motion, Stage Manager / Split View resizing during a
    round (the board must keep its order and progress), and backgrounding during
    the 1.2 s mismatch window.
@@ -77,9 +77,9 @@ All configurable values are build settings on the **AnimalPairs** target
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `AP_PLUS_PRODUCT_ID` | `com.example.animalpairs.plus.monthly` | Monthly auto-renewable *Animal Pairs Plus* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID and configuration](#product-id-and-configuration). |
-| `AP_TERMS_OF_USE_URL` | empty | `https://` Terms of Use (EULA), opened from Parents (behind the gate). Required for a subscription. |
-| `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). Required for a subscription. |
+| `AP_FULL_UNLOCK_PRODUCT_ID` | `com.littlepenguinstudio.animalpairs.fullgame` | Non-consumable *Full Game Unlock* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID and configuration](#product-id-and-configuration). |
+| `AP_TERMS_OF_USE_URL` | empty | Optional `https://` Terms of Use; shown in Parents (behind the gate) only when set. Apple's standard EULA applies otherwise. |
+| `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). Required by the App Store. |
 | `AP_SUPPORT_URL` | empty | `https://` support page. |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` | Replace with your own. |
 
@@ -140,9 +140,9 @@ totals cover every round. If the store cannot be opened the file is left
 untouched and an in-memory store is used for that session. Resetting progress
 never touches purchases.
 
-**Purchases.** One optional monthly auto-renewable subscription, *Animal Pairs
-Plus* — see [Animal Pairs Plus](#animal-pairs-plus-monthly-subscription). Debug
-builds have a *Simulate Animal Pairs Plus* switch in Parents; it is compiled out
+**Purchases.** One optional one-time, non-consumable purchase, *Full Game
+Unlock* — see [Full Game Unlock](#full-game-unlock-one-time-purchase). Debug
+builds have a *Simulate Full Game Unlock* switch in Parents; it is compiled out
 of Release builds.
 
 **Parents area.** Reached through an adult gate (a multiplication question in
@@ -156,101 +156,88 @@ accounts, chat or third-party analytics. Progress stays on the device. A
 privacy manifest (`PrivacyInfo.xcprivacy`) declares the only required-reason
 API used (UserDefaults).
 
-## Animal Pairs Plus (monthly subscription)
+## Full Game Unlock (one-time purchase)
 
-One optional auto-renewing monthly subscription, **Animal Pairs Plus**, in
-one subscription group. There are no ads and nothing else to buy. Values to
-enter in App Store Connect, App Review notes and the release checklist are in
-[APP_STORE.md](APP_STORE.md).
+One optional **non-consumable** in-app purchase, **Full Game Unlock**: bought
+once, never expires, no subscription, no ads, nothing else to buy. App Store
+Connect steps and review notes are in [APP_STORE.md](APP_STORE.md).
 
-### Free vs Plus
+### Free vs Full Game Unlock
 
-| Free for everyone | Added by **Animal Pairs Plus** |
+| Free for everyone, unlimited play | Added by **Full Game Unlock** |
 | --- | --- |
-| **Classic** mode, **6 cards** | **12-, 16- and 20-card** boards |
-| The 10 default animal pictures | **Exact Pose** mode |
-| Sounds, music, animal clips, hints, progress, Parents | **70 more pictures**: every friend playing, napping, waving, celebrating, playing football, playing golf and cooking |
+| **Classic** mode with **6 or 12 cards** | **Classic** with **16 and 20 cards** |
+| The 10 default animal pictures | **Exact Pose** mode at **every** board size (6, 12, 16, 20) |
+| Sounds, music, animal clips, hints, progress, Parents | **70 more pictures**: every friend in seven more poses |
 
-Only features that exist today are listed; no future packs are shown or
-promised. Subscribing, restoring or expiring never touches game progress or
-history (`ContentAccessPolicy`, AnimalPairsCore).
+What the purchase includes is defined in one place,
+`FullGameUnlock.features` (AnimalPairsCore, `ContentAccess.swift`), as
+explicit `PremiumFeature` cases. A future theme gets its own case and stays
+locked until someone deliberately adds it to a product;
+`testFullGameUnlockDefinitionIsDeliberate` fails as a reminder. Nothing that
+is not in the app today is described as included. Buying, restoring or a
+refund never touches game progress or history.
 
 ### Children never reach a purchase
 
-On the Setup screen a locked board size or Exact Pose shows a gentle note
-("Part of Animal Pairs Plus — ask a grown-up") with an **Ask a grown-up**
-button that opens the **adult gate**, never a purchase sheet. Everything that
-spends money or leaves the app sits behind the gate in **Parents → Animal
-Pairs Plus**:
+Free play (Classic 6 and 12) never shows a price, a purchase sheet or an Apple
+Account prompt, however often it is replayed. On the Setup screen a locked
+board or Exact Pose shows a gentle note ("Part of Full Game Unlock — ask a
+grown-up") whose **Ask a grown-up** button opens the **adult gate**, never a
+purchase. Everything that spends money or leaves the app is in **Parents →
+Full Game Unlock**, behind the gate:
 
-* what Plus includes today, the **localized price and period from StoreKit**
-  (e.g. "$1.99 per month"; never hard-coded), that it renews automatically
-  and how to cancel;
-* **Subscribe** (`Product.purchase` through SwiftUI's `PurchaseAction`), disabled
-  while a request is running so it cannot be sent twice;
-* **Restore Purchases**: `AppStore.sync()` (which may ask for the Apple
-  Account password, so it is never called anywhere else), then a fresh read
-  of verified entitlements. Messages: restored; no subscription for this Apple
-  Account; it ended on *date*; it was refunded; the App Store couldn't take
-  the payment; cancelled; no connection. A failed or cancelled restore leaves
-  access as it was. Subscribers rarely need it: launch and returning to the
-  app already re-read entitlements, without any prompt;
-* when Plus is off but the account had it, a short note says why (ended on
-  *date*, refunded, payment problem) — Parents only, never changes access;
-* **Manage Subscription** (`manageSubscriptionsSheet`) and, when not subscribed,
-  **Redeem Offer Code** (Apple's sheet);
-* **Terms of Use** and **Privacy Policy** links (`AP_TERMS_OF_USE_URL`,
-  `AP_PRIVACY_POLICY_URL`); a missing URL is shown as "not set yet" instead of
-  a broken link;
-* when subscribed: "renews on …" / "ends on …" and a billing-problem note during
-  Apple's grace period.
+* a **"One-time purchase"** label, what it unlocks, and the **localized price
+  from StoreKit** (`displayPrice`; never hard-coded);
+* **Buy Full Game Unlock for {price}** (`Product.purchase` through SwiftUI's
+  `PurchaseAction`), hidden once owned and disabled while any request runs;
+* **Restore Purchases**: `AppStore.sync()` (may ask for the Apple Account
+  password, so nothing else calls it), then a fresh read of verified
+  entitlements. Messages: restored; nothing found for this Apple Account;
+  refunded by Apple; cancelled; no connection;
+* **Redeem Offer Code** (Apple's sheet), when not owned;
+* **Privacy Policy** (and **Terms of Use** if `AP_TERMS_OF_USE_URL` is set).
 
-### How access is decided
+### How ownership is decided
 
-* Only **verified** StoreKit 2 transactions for `AP_PLUS_PRODUCT_ID` of type
-  auto-renewable count; unverified, upgraded-away, revoked/refunded and
-  expired transactions never unlock (`EntitlementResolver`, AnimalPairsCore,
-  unit-tested).
-* `Product.SubscriptionInfo.status` is also read: **subscribed** and
-  **grace period** keep Plus; **billing retry**, **expired** and **revoked** do not.
-* Refreshed at launch, on returning to the foreground, after Subscribe, after
-  Restore, after the Manage sheet closes, on every `Transaction.updates` event,
-  and automatically just after the current period's end date.
-* **Pending** (Ask to Buy), **cancelled**, **failed verification** and network
-  errors each show their own message and change nothing.
-* **Offline / network failure:** the last verified transaction ID and its
-  **period end date** are cached. If StoreKit cannot answer, Plus is kept only
-  until that date — never longer, and a completed scan without the entitlement
-  (expired, refunded) locks again. A plain UserDefaults flag never unlocks.
-* **Other devices:** the subscription belongs to the Apple Account, so it is
-  active on every iPhone and iPad signed in to it; **Restore Purchases** forces
-  a sync after a reinstall. Family Sharing is off.
+* Only **verified** StoreKit 2 transactions for `AP_FULL_UNLOCK_PRODUCT_ID`
+  of type **non-consumable** count (`EntitlementResolver`, unit-tested).
+  Unverified, other and refunded/revoked transactions never unlock; a refund
+  locks the extra content again and Parents says why.
+* Read at launch, on returning to the foreground, after a purchase, after
+  Restore, after the offer-code sheet, and on every `Transaction.updates` event
+  (Ask to Buy approval, purchase on another device, refund).
+* Pending (Ask to Buy), cancelled and failed purchases change nothing.
+* Offline: the ID of the last *verified* transaction is cached so a launch
+  before StoreKit answers stays unlocked. It is not a "purchased" flag: a
+  completed StoreKit scan without the purchase (refund) clears it, and a plain
+  UserDefaults Boolean never unlocks.
+* **iPhone and iPad:** the purchase belongs to the Apple Account, so every
+  device signed in to it unlocks at launch; Restore Purchases forces a sync.
 
 ### Product ID and configuration
 
-Everything is set in one place — the **AnimalPairs** target's build settings
-(documented in `AnimalPairs/App/AppConfiguration.swift`):
+| Build setting | Value |
+| --- | --- |
+| `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlepenguinstudio.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
+| `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` — **placeholder; set your own** (the product ID does not depend on it) |
+| `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | the Little Penguin Studio pages |
+| `AP_TERMS_OF_USE_URL` | empty (optional for a one-time purchase; Apple's standard EULA applies) |
 
-| Build setting | Now | Final value |
-| --- | --- | --- |
-| `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` (placeholder) | your bundle ID |
-| `AP_PLUS_PRODUCT_ID` | `com.example.animalpairs.plus.monthly` (placeholder) | suggested **`<bundle ID>.plus.monthly`** |
-| `AP_TERMS_OF_USE_URL` | empty | Terms of Use page (Apple's standard EULA or your own) |
-| `AP_PRIVACY_POLICY_URL` | `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` | same (update if the site moves to a custom domain) |
-| `AP_SUPPORT_URL` | `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | same (also needed in App Store Connect) |
-
-Also change `productID` in `Config/Products.storekit` to match
-(`PurchaseTests` fails if they differ). Debug builds show a note in Parents
-while the placeholder ID is used. A product ID can never be reused once
-created in App Store Connect.
+**Migration from the monthly subscription:** the earlier *Animal Pairs Plus*
+subscription (`com.example.animalpairs.plus.monthly`) existed only in the
+local StoreKit file and sandbox/local tests. It was never created in App Store
+Connect or sold, so no customer had paid access to preserve; its code,
+strings and cached record (`purchases.verifiedEntitlement`, removed at launch)
+are gone.
 
 ### Testing
 
 | Where | What it proves | How |
 | --- | --- | --- |
-| **Local StoreKit** — `Config/Products.storekit` (one group, one monthly subscription, in the scheme) and `AnimalPairsTests/PurchaseTests.swift` (`SKTestSession`) | product is monthly auto-renewable with a StoreKit price; free = Classic 6 only; subscribe → relaunch stays Plus; a relaunch/reinstall needs no Restore and shows nothing; Ask to Buy pending; cancel; failure; expiry locks; refund locks; restore of an existing subscription and after a reinstall; restore with nothing; restore after expiry says it ended; restore after a refund says so; Restore tapped twice runs once; cancelled/network restore errors; an expired cached period is not honoured; offline launch inside the paid period; a UserDefaults flag never unlocks | Xcode → Product → Test on an iPhone and an iPad simulator. By hand: Debug → StoreKit → Manage Transactions (expire, refund, Ask to Buy); Editor → Subscription Renewal Rate to speed renewals. |
-| **Sandbox** — a sandbox Apple Account (never a real one) | real App Store sheet and price, renewals, cancel in Manage Subscription, restore on a second device | sign in under Settings → Developer → Sandbox Apple Account; set the scheme's StoreKit Configuration to *None*. |
-| **TestFlight** | the same with the production product | after the subscription is submitted with a build. |
+| **Local StoreKit** — `Config/Products.storekit` (one non-consumable, in the scheme) and `AnimalPairsTests/PurchaseTests.swift` (`SKTestSession`) | non-consumable with a StoreKit price, not a subscription; Classic 6/12 free, Classic 16/20 and all Exact Pose boards locked; purchase unlocks all and survives a relaunch; another device / reinstall with the same Apple Account unlocks at launch without Restore; Ask to Buy pending stays locked; cancel and failure stay locked; refund locks again (also after relaunch); Restore after reinstall; Restore with nothing; Restore after a refund; Restore tapped twice runs once; offer codes; offline launch; a UserDefaults flag never unlocks; the retired subscription cache is ignored | Xcode → Product → Test on an **iPhone and an iPad** simulator. By hand: Debug → StoreKit → Manage Transactions (refund, Ask to Buy). |
+| **Sandbox** — a sandbox Apple Account (never a real one) | real App Store sheet and price, Restore on a second device | sign in under Settings → Developer → Sandbox Apple Account; set the scheme's StoreKit Configuration to *None*. |
+| **TestFlight** | the same with the production product | after the in-app purchase is submitted with a build. |
 
 No real purchases, personal credentials or live customer accounts are needed
 or used for any of these.

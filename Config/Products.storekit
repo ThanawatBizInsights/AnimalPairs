@@ -1,43 +1,30 @@
 {
   "identifier": "5E1A8C2B",
   "nonRenewingSubscriptions": [],
-  "products": [],
+  "products": [
+    {
+      "displayPrice": "2.99",
+      "familyShareable": false,
+      "internalID": "6740000003",
+      "localizations": [
+        {
+          "description": "Classic 16 & 20 cards, Exact Pose, 70 more pictures.",
+          "displayName": "Full Game Unlock",
+          "locale": "en_US"
+        }
+      ],
+      "productID": "com.littlepenguinstudio.animalpairs.fullgame",
+      "referenceName": "Full Game Unlock",
+      "type": "NonConsumable"
+    }
+  ],
   "settings": {
     "_failTransactionsEnabled": false,
     "_locale": "en_US",
     "_storefront": "USA",
     "_storeKitErrors": []
   },
-  "subscriptionGroups": [
-    {
-      "id": "21500001",
-      "localizations": [],
-      "name": "Animal Pairs Plus",
-      "subscriptions": [
-        {
-          "adHocOffers": [],
-          "codeOffers": [],
-          "displayPrice": "1.99",
-          "familyShareable": false,
-          "groupNumber": 1,
-          "internalID": "6740000002",
-          "introductoryOffer": null,
-          "localizations": [
-            {
-              "description": "More card counts and Exact Pose mode, renewed monthly.",
-              "displayName": "Animal Pairs Plus",
-              "locale": "en_US"
-            }
-          ],
-          "productID": "com.example.animalpairs.plus.monthly",
-          "recurringSubscriptionPeriod": "P1M",
-          "referenceName": "Animal Pairs Plus Monthly",
-          "subscriptionGroupID": "21500001",
-          "type": "RecurringSubscription"
-        }
-      ]
-    }
-  ],
+  "subscriptionGroups": [],
   "version": {
     "major": 4,
     "minor": 0

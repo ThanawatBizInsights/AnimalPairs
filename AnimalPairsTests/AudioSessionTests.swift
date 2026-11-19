@@ -26,7 +26,7 @@ final class AudioSessionTests: XCTestCase {
     func testActivationRunsOnceAndNeverOnTheMainThread() async throws {
         let recorder = Recorder()
         let model = AppModel(settings: SettingsStore(defaults: AppTestSupport.isolatedDefaults()),
-                             configuration: AppConfiguration(plusProductID: AppConfiguration.placeholderProductID,
+                             configuration: AppConfiguration(fullUnlockProductID: AppConfiguration.defaultFullUnlockProductID,
                                                              privacyPolicyURL: nil, supportURL: nil),
                              history: SwiftDataCompletionStore.inMemory(),
                              snapshots: RoundSnapshotStore(directory: AppTestSupport.temporaryDirectory()),

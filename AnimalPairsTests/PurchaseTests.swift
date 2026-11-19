@@ -4,19 +4,19 @@ import StoreKitTest
 import XCTest
 @testable import AnimalPairs
 
-/// Exercises the Animal Pairs Plus subscription — purchase, Ask to Buy,
-/// cancel, failure, expiry, refund, restore, relaunch — and offer codes
-/// against the local StoreKit configuration (Config/Products.storekit). Runs in the iOS
-/// Simulator only. These are *simulated* StoreKit tests: a real offer code
-/// can only be redeemed against App Store Connect (sandbox codes / TestFlight),
-/// see README "Gift codes".
+/// Exercises the one-time "Full Game Unlock" (non-consumable) — purchase,
+/// Ask to Buy, cancel, failure, refund, restore, relaunch, reinstall — and
+/// offer codes against the local StoreKit configuration
+/// (Config/Products.storekit). Runs in the iOS Simulator (run it on an
+/// iPhone and an iPad simulator). These are *simulated* StoreKit tests: real
+/// App Store behaviour is checked with a sandbox account / TestFlight.
 @MainActor
 final class PurchaseTests: XCTestCase {
     private var session: SKTestSession!
     private var defaults: UserDefaults!
-    /// The Plus subscription in Config/Products.storekit (keep it equal to
-    /// AP_PLUS_PRODUCT_ID when you rename it).
-    private var productID = AppConfiguration.placeholderProductID
+    /// The Full Game Unlock in Config/Products.storekit (must equal
+    /// AP_FULL_UNLOCK_PRODUCT_ID).
+    private var productID = AppConfiguration.defaultFullUnlockProductID
 
     override func setUp() async throws {
         let url = URL(fileURLWithPath: #filePath)
@@ -24,14 +24,13 @@ final class PurchaseTests: XCTestCase {
             .appendingPathComponent("Config/Products.storekit")
         session = try SKTestSession(contentsOf: url)
         let config = try JSONSerialization.jsonObject(with: Data(contentsOf: url)) as? [String: Any]
-        let groups = config?["subscriptionGroups"] as? [[String: Any]] ?? []
-        XCTAssertEqual(groups.count, 1, "one subscription group")
-        let subscriptions = groups.first?["subscriptions"] as? [[String: Any]] ?? []
-        XCTAssertEqual(subscriptions.count, 1, "one subscription")
-        XCTAssertEqual(subscriptions.first?["recurringSubscriptionPeriod"] as? String, "P1M", "monthly")
-        productID = try XCTUnwrap(subscriptions.first?["productID"] as? String)
-        XCTAssertEqual(productID, AppConfiguration.current.plusProductID,
-                       "Products.storekit and AP_PLUS_PRODUCT_ID must name the same product")
+        let products = config?["products"] as? [[String: Any]] ?? []
+        XCTAssertEqual(products.count, 1, "exactly one product")
+        XCTAssertEqual(products.first?["type"] as? String, "NonConsumable")
+        XCTAssertEqual((config?["subscriptionGroups"] as? [Any])?.count ?? 0, 0, "no subscriptions")
+        productID = try XCTUnwrap(products.first?["productID"] as? String)
+        XCTAssertEqual(productID, AppConfiguration.current.fullUnlockProductID,
+                       "Products.storekit and AP_FULL_UNLOCK_PRODUCT_ID must name the same product")
         session.resetToDefaultState()
         session.disableDialogs = true
         session.clearTransactions()
@@ -52,118 +51,131 @@ final class PurchaseTests: XCTestCase {
         return manager
     }
 
-    private func subscribe(_ manager: PurchaseManager) async throws {
+    private func buy(_ manager: PurchaseManager) async throws {
         let result = try await XCTUnwrap(manager.product).purchase()
         await manager.handle(result: result)
     }
 
-    func testProductIsAMonthlySubscriptionWithAStoreKitPrice() async throws {
+    private func policy(_ manager: PurchaseManager) -> ContentAccessPolicy {
+        ContentAccessPolicy(level: manager.accessLevel)
+    }
+
+    /// 6 and 12 Classic free; Classic 16/20 and every Exact Pose board locked.
+    private func assertFreeTier(_ manager: PurchaseManager, file: StaticString = #filePath, line: UInt = #line) {
+        let p = policy(manager)
+        for size in BoardSize.allCases {
+            XCTAssertEqual(p.isAvailable(GameConfiguration(mode: .classic, boardSize: size)),
+                           size == .six || size == .twelve, "Classic \(size.rawValue)", file: file, line: line)
+            XCTAssertFalse(p.isAvailable(GameConfiguration(mode: .exactPose, boardSize: size)),
+                           "Exact Pose \(size.rawValue)", file: file, line: line)
+        }
+    }
+
+    private func assertEverythingUnlocked(_ manager: PurchaseManager, file: StaticString = #filePath, line: UInt = #line) {
+        let p = policy(manager)
+        for mode in GameMode.allCases {
+            for size in BoardSize.allCases {
+                XCTAssertTrue(p.isAvailable(GameConfiguration(mode: mode, boardSize: size)), file: file, line: line)
+            }
+        }
+    }
+
+    func testProductIsAOneTimeNonConsumableWithAStoreKitPrice() async throws {
         let manager = await makeManager()
         let product = try XCTUnwrap(manager.product)
-        XCTAssertEqual(product.type, .autoRenewable)
-        XCTAssertEqual(product.subscription?.subscriptionPeriod.unit, .month)
-        XCTAssertEqual(product.subscription?.subscriptionPeriod.value, 1)
+        XCTAssertEqual(product.type, .nonConsumable)
+        XCTAssertNil(product.subscription, "not a subscription")
         XCTAssertFalse(product.displayPrice.isEmpty, "the app shows StoreKit's localized price")
         XCTAssertEqual(manager.accessLevel, .starter)
     }
 
-    func testFreePlayersHaveClassicWithSixCards() async throws {
+    func testFreeTierIsClassicSixAndTwelve() async throws {
         let manager = await makeManager()
         await manager.refreshEntitlements()
-        let policy = ContentAccessPolicy(level: manager.accessLevel)
-        XCTAssertEqual(Set(BoardSize.allCases.filter { policy.isAvailable($0) }), [.six])
-        XCTAssertEqual(Set(GameMode.allCases.filter { policy.isAvailable($0) }), [.classic])
+        assertFreeTier(manager)
     }
 
-    func testSubscribingUnlocksAndSurvivesARelaunch() async throws {
+    func testPurchaseUnlocksEverythingAndSurvivesARelaunch() async throws {
         let manager = await makeManager()
-        try await subscribe(manager)
+        try await buy(manager)
         XCTAssertEqual(manager.flowState, .purchased)
-        XCTAssertEqual(manager.accessLevel, .fullGame)
-        XCTAssertNotNil(manager.plan, "renewal details for Parents")
-        XCTAssertEqual(manager.plan?.willAutoRenew, true)
+        assertEverythingUnlocked(manager)
 
-        // A new launch honours the verified period even before StoreKit answers.
+        // A new launch honours the verified purchase even before StoreKit answers…
         let relaunched = PurchaseManager(productID: productID, cacheStore: EntitlementCacheStore(defaults: defaults))
         XCTAssertEqual(relaunched.verifiedLevel, .fullGame)
+        // …and StoreKit confirms it.
         await relaunched.refreshEntitlements()
         XCTAssertEqual(relaunched.verifiedLevel, .fullGame)
     }
 
-    func testAskToBuyIsPendingAndDoesNotUnlock() async throws {
-        session.askToBuyEnabled = true
+    func testAnotherDeviceOrReinstallWithTheSameAppleAccountIsUnlockedWithoutRestore() async throws {
         let manager = await makeManager()
-        try await subscribe(manager)
-        XCTAssertEqual(manager.flowState, .pendingApproval)
-        XCTAssertEqual(manager.accessLevel, .starter)
+        try await buy(manager)
+        // The same Apple Account on another iPhone/iPad, or a reinstall: no
+        // local cache; launch re-reads verified entitlements, no prompt.
+        let otherDevice = PurchaseManager(productID: productID,
+                                          cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        XCTAssertEqual(otherDevice.verifiedLevel, .starter)
+        await otherDevice.refreshEntitlements()
+        XCTAssertEqual(otherDevice.verifiedLevel, .fullGame)
+        XCTAssertEqual(otherDevice.flowState, .idle, "nothing was shown or asked")
     }
 
-    func testCancelledPurchaseChangesNothing() async throws {
+    func testAskToBuyIsPendingAndStaysLocked() async throws {
+        session.askToBuyEnabled = true
+        let manager = await makeManager()
+        try await buy(manager)
+        XCTAssertEqual(manager.flowState, .pendingApproval)
+        assertFreeTier(manager)
+    }
+
+    func testCancelledPurchaseStaysLocked() async throws {
         let manager = await makeManager()
         await manager.handle(result: .userCancelled)
         XCTAssertEqual(manager.flowState, .cancelled)
-        XCTAssertEqual(manager.accessLevel, .starter)
+        assertFreeTier(manager)
     }
 
-    func testFailedTransactionDoesNotUnlock() async throws {
+    func testFailedTransactionStaysLocked() async throws {
         session.failTransactionsEnabled = true
         let manager = await makeManager()
         do {
-            try await subscribe(manager)
+            try await buy(manager)
         } catch {
-            // Expected: StoreKit reports the simulated failure.
+            XCTAssertNotEqual(manager.flowState, .purchased)
         }
-        XCTAssertEqual(manager.accessLevel, .starter)
-    }
-
-    func testExpiryRemovesAccess() async throws {
-        let manager = await makeManager()
-        try await subscribe(manager)
-        XCTAssertEqual(manager.accessLevel, .fullGame)
-        try session.expireSubscription(productIdentifier: productID)
-        await manager.refreshEntitlements()
-        XCTAssertEqual(manager.accessLevel, .starter)
-        XCTAssertNil(manager.plan)
+        assertFreeTier(manager)
     }
 
     func testRefundRevokesAccess() async throws {
         let manager = await makeManager()
-        try await subscribe(manager)
-        XCTAssertEqual(manager.accessLevel, .fullGame)
+        try await buy(manager)
+        assertEverythingUnlocked(manager)
         let transaction = try XCTUnwrap(session.allTransactions().first { $0.productIdentifier == productID })
         try session.refundTransaction(identifier: transaction.identifier)
         await manager.refreshEntitlements()
-        XCTAssertEqual(manager.accessLevel, .starter)
-    }
-
-    func testRestoreFindsAnExistingSubscription() async throws {
-        try session.buyProduct(productIdentifier: productID)        // e.g. bought on another device
-        let manager = await makeManager()
-        await manager.refreshEntitlements()
-        XCTAssertEqual(manager.accessLevel, .fullGame)
-    }
-
-    func testRestoreWithNothingToRestore() async throws {
-        let manager = await makeManager()
-        await manager.restore()
-        XCTAssertEqual(manager.flowState, .restoreFoundNothing)
-        XCTAssertEqual(manager.accessLevel, .starter)
+        assertFreeTier(manager)
+        XCTAssertTrue(manager.wasRefunded, "Parents explains why the game is locked again")
+        // A relaunch after the refund stays locked.
+        let relaunched = PurchaseManager(productID: productID, cacheStore: EntitlementCacheStore(defaults: defaults))
+        await relaunched.refreshEntitlements()
+        XCTAssertEqual(relaunched.verifiedLevel, .starter)
     }
 
     func testNoPurchaseMeansFree() async throws {
         let manager = await makeManager()
         await manager.refreshEntitlements()
         XCTAssertEqual(manager.accessLevel, .starter)
+        XCTAssertFalse(manager.wasRefunded)
     }
 
-    func testAnExpiredCachedPeriodIsNotHonouredOffline() {
-        let store = EntitlementCacheStore(defaults: defaults)
-        store.save(CachedEntitlement(transactionID: 1, verifiedAt: Date(timeIntervalSinceNow: -40 * 86_400),
-                                     expiresAt: Date(timeIntervalSinceNow: -10 * 86_400)))
-        XCTAssertEqual(PurchaseManager(productID: productID, cacheStore: store).verifiedLevel, .starter)
-        store.save(CachedEntitlement(transactionID: 2, verifiedAt: Date(), expiresAt: Date(timeIntervalSinceNow: 86_400)))
-        XCTAssertEqual(PurchaseManager(productID: productID, cacheStore: store).verifiedLevel, .fullGame,
-                       "a paid period still running is honoured before StoreKit answers")
+    func testRetiredSubscriptionCacheIsRemovedAndIgnored() async throws {
+        // Development builds kept a test-subscription record under this key.
+        defaults.set(Data("{\"transactionID\":1,\"verifiedAt\":0}".utf8), forKey: "purchases.verifiedEntitlement")
+        let manager = PurchaseManager(productID: productID, cacheStore: EntitlementCacheStore(defaults: defaults))
+        XCTAssertEqual(manager.verifiedLevel, .starter)
+        XCTAssertNil(defaults.object(forKey: "purchases.verifiedEntitlement"))
     }
 
     // MARK: Gift codes
@@ -236,11 +248,13 @@ final class PurchaseTests: XCTestCase {
     }
 
     func testAPlainUserDefaultsFlagNeverUnlocks() async throws {
-        defaults.set(true, forKey: "purchases.verifiedEntitlement")   // not a verified record
+        defaults.set(true, forKey: "purchases.fullGameUnlock.verified")   // not a verified record
         defaults.set(true, forKey: "fullGameUnlocked")
         let manager = PurchaseManager(productID: productID, cacheStore: EntitlementCacheStore(defaults: defaults))
         XCTAssertEqual(manager.verifiedLevel, .starter)
     }
+
+    // MARK: Restore Purchases
 
     func testRestoreAfterReinstallFindsThePurchase() async throws {
         try session.buyProduct(productIdentifier: productID)
@@ -250,33 +264,24 @@ final class PurchaseTests: XCTestCase {
         XCTAssertEqual(manager.verifiedLevel, .starter)
         await manager.restore()
         XCTAssertEqual(manager.flowState, .restored)
-        XCTAssertEqual(manager.verifiedLevel, .fullGame)
+        assertEverythingUnlocked(manager)
     }
 
-    // MARK: Restore Purchases outcomes
-
-    func testRestoreAfterExpiryExplainsThatItEnded() async throws {
+    func testRestoreWithNothingToRestore() async throws {
         let manager = await makeManager()
-        try await subscribe(manager)
-        try session.expireSubscription(productIdentifier: productID)
         await manager.restore()
-        XCTAssertEqual(manager.accessLevel, .starter)
-        guard case .restoreFoundLapsed(.expired) = manager.flowState else {
-            return XCTFail("expected an 'ended' restore message, got \(manager.flowState)")
-        }
-        XCTAssertNotNil(manager.lapse, "Parents also shows why Plus is off")
+        XCTAssertEqual(manager.flowState, .restoreFoundNothing)
+        assertFreeTier(manager)
     }
 
-    func testRestoreAfterARefundExplainsTheRefund() async throws {
+    func testRestoreAfterARefundSaysSo() async throws {
         let manager = await makeManager()
-        try await subscribe(manager)
+        try await buy(manager)
         let transaction = try XCTUnwrap(session.allTransactions().first { $0.productIdentifier == productID })
         try session.refundTransaction(identifier: transaction.identifier)
         await manager.restore()
-        XCTAssertEqual(manager.accessLevel, .starter)
-        guard case .restoreFoundLapsed(.revoked) = manager.flowState else {
-            return XCTFail("expected a 'refunded' restore message, got \(manager.flowState)")
-        }
+        XCTAssertEqual(manager.flowState, .restoreFoundRefunded)
+        assertFreeTier(manager)
     }
 
     func testRestoreTappedTwiceRunsOnce() async throws {
@@ -290,19 +295,7 @@ final class PurchaseTests: XCTestCase {
         XCTAssertEqual(manager.verifiedLevel, .fullGame)
     }
 
-    func testSubscriberRelaunchNeedsNoRestore() async throws {
-        let manager = await makeManager()
-        try await subscribe(manager)
-        // A relaunch, a reinstall, or another iPhone or iPad with the same
-        // Apple Account: launch re-reads verified entitlements, no prompt.
-        let relaunched = PurchaseManager(productID: productID,
-                                         cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
-        await relaunched.refreshEntitlements()
-        XCTAssertEqual(relaunched.verifiedLevel, .fullGame)
-        XCTAssertEqual(relaunched.flowState, .idle, "nothing was shown or asked")
-    }
-
-    func testRestoreErrorsBecomeParentMessages() {
+    func testStoreErrorsBecomeParentMessages() {
         XCTAssertEqual(PurchaseManager.flowState(for: StoreKitError.userCancelled), .cancelled)
         XCTAssertEqual(PurchaseManager.flowState(for: StoreKitError.networkError(URLError(.notConnectedToInternet))),
                        .networkUnavailable)

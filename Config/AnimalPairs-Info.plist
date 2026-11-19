@@ -3,8 +3,8 @@
 <plist version="1.0">
 <dict>
 	<!-- Configure these through the target's Build Settings (AP_* user-defined settings). -->
-	<key>APPlusProductID</key>
-	<string>$(AP_PLUS_PRODUCT_ID)</string>
+	<key>APFullUnlockProductID</key>
+	<string>$(AP_FULL_UNLOCK_PRODUCT_ID)</string>
 	<key>APTermsOfUseURL</key>
 	<string>$(AP_TERMS_OF_USE_URL)</string>
 	<key>APPrivacyPolicyURL</key>

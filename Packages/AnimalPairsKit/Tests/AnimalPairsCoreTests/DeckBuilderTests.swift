@@ -80,7 +80,8 @@ final class DeckBuilderTests: XCTestCase {
 
     func testStarterCannotBuildPremiumConfigurations() {
         XCTAssertThrowsError(try board(.exactPose, .six, seed: 1, policy: Fixtures.starter))
-        XCTAssertThrowsError(try board(.classic, .twelve, seed: 1, policy: Fixtures.starter), "12 cards need Plus")
+        XCTAssertNoThrow(try board(.classic, .twelve, seed: 1, policy: Fixtures.starter), "Classic 12 is free")
+        XCTAssertThrowsError(try board(.exactPose, .twelve, seed: 1, policy: Fixtures.starter))
         XCTAssertThrowsError(try board(.classic, .sixteen, seed: 1, policy: Fixtures.starter))
         XCTAssertThrowsError(try board(.classic, .twenty, seed: 1, policy: Fixtures.starter))
     }
@@ -88,7 +89,7 @@ final class DeckBuilderTests: XCTestCase {
     func testStarterUsesOnlyDefaultPoses() throws {
         let manifest = Fixtures.manifest()
         for seed in 0..<40 as Range<UInt64> {
-            for size in [BoardSize.six] {          // the free board
+            for size in [BoardSize.six, .twelve] {   // the free boards
                 let tiles = try board(.classic, size, seed: seed, policy: Fixtures.starter)
                 XCTAssertTrue(tiles.allSatisfy { manifest.artwork($0.pairKey)!.tier == .free })
             }

@@ -178,21 +178,30 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(afterVideo.route, .home)
     }
 
-    func testFreePlayersCanStartClassicSixButNothingElse() throws {
+    func testFreePlayersCanPlayClassicSixAndTwelveButNothingElse() throws {
         let model = AppTestSupport.makeModel()
-        guard !model.purchases.isUnlocked else { throw XCTSkip("simulator already holds a subscription") }
-        XCTAssertNoThrow(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: .six)))
-        XCTAssertEqual(model.route, .game)
-        XCTAssertEqual(model.session?.state.tiles.count, 6)
+        guard !model.purchases.isUnlocked else { throw XCTSkip("simulator already holds Full Game Unlock") }
+        // Free and unlimited: Classic with 6 or 12 cards, as many times as
+        // a child likes, with no purchase step in between.
+        for _ in 0..<3 {
+            for size in [BoardSize.six, .twelve] {
+                XCTAssertNoThrow(try model.startNewGame(GameConfiguration(mode: .classic, boardSize: size)))
+                XCTAssertEqual(model.route, .game)
+                XCTAssertEqual(model.session?.state.tiles.count, size.rawValue)
+            }
+        }
+        XCTAssertEqual(model.purchases.flowState, .idle, "playing never starts a purchase")
         // Locked options never start a game (and never open a purchase sheet:
         // Setup shows the "ask a grown-up" message instead).
-        for config in [GameConfiguration(mode: .classic, boardSize: .twelve),
-                       GameConfiguration(mode: .classic, boardSize: .twenty),
-                       GameConfiguration(mode: .exactPose, boardSize: .six)] {
-            XCTAssertThrowsError(try model.startNewGame(config)) { error in
+        var locked = [GameConfiguration(mode: .classic, boardSize: .sixteen),
+                      GameConfiguration(mode: .classic, boardSize: .twenty)]
+        locked += BoardSize.allCases.map { GameConfiguration(mode: .exactPose, boardSize: $0) }
+        for config in locked {
+            XCTAssertThrowsError(try model.startNewGame(config), "\(config)") { error in
                 XCTAssertEqual(error as? AppModel.StartError, .locked)
             }
         }
+        XCTAssertEqual(model.purchases.flowState, .idle)
     }
 
     func testBackgroundPausesSavesAndResumesWithoutReshuffle() throws {

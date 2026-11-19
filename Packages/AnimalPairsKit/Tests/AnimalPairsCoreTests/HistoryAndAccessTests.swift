@@ -81,53 +81,24 @@ final class EntitlementResolverTests: XCTestCase {
         XCTAssertNil(d.cache)
     }
 
-    // MARK: Subscription periods
-
-    let now = Date(timeIntervalSince1970: 1_000_000)
-
-    func testActiveSubscriptionUnlocksUntilItsPeriodEnds() {
-        let end = now.addingTimeInterval(86_400)
-        let d = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 3, expiresAt: end)],
-                                            scanCompleted: true, cached: nil, now: now)
-        XCTAssertEqual(d.level, .fullGame)
-        XCTAssertEqual(d.cache?.expiresAt, end)
-        let after = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 3, expiresAt: end)],
-                                                scanCompleted: true, cached: d.cache, now: end.addingTimeInterval(1))
-        XCTAssertEqual(after.level, .starter, "an expired period never unlocks")
+    func testTheUnlockNeverExpires() {
+        let longAgo = CachedEntitlement(transactionID: 3, verifiedAt: Date(timeIntervalSince1970: 0))
+        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], scanCompleted: false, cached: longAgo,
+                                                   now: Date(timeIntervalSince1970: 4_000_000_000)).level, .fullGame,
+                       "a one-time purchase verified years ago still counts before StoreKit answers")
     }
 
-    func testTheLatestRenewalIsCached() {
-        let d = EntitlementResolver.resolve(evidence: [.verifiedActive(transactionID: 1, expiresAt: now.addingTimeInterval(10)),
-                                                       .verifiedActive(transactionID: 2, expiresAt: now.addingTimeInterval(99))],
-                                            scanCompleted: true, cached: nil, now: now)
-        XCTAssertEqual(d.cache?.transactionID, 2)
-    }
-
-    func testGracePeriodKeepsAccessBillingRetryDoesNot() {
-        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.inGracePeriod],
-                                                   scanCompleted: true, cached: nil, now: now).level, .fullGame)
-        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.inBillingRetry],
-                                                   scanCompleted: true, cached: nil, now: now).level, .starter)
-        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], renewalStates: [.expired],
-                                                   scanCompleted: true, cached: nil, now: now).level, .starter)
-    }
-
-    func testOfflineKeepsAccessForThePaidPeriodOnly() {
-        let paid = CachedEntitlement(transactionID: 5, verifiedAt: now, expiresAt: now.addingTimeInterval(3_600))
-        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], scanCompleted: false, cached: paid,
-                                                   now: now.addingTimeInterval(60)).level, .fullGame,
-                       "a temporary network failure does not remove access")
-        XCTAssertEqual(EntitlementResolver.resolve(evidence: [], scanCompleted: false, cached: paid,
-                                                   now: now.addingTimeInterval(7_200)).level, .starter,
-                       "nor does it extend it past the paid period")
-    }
-
-    func testRefundOfASubscriptionLocks() {
-        let paid = CachedEntitlement(transactionID: 5, verifiedAt: now, expiresAt: now.addingTimeInterval(3_600))
-        let d = EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: 5)], renewalStates: [.revoked],
-                                            scanCompleted: true, cached: paid, now: now)
-        XCTAssertEqual(d.level, .starter)
+    func testRefundAfterPurchaseLocks() {
+        let d = EntitlementResolver.resolve(evidence: [.verifiedRevoked(transactionID: 5)], scanCompleted: false, cached: cache)
+        XCTAssertEqual(d.level, .starter, "a verified refund wins even over a cached unlock")
         XCTAssertNil(d.cache)
+    }
+
+    func testRestoreOutcomes() {
+        XCTAssertEqual(RestoreOutcome.resolve(owned: true, refunded: false), .restored)
+        XCTAssertEqual(RestoreOutcome.resolve(owned: false, refunded: false), .restoreFoundNothing)
+        XCTAssertEqual(RestoreOutcome.resolve(owned: false, refunded: true), .restoreFoundRefunded)
+        XCTAssertFalse(PurchaseFlowState.restoreFoundRefunded.isBusy)
     }
 
     func testClosingTheRedeemSheetAloneNeverUnlocks() {
@@ -152,20 +123,34 @@ final class EntitlementResolverTests: XCTestCase {
     func testFullGameUnlocksExactlyThePremiumFeatures() {
         let starter = ContentAccessPolicy(level: .starter)
         let full = ContentAccessPolicy(level: .fullGame)
-        // Free for everyone: Classic mode with 6 cards.
+        // Free for everyone: Classic mode with 6 or 12 cards.
         XCTAssertEqual(Set(GameMode.allCases.filter { starter.isAvailable($0) }), [.classic])
-        XCTAssertEqual(Set(BoardSize.allCases.filter { starter.isAvailable($0) }), [.six])
-        // Animal Pairs Plus: everything.
+        XCTAssertEqual(Set(BoardSize.allCases.filter { starter.isAvailable($0) }), [.six, .twelve])
+        XCTAssertTrue(starter.grantedFeatures.isEmpty)
+        // Full Game Unlock: everything that ships today.
         XCTAssertEqual(Set(GameMode.allCases.filter { full.isAvailable($0) }), Set(GameMode.allCases))
         XCTAssertEqual(Set(BoardSize.allCases.filter { full.isAvailable($0) }), Set(BoardSize.allCases))
+    }
+
+    /// The purchase's definition is explicit. When a future theme adds a
+    /// `PremiumFeature`, this test fails until someone decides deliberately
+    /// whether Full Game Unlock includes it.
+    func testFullGameUnlockDefinitionIsDeliberate() {
+        XCTAssertEqual(FullGameUnlock.features, [.exactPoseMode, .sixteenCardBoard, .twentyCardBoard, .extraPoses])
+        XCTAssertEqual(Set(PremiumFeature.allCases), FullGameUnlock.features,
+                       "a new PremiumFeature needs a deliberate decision about which product grants it")
     }
 
     func testAccessPolicy() {
         let starter = ContentAccessPolicy(level: .starter)
         XCTAssertTrue(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .six)))
-        XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .twelve)))
+        XCTAssertTrue(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .twelve)))
         XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .sixteen)))
-        XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .exactPose, boardSize: .six)))
+        XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .classic, boardSize: .twenty)))
+        for size in BoardSize.allCases {
+            XCTAssertFalse(starter.isAvailable(GameConfiguration(mode: .exactPose, boardSize: size)),
+                           "Exact Pose is locked at every size, including \(size.rawValue)")
+        }
         let full = ContentAccessPolicy(level: .fullGame)
         XCTAssertTrue(GameMode.allCases.allSatisfy { m in BoardSize.allCases.allSatisfy { full.isAvailable(GameConfiguration(mode: m, boardSize: $0)) } })
     }
@@ -214,48 +199,4 @@ final class ParentalGateTests: XCTestCase {
         XCTAssertFalse(session.isActive(now: t0))
     }
 
-}
-
-// MARK: Restore and lapsed subscriptions
-
-final class SubscriptionLapseTests: XCTestCase {
-    private let now = Date(timeIntervalSince1970: 1_800_000_000)
-
-    func testNothingToExplainWhenActiveOrNeverSubscribed() {
-        XCTAssertNil(SubscriptionLapseResolver.resolve(isActive: true,
-                                                       latest: .init(expiresAt: now.addingTimeInterval(-60), revokedAt: nil),
-                                                       renewalStates: [.expired], now: now))
-        XCTAssertNil(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [], now: now))
-    }
-
-    func testExpiredSubscriptionReportsItsEndDate() {
-        let end = now.addingTimeInterval(-3600)
-        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: .init(expiresAt: end, revokedAt: nil),
-                                                         renewalStates: [], now: now), .expired(endedOn: end))
-        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [.expired], now: now),
-                       .expired(endedOn: nil))
-    }
-
-    func testRefundWinsOverExpiry() {
-        let refunded = now.addingTimeInterval(-10)
-        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false,
-                                                         latest: .init(expiresAt: now.addingTimeInterval(-5), revokedAt: refunded),
-                                                         renewalStates: [.expired], now: now), .revoked(on: refunded))
-        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: nil, renewalStates: [.revoked], now: now),
-                       .revoked(on: nil))
-    }
-
-    func testBillingRetryIsReportedAsAPaymentProblem() {
-        XCTAssertEqual(SubscriptionLapseResolver.resolve(isActive: false, latest: .init(expiresAt: now.addingTimeInterval(-60), revokedAt: nil),
-                                                         renewalStates: [.inBillingRetry], now: now), .billingRetry)
-    }
-
-    func testRestoreOutcomes() {
-        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: true, lapse: nil), .restored)
-        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: nil), .restoreFoundNothing)
-        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: .revoked(on: nil)), .restoreFoundLapsed(.revoked(on: nil)))
-        XCTAssertEqual(RestoreOutcome.resolve(verifiedActive: false, lapse: .expired(endedOn: now)),
-                       .restoreFoundLapsed(.expired(endedOn: now)))
-        XCTAssertFalse(PurchaseFlowState.restoreFoundLapsed(.billingRetry).isBusy)
-    }
 }

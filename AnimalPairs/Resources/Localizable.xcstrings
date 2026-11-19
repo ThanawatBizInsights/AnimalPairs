@@ -1943,7 +1943,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Game history and the unfinished game will be removed from this device. Animal Pairs Plus is not affected."
+            "value": "Game history and the unfinished game will be removed from this device. Full Game Unlock is not affected."
           }
         }
       }
@@ -1977,6 +1977,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "Restore Purchases"
+          }
+        }
+      }
+    },
+    "parents.restore.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Checks with the App Store for a Full Game Unlock bought with this Apple Account. Apple may ask you to sign in."
           }
         }
       }
@@ -2047,6 +2058,17 @@
         }
       }
     },
+    "parents.termsOfUse": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Terms of Use"
+          }
+        }
+      }
+    },
     "parents.title": {
       "extractionState": "manual",
       "localizations": {
@@ -2069,17 +2091,6 @@
         }
       }
     },
-    "parents.unlock.placeholderID": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Development build: the example product ID is in use. Set AP_PLUS_PRODUCT_ID before release."
-          }
-        }
-      }
-    },
     "parents.unlock.retry": {
       "extractionState": "manual",
       "localizations": {
@@ -2097,7 +2108,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "The App Store didn’t return Animal Pairs Plus. Check the internet connection and try again."
+            "value": "The App Store didn’t return Full Game Unlock. Check the internet connection and try again."
           }
         }
       }
@@ -2157,358 +2168,6 @@
         }
       }
     },
-    "plus.active": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus is active"
-          }
-        }
-      }
-    },
-    "plus.cancel": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "To cancel, tap Manage Subscription, or open the Settings app, tap your name, then Subscriptions. Plus stays active until the end of the period you have paid for."
-          }
-        }
-      }
-    },
-    "plus.ends": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Ends on %@ and will not renew."
-          }
-        }
-      }
-    },
-    "plus.feature.cards": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Bigger boards: 12, 16 and 20 cards"
-          }
-        }
-      }
-    },
-    "plus.feature.exactPose": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Exact Pose mode: match the same animal in the same pose"
-          }
-        }
-      }
-    },
-    "plus.feature.pictures": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "70 more animal pictures: every friend in seven more poses"
-          }
-        }
-      }
-    },
-    "plus.free": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Free, always: Classic mode with 6 cards."
-          }
-        }
-      }
-    },
-    "plus.gracePeriod": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The App Store couldn’t take the last payment. Plus continues for now; please check the payment method in Manage Subscription."
-          }
-        }
-      }
-    },
-    "plus.includes": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus adds:"
-          }
-        }
-      }
-    },
-    "plus.lapse.billingRetry": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "The App Store couldn’t take the renewal payment, so Animal Pairs Plus is paused. Check the payment method in Manage Subscription; Plus comes back once the payment goes through."
-          }
-        }
-      }
-    },
-    "plus.lapse.expired": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus has ended. Subscribe again any time; the free game keeps working."
-          }
-        }
-      }
-    },
-    "plus.lapse.expiredOn": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus ended on %@. Subscribe again any time; the free game keeps working."
-          }
-        }
-      }
-    },
-    "plus.lapse.revoked": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus was refunded or cancelled by Apple, so it is off. The free game keeps working."
-          }
-        }
-      }
-    },
-    "plus.manage": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Manage Subscription"
-          }
-        }
-      }
-    },
-    "plus.manage.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opens the App Store page to change or cancel the subscription."
-          }
-        }
-      }
-    },
-    "plus.noAds": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "No ads, ever."
-          }
-        }
-      }
-    },
-    "plus.period.day": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "day"
-          }
-        }
-      }
-    },
-    "plus.period.days": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld days"
-          }
-        }
-      }
-    },
-    "plus.period.month": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "month"
-          }
-        }
-      }
-    },
-    "plus.period.months": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld months"
-          }
-        }
-      }
-    },
-    "plus.period.week": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "week"
-          }
-        }
-      }
-    },
-    "plus.period.weeks": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld weeks"
-          }
-        }
-      }
-    },
-    "plus.period.year": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "year"
-          }
-        }
-      }
-    },
-    "plus.period.years": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%lld years"
-          }
-        }
-      }
-    },
-    "plus.price": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "%@ per %@"
-          }
-        }
-      }
-    },
-    "plus.renews": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renews automatically on %@."
-          }
-        }
-      }
-    },
-    "plus.renews.unknown": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Renews automatically each month until cancelled."
-          }
-        }
-      }
-    },
-    "plus.subscribe": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Subscribe to Animal Pairs Plus"
-          }
-        }
-      }
-    },
-    "plus.subscribe.hint": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Opens the App Store to subscribe for %@ per %@."
-          }
-        }
-      }
-    },
-    "plus.terms": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Payment of %@ per %@ is charged to your Apple Account when you confirm. The subscription renews automatically unless it is cancelled at least 24 hours before the end of the current period. Cancel any time with Manage Subscription below, or in the Settings app: tap your name, then Subscriptions."
-          }
-        }
-      }
-    },
-    "plus.termsOfUse": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Terms of Use"
-          }
-        }
-      }
-    },
-    "plus.title": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Animal Pairs Plus"
-          }
-        }
-      }
-    },
     "purchase.cancelled": {
       "extractionState": "manual",
       "localizations": {
@@ -2559,7 +2218,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Waiting for approval. Plus unlocks automatically once it is approved."
+            "value": "Waiting for approval. The game unlocks automatically once the purchase is approved."
           }
         }
       }
@@ -2592,7 +2251,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Offer code redeemed. Animal Pairs Plus is active!"
+            "value": "Offer code redeemed. Full Game Unlock is ready!"
           }
         }
       }
@@ -2608,24 +2267,24 @@
         }
       }
     },
-    "purchase.restoreLapsed": {
-      "extractionState": "manual",
-      "localizations": {
-        "en": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "Restore finished. No active subscription was found. %@"
-          }
-        }
-      }
-    },
     "purchase.restoreNothing": {
       "extractionState": "manual",
       "localizations": {
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Restore finished. No Animal Pairs Plus subscription was found for this Apple Account. If you subscribed with a different Apple Account, sign in with it and try again."
+            "value": "Restore finished. No Full Game Unlock purchase was found for this Apple Account. If you bought it with a different Apple Account, sign in with it and try again."
+          }
+        }
+      }
+    },
+    "purchase.restoreRefunded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Restore finished. Full Game Unlock was refunded by Apple, so it can’t be restored. You can buy it again any time."
           }
         }
       }
@@ -2636,7 +2295,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Purchases restored. Animal Pairs Plus is active."
+            "value": "Purchases restored. Full Game Unlock is ready."
           }
         }
       }
@@ -2658,7 +2317,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Thank you! Animal Pairs Plus is active."
+            "value": "Thank you! Full Game Unlock is ready: the bigger Classic boards and Exact Pose are open."
           }
         }
       }
@@ -2823,7 +2482,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "This one is part of Animal Pairs Plus. Ask a grown-up to have a look in the Parents area. Classic with 6 cards is always free to play."
+            "value": "This one is part of Full Game Unlock. Ask a grown-up to have a look in the Parents area. Classic with 6 or 12 cards is always free to play."
           }
         }
       }
@@ -2834,7 +2493,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Part of Animal Pairs Plus"
+            "value": "Part of Full Game Unlock"
           }
         }
       }
@@ -2879,6 +2538,182 @@
           "stringUnit": {
             "state": "translated",
             "value": "Let's set up!"
+          }
+        }
+      }
+    },
+    "unlock.buy": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Buy Full Game Unlock for %@"
+          }
+        }
+      }
+    },
+    "unlock.buy.hint": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Opens the App Store to buy Full Game Unlock once for %@. It never expires."
+          }
+        }
+      }
+    },
+    "unlock.feature.classicBoards": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Classic mode with 16 and 20 cards"
+          }
+        }
+      }
+    },
+    "unlock.feature.exactPose": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Exact Pose mode with 6, 12, 16 and 20 cards: match the same animal in the same pose"
+          }
+        }
+      }
+    },
+    "unlock.feature.pictures": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "70 more animal pictures: every friend in seven more poses"
+          }
+        }
+      }
+    },
+    "unlock.footer": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bought it on another iPhone or iPad? Sign in with the same Apple Account and tap Restore Purchases."
+          }
+        }
+      }
+    },
+    "unlock.free": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Free, always: Classic mode with 6 or 12 cards, as often as you like."
+          }
+        }
+      }
+    },
+    "unlock.includes": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Game Unlock adds:"
+          }
+        }
+      }
+    },
+    "unlock.noAds": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "No ads and no subscription."
+          }
+        }
+      }
+    },
+    "unlock.oneTime": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One-time purchase"
+          }
+        }
+      }
+    },
+    "unlock.owned": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Game Unlock is yours. Thank you!"
+          }
+        }
+      }
+    },
+    "unlock.ownedDetail": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Bought once with your Apple Account. It never expires and works on every iPhone and iPad signed in to that Apple Account."
+          }
+        }
+      }
+    },
+    "unlock.price": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "One-time purchase: %@"
+          }
+        }
+      }
+    },
+    "unlock.refunded": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Apple refunded Full Game Unlock, so the bigger Classic boards and Exact Pose are locked again. The free game keeps working."
+          }
+        }
+      }
+    },
+    "unlock.terms": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "%@ is charged once to your Apple Account when you confirm. It is not a subscription: nothing renews and there is nothing to cancel."
+          }
+        }
+      }
+    },
+    "unlock.title": {
+      "extractionState": "manual",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Full Game Unlock"
           }
         }
       }

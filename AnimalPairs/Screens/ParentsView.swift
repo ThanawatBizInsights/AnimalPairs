@@ -10,7 +10,6 @@ struct ParentsView: View {
     @Environment(\.purchase) private var purchaseAction
     @Environment(\.openURL) private var openURL
     @State private var confirmReset = false
-    @State private var showManageSubscriptions = false
     @State private var records: [CompletionRecord] = []
     @State private var totals = ProgressTotals()
 
@@ -47,8 +46,8 @@ struct ParentsView: View {
             .scrollContentBackground(.hidden)
             .listStyle(.insetGrouped)
         }
-        // Apple's own offer-code sheet. Apple validates the code; Plus is
-        // granted only when StoreKit then delivers a verified transaction.
+        // Apple's own offer-code sheet. Apple validates the code; the game is
+        // unlocked only when StoreKit then delivers a verified transaction.
         .offerCodeRedemption(isPresented: $purchases.isRedeemSheetPresented) { result in
             Task { await model.purchases.redemptionSheetClosed(result) }
         }
@@ -57,11 +56,6 @@ struct ParentsView: View {
             if wasOpen && !isOpen {
                 Task { await model.purchases.redemptionSheetClosed(.success(())) }
             }
-        }
-        // Apple's own subscription management (cancel, change, refund request).
-        .manageSubscriptionsSheet(isPresented: $showManageSubscriptions)
-        .onChange(of: showManageSubscriptions) { wasOpen, isOpen in
-            if wasOpen && !isOpen { Task { await model.purchases.refreshEntitlements() } }
         }
         .task(id: model.historyRevision) { loadProgress() }
         .task {
@@ -81,67 +75,68 @@ struct ParentsView: View {
 
     // MARK: Sections
 
-    /// Animal Pairs Plus: what it includes today, the StoreKit price and
-    /// billing period, auto-renewal and cancellation, Subscribe, Restore,
-    /// Manage Subscription, offer codes and the Terms / Privacy links.
-    /// Everything here is behind the parental gate.
+    /// Full Game Unlock: a one-time purchase. Shows what it unlocks today,
+    /// the localized price from StoreKit, Buy, Restore Purchases, offer codes
+    /// and the legal links. Everything here is behind the parental gate.
     private var purchaseSection: some View {
         let t = model.localizer
         let purchases = model.purchases
         let busy = purchases.flowState.isBusy
+        let owned = purchases.verifiedLevel == .fullGame
         return Section {
-            if purchases.verifiedLevel == .fullGame {
-                Label(t["plus.active"], systemImage: "checkmark.seal.fill")
+            if owned {
+                Label(t["unlock.owned"], systemImage: "checkmark.seal.fill")
                     .foregroundStyle(Palette.mintDeep)
                     .font(.rounded(.headline))
-                if let plan = purchases.plan {
-                    Text(planText(plan)).font(.rounded(.callout))
-                    if plan.inGracePeriod {
-                        Text(t["plus.gracePeriod"]).font(.rounded(.callout)).foregroundStyle(Palette.brown)
-                    }
-                }
+                Text(t["unlock.ownedDetail"]).font(.rounded(.callout))
             } else {
                 #if DEBUG
                 if purchases.isUnlocked {
-                    Text(verbatim: "Debug build: Animal Pairs Plus is simulated (Developer section). "
-                         + "No App Store subscription has been verified.")
+                    Text(verbatim: "Debug build: Full Game Unlock is simulated (Developer section). "
+                         + "No App Store purchase has been verified.")
                         .font(.rounded(.footnote))
                         .foregroundStyle(Palette.brownSoft)
                 }
                 #endif
-                if let lapse = purchases.lapse, !isLapseMessageShowing(purchases.flowState) {
-                    Label(lapseText(lapse), systemImage: "info.circle")
+                if purchases.wasRefunded {
+                    Label(t["unlock.refunded"], systemImage: "info.circle")
                         .font(.rounded(.callout))
                         .foregroundStyle(Palette.brown)
                 }
-                Text(t["plus.free"]).font(.rounded(.body))
+                Text(t["unlock.free"]).font(.rounded(.body))
             }
             VStack(alignment: .leading, spacing: 8) {
-                Text(t["plus.includes"]).font(.rounded(.headline))
-                ForEach(["plus.feature.cards", "plus.feature.exactPose", "plus.feature.pictures"], id: \.self) { key in
+                Text(t["unlock.oneTime"])
+                    .font(.rounded(.caption, weight: .bold))
+                    .textCase(.uppercase)
+                    .padding(.horizontal, 10)
+                    .padding(.vertical, 4)
+                    .background(Capsule().fill(Palette.lavenderMist))
+                Text(t["unlock.includes"]).font(.rounded(.headline))
+                ForEach(["unlock.feature.classicBoards", "unlock.feature.exactPose", "unlock.feature.pictures"],
+                        id: \.self) { key in
                     Label(t[key], systemImage: "checkmark.circle.fill")
                         .font(.rounded(.body))
                         .foregroundStyle(Palette.brown)
                 }
-                Text(t["plus.noAds"]).font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
+                Text(t["unlock.noAds"]).font(.rounded(.footnote)).foregroundStyle(Palette.brownSoft)
             }
             .padding(.vertical, 4)
             .accessibilityElement(children: .combine)
 
-            if purchases.verifiedLevel != .fullGame {
+            if !owned {
                 if let product = purchases.product {
-                    let period = periodText(product.subscription?.subscriptionPeriod)
-                    Text(t("plus.price", product.displayPrice, period))
+                    Text(t("unlock.price", product.displayPrice))
                         .font(.rounded(.title3, weight: .bold))
                     Button {
                         Task { await purchases.purchase(using: purchaseAction) }
                     } label: {
-                        Text(t["plus.subscribe"]).frame(maxWidth: .infinity)
+                        Text(t("unlock.buy", product.displayPrice)).frame(maxWidth: .infinity)
                     }
                     .buttonStyle(PillowButtonStyle(kind: .primary))
                     .disabled(busy)
-                    .accessibilityHint(Text(t("plus.subscribe.hint", product.displayPrice, period)))
-                    Text(t("plus.terms", product.displayPrice, period))
+                    .accessibilityHint(Text(t("unlock.buy.hint", product.displayPrice)))
+                    Text(t("unlock.terms", product.displayPrice))
                         .font(.rounded(.footnote))
                         .foregroundStyle(Palette.brownSoft)
                 } else if purchases.flowState == .loadingProducts {
@@ -163,16 +158,9 @@ struct ParentsView: View {
             }
             .frame(minHeight: 44)
             .disabled(busy)
+            .accessibilityHint(Text(t["parents.restore.hint"]))
 
-            Button {
-                showManageSubscriptions = true
-            } label: {
-                Label(t["plus.manage"], systemImage: "creditcard")
-            }
-            .frame(minHeight: 44)
-            .accessibilityHint(Text(t["plus.manage.hint"]))
-
-            if purchases.verifiedLevel != .fullGame {
+            if !owned {
                 Button {
                     purchases.beginRedemption()
                 } label: {
@@ -183,8 +171,12 @@ struct ParentsView: View {
                 .accessibilityHint(Text(t["parents.redeem.hint"]))
             }
 
-            externalLink(title: t["plus.termsOfUse"], url: model.configuration.termsOfUseURL,
-                         missingKey: "AP_TERMS_OF_USE_URL")
+            // Terms of Use is optional for a one-time purchase (Apple's
+            // standard licence applies); the link appears once it is set.
+            if model.configuration.termsOfUseURL != nil {
+                externalLink(title: t["parents.termsOfUse"], url: model.configuration.termsOfUseURL,
+                             missingKey: "AP_TERMS_OF_USE_URL")
+            }
             externalLink(title: t["parents.privacy.policy"], url: model.configuration.privacyPolicyURL,
                          missingKey: "AP_PRIVACY_POLICY_URL")
 
@@ -195,55 +187,10 @@ struct ParentsView: View {
                 Text(message).font(.rounded(.callout)).foregroundStyle(Palette.brown)
             }
         } header: {
-            Text(t["plus.title"])
+            Text(t["unlock.title"])
         } footer: {
-            if model.configuration.usesPlaceholderProductID {
-                Text(t["parents.unlock.placeholderID"])
-            } else {
-                Text(t["plus.cancel"])
-            }
+            Text(t["unlock.footer"])
         }
-    }
-
-    /// "Renews automatically on 18 Dec 2026" / "Ends on …".
-    /// Why Plus is off, for parents: ended (with the date), refunded, or a
-    /// payment the App Store could not take.
-    private func lapseText(_ lapse: SubscriptionLapse) -> String {
-        let t = model.localizer
-        switch lapse {
-        case .expired(let endedOn?):
-            return t("plus.lapse.expiredOn", endedOn.formatted(Date.FormatStyle(date: .long, time: .omitted).locale(t.locale)))
-        case .expired(nil): return t["plus.lapse.expired"]
-        case .revoked: return t["plus.lapse.revoked"]
-        case .billingRetry: return t["plus.lapse.billingRetry"]
-        }
-    }
-
-    /// The restore result already explains the lapse; don't say it twice.
-    private func isLapseMessageShowing(_ state: PurchaseFlowState) -> Bool {
-        if case .restoreFoundLapsed = state { return true }
-        return false
-    }
-
-    private func planText(_ plan: PurchaseManager.PlanStatus) -> String {
-        let t = model.localizer
-        guard let end = plan.periodEnd else { return t["plus.renews.unknown"] }
-        let date = end.formatted(Date.FormatStyle(date: .long, time: .omitted).locale(t.locale))
-        return plan.willAutoRenew ? t("plus.renews", date) : t("plus.ends", date)
-    }
-
-    /// "month", "3 months", "year"… from StoreKit's billing period.
-    private func periodText(_ period: Product.SubscriptionPeriod?) -> String {
-        let t = model.localizer
-        guard let period else { return t["plus.period.month"] }
-        let unit: String
-        switch period.unit {
-        case .day: unit = "day"
-        case .week: unit = "week"
-        case .year: unit = "year"
-        default: unit = "month"
-        }
-        return period.value == 1 ? t["plus.period.\(unit)"] : t("plus.period.\(unit)s", period.value)
     }
 
     private var settingsSection: some View {
@@ -343,7 +290,7 @@ struct ParentsView: View {
         @Bindable var purchases = model.purchases
         let placeholders = model.catalog.manifest.placeholderArtworks.count
         return Section {
-            Toggle(isOn: $purchases.debugMockUnlocked) { Text(verbatim: "Simulate Animal Pairs Plus (mock)") }
+            Toggle(isOn: $purchases.debugMockUnlocked) { Text(verbatim: "Simulate Full Game Unlock (mock)") }
             Text(verbatim: "DEBUG builds only. Release builds do not contain this switch. Prefer the Products.storekit configuration for purchase testing.")
                 .font(.footnote)
             Text(verbatim: "Artwork: \(placeholders) of \(model.catalog.manifest.artworks.count) are development placeholders. Missing resources: \(model.catalog.missingArtworks.count).")
@@ -398,7 +345,7 @@ struct ParentsView: View {
         case .verificationFailed: return t["purchase.verificationFailed"]
         case .restoring: return t["purchase.restoring"]
         case .restoreFoundNothing: return t["purchase.restoreNothing"]
-        case .restoreFoundLapsed(let lapse): return t("purchase.restoreLapsed", lapseText(lapse))
+        case .restoreFoundRefunded: return t["purchase.restoreRefunded"]
         case .restored: return t["purchase.restored"]
         case .failed(let detail): return t("purchase.failed", detail)
         }

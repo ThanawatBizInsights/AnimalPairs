@@ -3,22 +3,22 @@ import Foundation
 /// Release configuration, in ONE place: the AnimalPairs target's Build
 /// Settings (User-Defined `AP_*` settings) → Info.plist → this type.
 ///
-/// | Build setting          | Info.plist key      | Meaning |
-/// | ---------------------- | ------------------- | ------- |
-/// | `AP_PLUS_PRODUCT_ID`   | `APPlusProductID`   | Product ID of the "Animal Pairs Plus" monthly auto-renewable subscription. Must match App Store Connect and `Config/Products.storekit`. |
-/// | `AP_TERMS_OF_USE_URL`  | `APTermsOfUseURL`   | Terms of Use (EULA) page, `https://` only. |
+/// | Build setting               | Info.plist key          | Meaning |
+/// | --- | --- | --- |
+/// | `AP_FULL_UNLOCK_PRODUCT_ID` | `APFullUnlockProductID` | Product ID of the one-time, non-consumable "Full Game Unlock". Must match App Store Connect and `Config/Products.storekit`. |
+/// | `AP_TERMS_OF_USE_URL`  | `APTermsOfUseURL`   | Terms of Use (EULA) page, `https://` only (optional). |
 /// | `AP_PRIVACY_POLICY_URL`| `APPrivacyPolicyURL`| Privacy policy page, `https://` only. |
 /// | `AP_SUPPORT_URL`       | `APSupportURL`      | Website / support page, `https://` only. |
 ///
 /// Empty or non-https values are treated as "not set": Parents says so
 /// instead of offering a dead link. Change them in Build Settings, not in code.
 struct AppConfiguration: Sendable {
-    /// Development placeholder. Replace with `<your bundle ID>.plus.monthly`
-    /// (e.g. `com.littlepenguinstudio.animalpairs.plus.monthly`) once the
-    /// final bundle ID is known.
-    static let placeholderProductID = "com.example.animalpairs.plus.monthly"
+    /// The Full Game Unlock product ID. A product ID need not match the
+    /// bundle ID; this one must be created in App Store Connect as a
+    /// Non-Consumable. Used when the build setting is empty.
+    static let defaultFullUnlockProductID = "com.littlepenguinstudio.animalpairs.fullgame"
 
-    let plusProductID: String
+    let fullUnlockProductID: String
     let termsOfUseURL: URL?
     let privacyPolicyURL: URL?
     let supportURL: URL?
@@ -28,8 +28,8 @@ struct AppConfiguration: Sendable {
 
     init(bundle: Bundle) {
         let info = bundle.infoDictionary ?? [:]
-        let productID = (info["APPlusProductID"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
-        plusProductID = productID.isEmpty ? Self.placeholderProductID : productID
+        let productID = (info["APFullUnlockProductID"] as? String)?.trimmingCharacters(in: .whitespaces) ?? ""
+        fullUnlockProductID = productID.isEmpty ? Self.defaultFullUnlockProductID : productID
         termsOfUseURL = Self.url(info["APTermsOfUseURL"])
         privacyPolicyURL = Self.url(info["APPrivacyPolicyURL"])
         supportURL = Self.url(info["APSupportURL"])
@@ -38,21 +38,20 @@ struct AppConfiguration: Sendable {
         appVersion = "\(short) (\(build))"
     }
 
-    init(plusProductID: String, termsOfUseURL: URL? = nil, privacyPolicyURL: URL?, supportURL: URL?,
+    init(fullUnlockProductID: String, termsOfUseURL: URL? = nil, privacyPolicyURL: URL?, supportURL: URL?,
          appVersion: String = "test") {
-        self.plusProductID = plusProductID
+        self.fullUnlockProductID = fullUnlockProductID
         self.termsOfUseURL = termsOfUseURL
         self.privacyPolicyURL = privacyPolicyURL
         self.supportURL = supportURL
         self.appVersion = appVersion
     }
 
-    /// True while the bundle still uses the example product identifier.
-    var usesPlaceholderProductID: Bool { plusProductID == Self.placeholderProductID }
-
-    /// Links App Review requires for a subscription that are still missing.
+    /// Links still missing that a release should have (the privacy policy
+    /// is required for the App Store; Terms of Use is optional for a
+    /// one-time purchase — Apple's standard EULA applies without it).
     var missingRequiredLinks: [String] {
-        [("AP_TERMS_OF_USE_URL", termsOfUseURL), ("AP_PRIVACY_POLICY_URL", privacyPolicyURL)]
+        [("AP_PRIVACY_POLICY_URL", privacyPolicyURL), ("AP_SUPPORT_URL", supportURL)]
             .filter { $0.1 == nil }.map(\.0)
     }
 
