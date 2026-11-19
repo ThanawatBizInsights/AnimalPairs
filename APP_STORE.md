@@ -14,7 +14,7 @@ published by Claude: every App Store Connect step below is yours to do.
 | **Family Sharing** | ❗ your decision (off in the local test file). Once turned on in App Store Connect it cannot be turned off | the in-app purchase → Family Sharing |
 | **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (the page is still a website *draft* until the publisher name, effective date, age rating and availability are filled in) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy |
 | **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | `AP_SUPPORT_URL`; version page → Support URL |
-| **Terms of Use** | optional for a one-time purchase. With no URL, Apple's standard EULA applies and the Parents screen shows no Terms link | `AP_TERMS_OF_USE_URL` (optional) |
+| **Terms of Use** | set to Apple's standard EULA, `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/` (your choice, recorded on the website 19 Nov 2026); shown in Parents | `AP_TERMS_OF_USE_URL` |
 
 ## App Store Connect: the in-app purchase
 
@@ -52,14 +52,15 @@ Unlock", adds Classic with 16 and 20 cards, Exact Pose mode at every board
 size, and 70 more animal pictures. There are no subscriptions, ads or accounts.
 
 Parental gate: every purchase, Restore Purchases, offer codes and external
-link (Privacy Policy, Support) is behind an adult gate. On the Home screen tap
+link (Terms of Use, Privacy Policy, Support) is behind an adult gate. On the Home screen tap
 the gear button (top corner, "Parents and settings"). The gate asks a
 multiplication question written in words (for example "What is seven times
 eight?"); enter the answer on the number pad and tap Check.
 
 Purchase screen: after the gate, the Parents screen opens. The "Full Game
 Unlock" section shows "One-time purchase", what it unlocks, the price from the
-App Store, Buy, Restore Purchases, Redeem Offer Code and the Privacy Policy.
+App Store, Buy, Restore Purchases, Redeem Offer Code, Terms of Use and the
+Privacy Policy.
 
 Locked features: from Home, tap Play. Classic with 16 or 20 cards and Exact
 Pose show a lock. Tapping one shows a short message for the child with an

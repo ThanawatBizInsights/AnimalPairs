@@ -222,7 +222,7 @@ Full Game Unlock**, behind the gate:
 | `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlepenguinstudio.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` — **placeholder; set your own** (the product ID does not depend on it) |
 | `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | the Little Penguin Studio pages |
-| `AP_TERMS_OF_USE_URL` | empty (optional for a one-time purchase; Apple's standard EULA applies) |
+| `AP_TERMS_OF_USE_URL` | Apple's standard EULA (`https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`) |
 
 **Migration from the monthly subscription:** the earlier *Animal Pairs Plus*
 subscription (`com.example.animalpairs.plus.monthly`) existed only in the

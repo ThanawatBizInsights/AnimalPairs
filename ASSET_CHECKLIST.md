@@ -55,5 +55,5 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |
 | App Store screenshots, preview video, marketing text | — | **missing** |
 | Privacy policy and support pages (URLs) | build settings `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | **set** to the Little Penguin Studio workers.dev pages; the policy page is still a draft on the website (APP_STORE.md) |
-| Terms of Use (URL) | build setting `AP_TERMS_OF_USE_URL` | optional for a one-time purchase (Apple's standard EULA applies); the Parents link appears only when set |
+| Terms of Use (URL) | build setting `AP_TERMS_OF_USE_URL` | **set** to Apple's standard EULA (shown in Parents) |
 | In-app purchase review screenshot | App Store Connect | **missing** — Parents → Full Game Unlock on iPhone (APP_STORE.md) |
