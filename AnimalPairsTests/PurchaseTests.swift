@@ -86,6 +86,10 @@ final class PurchaseTests: XCTestCase {
         XCTAssertEqual(product.type, .nonConsumable)
         XCTAssertNil(product.subscription, "not a subscription")
         XCTAssertFalse(product.displayPrice.isEmpty, "the app shows StoreKit's localized price")
+        // The local test configuration mirrors the App Store Connect price
+        // (US$3.99, US storefront). The app never hard-codes it.
+        XCTAssertEqual(product.price, Decimal(string: "3.99"))
+        XCTAssertTrue(product.displayPrice.contains("3.99"), product.displayPrice)
         XCTAssertEqual(manager.accessLevel, .starter)
     }
 

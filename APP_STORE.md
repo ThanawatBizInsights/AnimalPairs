@@ -10,7 +10,7 @@ published by Claude: every App Store Connect step below is yours to do.
 | --- | --- | --- |
 | **Bundle ID** | `com.littlesnowyowl.animalpairs` (app 6838152398). Xcode Cloud's `ci_scripts` stop an archive whose main app has any other identifier | `PRODUCT_BUNDLE_IDENTIFIER`, AnimalPairs target |
 | **Product ID** | set in the project: **`com.littlesnowyowl.animalpairs.fullgame`**. It does **not** exist in App Store Connect until you create it (below). To use a different ID, change `AP_FULL_UNLOCK_PRODUCT_ID` and `productID` in `Config/Products.storekit` together | build setting + StoreKit file |
-| **Price** | ❗ your decision. The local StoreKit test file uses US$2.99 for simulator testing only; the app always shows the price StoreKit returns | App Store Connect → the in-app purchase → Price Schedule |
+| **Price** | US$3.99 (set in App Store Connect). The local StoreKit test file mirrors it (3.99, US storefront) for simulator testing only; the app always shows the price StoreKit returns | App Store Connect → the in-app purchase → Price Schedule |
 | **Family Sharing** | ❗ your decision (off in the local test file). Once turned on in App Store Connect it cannot be turned off | the in-app purchase → Family Sharing |
 | **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (the page is still a website *draft* until the publisher name, effective date, age rating and availability are filled in) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy |
 | **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | `AP_SUPPORT_URL`; version page → Support URL |
