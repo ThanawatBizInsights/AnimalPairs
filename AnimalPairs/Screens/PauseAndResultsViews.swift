@@ -6,43 +6,53 @@ struct PauseOverlay: View {
     @Environment(AppModel.self) private var model
 
     var body: some View {
-        let t = model.localizer
         ZStack {
             Palette.brown.opacity(0.35).ignoresSafeArea()
                 .accessibilityHidden(true)
-            Panel {
-                VStack(spacing: 18) {
-                    Image(systemName: "moon.stars.fill")
-                        .font(.system(size: 48))
-                        .foregroundStyle(Palette.lavenderDeep)
-                        .accessibilityHidden(true)
-                    Text(t["pause.title"])
-                        .font(.rounded(.largeTitle, weight: .bold))
-                        .accessibilityAddTraits(.isHeader)
-                    Button {
-                        session.resumeFromPauseMenu()
-                    } label: {
-                        Label(t["pause.resume"], systemImage: "play.fill").frame(minWidth: 220)
-                    }
-                    .buttonStyle(PillowButtonStyle(kind: .mint))
-                    Button {
-                        model.restartCurrentGame()
-                    } label: {
-                        Label(t["pause.restart"], systemImage: "arrow.counterclockwise").frame(minWidth: 220)
-                    }
-                    .buttonStyle(PillowButtonStyle(kind: .secondary))
-                    Button {
-                        model.goHome()
-                    } label: {
-                        Label(t["common.home"], systemImage: "house.fill").frame(minWidth: 220)
-                    }
-                    .buttonStyle(PillowButtonStyle(kind: .secondary))
-                }
+            // At large text sizes on a compact screen the panel can be taller
+            // than the window: it then scrolls, so every button stays reachable.
+            ViewThatFits(in: .vertical) {
+                panel
+                ScrollView(.vertical) { panel.padding(.vertical, 24) }
+                    .scrollIndicators(.visible)
             }
-            .frame(maxWidth: 440)
-            .padding(24)
         }
         .accessibilityAddTraits(.isModal)
+    }
+
+    private var panel: some View {
+        let t = model.localizer
+        return Panel {
+            VStack(spacing: 18) {
+                Image(systemName: "moon.stars.fill")
+                    .font(.system(size: 48))
+                    .foregroundStyle(Palette.lavenderDeep)
+                    .accessibilityHidden(true)
+                Text(t["pause.title"])
+                    .font(.rounded(.largeTitle, weight: .bold))
+                    .accessibilityAddTraits(.isHeader)
+                Button {
+                    session.resumeFromPauseMenu()
+                } label: {
+                    Label(t["pause.resume"], systemImage: "play.fill").frame(minWidth: 220)
+                }
+                .buttonStyle(PillowButtonStyle(kind: .mint))
+                Button {
+                    model.restartCurrentGame()
+                } label: {
+                    Label(t["pause.restart"], systemImage: "arrow.counterclockwise").frame(minWidth: 220)
+                }
+                .buttonStyle(PillowButtonStyle(kind: .secondary))
+                Button {
+                    model.goHome()
+                } label: {
+                    Label(t["common.home"], systemImage: "house.fill").frame(minWidth: 220)
+                }
+                .buttonStyle(PillowButtonStyle(kind: .secondary))
+            }
+        }
+        .frame(maxWidth: 440)
+        .padding(24)
     }
 }
 

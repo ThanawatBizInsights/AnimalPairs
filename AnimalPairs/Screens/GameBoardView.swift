@@ -86,42 +86,63 @@ private struct PairDots: View {
 
 /// Fixed row-major grid. Card positions depend only on board order, so
 /// rotating or resizing the window rescales cards without moving them.
+/// When the cards would become too small to tap (a 20-card board on a compact
+/// iPhone in landscape, a short iPad window, accessibility text sizes), they
+/// keep a usable minimum size and the grid scrolls instead (`BoardLayout`).
 private struct CardGrid: View {
     let session: GameSession
 
     var body: some View {
         let state = session.state
-        let columns = state.configuration.boardSize.columns
-        let rows = state.configuration.boardSize.rows
         GeometryReader { proxy in
-            let spacing = max(6, min(18, min(proxy.size.width, proxy.size.height) * 0.02))
-            let cellWidth = (proxy.size.width - spacing * CGFloat(columns - 1)) / CGFloat(columns)
-            let cellHeight = (proxy.size.height - spacing * CGFloat(rows - 1)) / CGFloat(rows)
-            let aspect = CardGeometry.aspect
-            let width = max(44, min(cellWidth, cellHeight * aspect))
-            let height = max(44, width / aspect)
-            VStack(spacing: spacing) {
-                ForEach(0..<rows, id: \.self) { row in
-                    HStack(spacing: spacing) {
-                        ForEach(0..<columns, id: \.self) { column in
-                            let index = row * columns + column
-                            if index < state.tiles.count {
-                                let tile = state.tiles[index]
-                                CardView(tile: tile,
-                                         artwork: session.artwork(for: tile),
-                                         isHighlighted: session.highlightedTiles.contains(tile.id),
-                                         isLocked: state.isInputLocked,
-                                         position: CardPosition(index: index, row: row, column: column),
-                                         cornerRadius: width * CardGeometry.cornerRatio)
-                                    .frame(width: width, height: height)
-                                    .onTapGesture { session.tap(tile.id) }
-                                    .accessibilityAction { session.tap(tile.id) }
-                            }
+            let layout = BoardLayout(width: proxy.size.width, height: proxy.size.height,
+                                     columns: state.configuration.boardSize.columns,
+                                     rows: state.configuration.boardSize.rows,
+                                     aspect: CardGeometry.aspect)
+            if layout.fitsWithoutScrolling {
+                cards(layout)
+                    .frame(width: proxy.size.width, height: proxy.size.height)
+            } else {
+                ScrollView(scrollAxes(layout)) {
+                    cards(layout)
+                        .frame(minWidth: proxy.size.width, minHeight: proxy.size.height)
+                }
+                .scrollIndicators(.visible)
+            }
+        }
+    }
+
+    private func scrollAxes(_ layout: BoardLayout) -> Axis.Set {
+        var axes: Axis.Set = []
+        if layout.scrollsHorizontally { axes.insert(.horizontal) }
+        if layout.scrollsVertically { axes.insert(.vertical) }
+        return axes
+    }
+
+    private func cards(_ layout: BoardLayout) -> some View {
+        let state = session.state
+        let width = layout.cardWidth, height = layout.cardHeight
+        return VStack(spacing: layout.spacing) {
+            ForEach(0..<layout.rows, id: \.self) { row in
+                HStack(spacing: layout.spacing) {
+                    ForEach(0..<layout.columns, id: \.self) { column in
+                        let index = row * layout.columns + column
+                        if index < state.tiles.count {
+                            let tile = state.tiles[index]
+                            CardView(tile: tile,
+                                     artwork: session.artwork(for: tile),
+                                     isHighlighted: session.highlightedTiles.contains(tile.id),
+                                     isLocked: state.isInputLocked,
+                                     position: CardPosition(index: index, row: row, column: column),
+                                     cornerRadius: width * CardGeometry.cornerRatio)
+                                .frame(width: width, height: height)
+                                .contentShape(Rectangle())
+                                .onTapGesture { session.tap(tile.id) }
+                                .accessibilityAction { session.tap(tile.id) }
                         }
                     }
                 }
             }
-            .frame(width: proxy.size.width, height: proxy.size.height)
         }
     }
 }
