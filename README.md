@@ -27,7 +27,7 @@ failure screens, no ads, no accounts, and it works fully offline.
 
 1. Open `AnimalPairs.xcodeproj`.
 2. Select the **AnimalPairs** target → *Signing & Capabilities* → choose your
-   team. Change the bundle identifier (`com.example.AnimalPairs`) to one you own.
+   team. The bundle identifier is `com.littlesnowyowl.animalpairs` (App Store Connect app 6838152398); keep it.
 3. Choose the shared **AnimalPairs** scheme and an iPad simulator, then Run.
    The scheme's Run action uses `Config/Products.storekit`, so Full Game
    Unlock can be bought locally (no money, no Apple Account, no App Store
@@ -81,7 +81,7 @@ All configurable values are build settings on the **AnimalPairs** target
 | `AP_TERMS_OF_USE_URL` | empty | Optional `https://` Terms of Use; shown in Parents (behind the gate) only when set. Apple's standard EULA applies otherwise. |
 | `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). Required by the App Store. |
 | `AP_SUPPORT_URL` | empty | `https://` support page. |
-| `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` | Replace with your own. |
+| `PRODUCT_BUNDLE_IDENTIFIER` | `com.littlesnowyowl.animalpairs` | Must stay equal to the App Store Connect app's bundle ID. Xcode Cloud checks it before and after archiving (`ci_scripts/`). |
 
 When a value is missing the app says so in the Parents area instead of pretending
 a link or product works.
@@ -220,7 +220,7 @@ Full Game Unlock**, behind the gate:
 | Build setting | Value |
 | --- | --- |
 | `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlepenguinstudio.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
-| `PRODUCT_BUNDLE_IDENTIFIER` | `com.example.AnimalPairs` — **placeholder; set your own** (the product ID does not depend on it) |
+| `PRODUCT_BUNDLE_IDENTIFIER` | `com.littlesnowyowl.animalpairs` (the product ID does not depend on it) |
 | `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | the Little Penguin Studio pages |
 | `AP_TERMS_OF_USE_URL` | Apple's standard EULA (`https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`) |
 

@@ -8,7 +8,7 @@ published by Claude: every App Store Connect step below is yours to do.
 
 | Item | Status | Where it goes |
 | --- | --- | --- |
-| **Final bundle ID** | ❗ to supply. The project still uses the placeholder `com.example.AnimalPairs` | `PRODUCT_BUNDLE_IDENTIFIER` (AnimalPairs and AnimalPairsTests targets) |
+| **Bundle ID** | `com.littlesnowyowl.animalpairs` (app 6838152398). Xcode Cloud's `ci_scripts` stop an archive whose main app has any other identifier | `PRODUCT_BUNDLE_IDENTIFIER`, AnimalPairs target |
 | **Product ID** | set in the project: **`com.littlepenguinstudio.animalpairs.fullgame`**. It does **not** exist in App Store Connect until you create it (below). To use a different ID, change `AP_FULL_UNLOCK_PRODUCT_ID` and `productID` in `Config/Products.storekit` together | build setting + StoreKit file |
 | **Price** | ❗ your decision. The local StoreKit test file uses US$2.99 for simulator testing only; the app always shows the price StoreKit returns | App Store Connect → the in-app purchase → Price Schedule |
 | **Family Sharing** | ❗ your decision (off in the local test file). Once turned on in App Store Connect it cannot be turned off | the in-app purchase → Family Sharing |
