@@ -17,7 +17,7 @@ from sqlalchemy.orm import Session
 from .apple import PurchaseVerifier, VerificationFailed, VerificationUnavailable, build_verifier
 from .config import Settings, get_settings
 from .db import Database
-from .entitlements import apply_notification, is_revoked_after, upsert_entitlement
+from .entitlements import NotificationStoreUnavailable, apply_notification, is_revoked_after, upsert_entitlement
 from .manifest_validation import publish_problems, validate_manifest
 from .models import AssetObject, Manifest
 from .schemas import (
@@ -154,7 +154,11 @@ def create_app(
             raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "verification unavailable")
         except VerificationFailed:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, "invalid signed payload")
-        outcome = apply_notification(session, notification, settings.full_unlock_product_id)
+        try:
+            outcome = apply_notification(session, notification, settings.full_unlock_product_id)
+        except NotificationStoreUnavailable:
+            # Not stored: a non-2xx answer makes Apple deliver it again later.
+            raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "notification could not be stored; retry")
         return {"outcome": outcome}
 
     # MARK: Admin

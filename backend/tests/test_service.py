@@ -10,7 +10,7 @@ from app.apple import UnavailableVerifier, build_verifier
 from app.config import Settings
 from app.manifest_validation import validate_manifest
 
-from .conftest import PRODUCT
+from .conftest import PRODUCT, ts
 
 PNG = b"\x89PNG\r\n\x1a\n" + b"0" * 64
 
@@ -170,6 +170,64 @@ def test_out_of_order_notifications_keep_newest_state(client, admin, bundled_man
     assert notify(client, "reversed", "REFUND_REVERSED", 300).json() == {"outcome": "applied"}
     assert client.post("/v1/assets/momo.wave/download",
                        json={"version": 1, "signedTransaction": old_jws}).status_code == 200
+
+
+def test_integrity_error_from_a_concurrent_delivery_is_a_duplicate(client, settings, monkeypatch):
+    """The same notification is stored by a concurrent delivery between the
+    duplicate check and the commit: the unique UUID constraint fails, the row
+    is there, so it is acknowledged as a duplicate."""
+    from sqlalchemy.orm import Session
+    from app.db import Database
+    from app.models import AppleNotification
+
+    original_commit = Session.commit
+    raced = {"done": False}
+
+    def racing_commit(self):
+        if not raced["done"]:
+            raced["done"] = True
+            other = Database(settings.database_url)
+            with other.sessionmaker() as concurrent:
+                concurrent.add(AppleNotification(notification_uuid="race", notification_type="ONE_TIME_CHARGE",
+                                                 subtype=None, original_transaction_id="77",
+                                                 signed_at=ts(100), outcome="applied"))
+                original_commit(concurrent)
+        return original_commit(self)
+
+    monkeypatch.setattr(Session, "commit", racing_commit)
+    response = notify(client, "race", "ONE_TIME_CHARGE", 100)
+    assert response.status_code == 200
+    assert response.json() == {"outcome": "duplicate"}
+
+
+def test_other_integrity_errors_are_retryable_not_acknowledged(client, monkeypatch):
+    """An IntegrityError that is not this UUID already being stored must not be
+    swallowed as a duplicate: 503 makes Apple deliver it again."""
+    from sqlalchemy.exc import IntegrityError
+    from sqlalchemy.orm import Session
+
+    def failing_commit(self):
+        raise IntegrityError("INSERT ...", {}, Exception("some other constraint failed"))
+
+    monkeypatch.setattr(Session, "commit", failing_commit)
+    response = notify(client, "lost", "ONE_TIME_CHARGE", 100)
+    assert response.status_code == 503
+    monkeypatch.undo()
+    # Nothing was stored, so Apple's retry is applied normally.
+    assert notify(client, "lost", "ONE_TIME_CHARGE", 100).json() == {"outcome": "applied"}
+
+
+def test_database_failures_are_retryable(client, monkeypatch):
+    from sqlalchemy.exc import OperationalError
+    from sqlalchemy.orm import Session
+
+    def failing_commit(self):
+        raise OperationalError("COMMIT", {}, Exception("database is locked"))
+
+    monkeypatch.setattr(Session, "commit", failing_commit)
+    assert notify(client, "busy", "ONE_TIME_CHARGE", 100).status_code == 503
+    monkeypatch.undo()
+    assert notify(client, "busy", "ONE_TIME_CHARGE", 100).json() == {"outcome": "applied"}
 
 
 def test_notification_for_other_product_is_recorded_not_applied(client):

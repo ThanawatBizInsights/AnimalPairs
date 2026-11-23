@@ -2,6 +2,9 @@
 
 Rules:
 * Notifications are de-duplicated by `notificationUUID` (Apple retries).
+* A notification is acknowledged only once it is stored (or already was).
+  Any other database failure raises `NotificationStoreUnavailable`, so the
+  endpoint answers with a retryable error and Apple redelivers it.
 * Events are ordered by Apple's `signedDate`; an older event never overwrites
   a newer state (out-of-order delivery).
 * Only the configured full-unlock product is considered.
@@ -11,13 +14,17 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from sqlalchemy import select
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from .apple import VerifiedNotification, VerifiedTransaction
 from .models import AppleNotification, Entitlement
 
 REVOKING = {"REFUND", "REVOKE"}
+
+
+class NotificationStoreUnavailable(Exception):
+    """The notification could not be stored; Apple should send it again."""
 GRANTING = {"ONE_TIME_CHARGE", "REFUND_REVERSED"}
 
 
@@ -45,10 +52,16 @@ def upsert_entitlement(session: Session, transaction: VerifiedTransaction, statu
     return "applied"
 
 
+def notification_is_stored(session: Session, notification_uuid: str) -> bool:
+    return session.scalar(select(AppleNotification.id).where(
+        AppleNotification.notification_uuid == notification_uuid)) is not None
+
+
 def apply_notification(session: Session, notification: VerifiedNotification, product_id: str) -> str:
-    """Applies a verified notification exactly once. Returns the outcome."""
-    if session.scalar(select(AppleNotification.id).where(
-            AppleNotification.notification_uuid == notification.notification_uuid)) is not None:
+    """Applies a verified notification exactly once. Returns the outcome.
+
+    Raises `NotificationStoreUnavailable` when it could not be stored."""
+    if notification_is_stored(session, notification.notification_uuid):
         return "duplicate"
 
     outcome = "ignored"
@@ -71,10 +84,21 @@ def apply_notification(session: Session, notification: VerifiedNotification, pro
     ))
     try:
         session.commit()
-    except IntegrityError:
-        # A concurrent retry stored the same UUID first.
+    except IntegrityError as error:
         session.rollback()
-        return "duplicate"
+        # A duplicate only if a concurrent delivery really stored this UUID
+        # first; any other constraint failure must be retried.
+        try:
+            stored = notification_is_stored(session, notification.notification_uuid)
+        except SQLAlchemyError as lookup_error:
+            session.rollback()
+            raise NotificationStoreUnavailable("could not check for a stored duplicate") from lookup_error
+        if stored:
+            return "duplicate"
+        raise NotificationStoreUnavailable("notification was not stored") from error
+    except SQLAlchemyError as error:
+        session.rollback()
+        raise NotificationStoreUnavailable("database error while storing the notification") from error
     return outcome
 
 
