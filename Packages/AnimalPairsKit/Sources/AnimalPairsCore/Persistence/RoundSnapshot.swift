@@ -152,6 +152,17 @@ public enum SnapshotError: Error, Equatable, Sendable {
     case invalidCounters
 }
 
+extension SnapshotError {
+    /// The save needs content the current access level does not include
+    /// (as opposed to being malformed or incompatible).
+    public var isAccessRestriction: Bool {
+        switch self {
+        case .configurationNotAvailable, .artworkNotAvailable: true
+        default: false
+        }
+    }
+}
+
 /// JSON encoding with an explicit schema header so future versions can migrate.
 public enum SnapshotCodec {
     private struct Header: Decodable { let schemaVersion: Int }

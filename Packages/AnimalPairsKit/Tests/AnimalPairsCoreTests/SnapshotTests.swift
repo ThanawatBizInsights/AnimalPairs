@@ -163,6 +163,49 @@ final class SnapshotTests: XCTestCase {
         XCTAssertEqual(store.load(catalog: Fixtures.catalog(), policy: Fixtures.full), .none)
     }
 
+    // MARK: Paid rounds while access is unknown or absent
+
+    /// A valid Full Game Unlock round, loaded before StoreKit has confirmed
+    /// the purchase, stays on disk and becomes resumable once it has.
+    func testPaidSaveSurvivesLockedLoadAndResumesWhenUnlocked() throws {
+        let store = RoundSnapshotStore(directory: directory)
+        for config in [GameConfiguration(mode: .classic, boardSize: .twenty),
+                       GameConfiguration(mode: .exactPose, boardSize: .six)] {
+            let state = try Fixtures.round(config)
+            try store.save(state: state, manifestVersion: "t")
+            guard case .locked(let reason) = store.load(catalog: Fixtures.catalog(), policy: Fixtures.starter) else {
+                return XCTFail("expected .locked for \(config)")
+            }
+            XCTAssertTrue(reason.isAccessRestriction)
+            XCTAssertTrue(store.hasSnapshot, "the save is kept on disk")
+            XCTAssertTrue(store.quarantinedFiles.isEmpty, "not quarantined")
+            // Loading again while still locked changes nothing.
+            guard case .locked = store.load(catalog: Fixtures.catalog(), policy: Fixtures.starter) else { return XCTFail() }
+            // Entitlement arrives.
+            guard case .restored(let restored) = store.load(catalog: Fixtures.catalog(), policy: Fixtures.full) else {
+                return XCTFail("expected .restored for \(config)")
+            }
+            XCTAssertEqual(restored.roundID, state.roundID)
+            XCTAssertEqual(restored.tiles.map(\.id), state.tiles.map(\.id), "same card order")
+        }
+    }
+
+    /// A broken file is still quarantined even when the access level is
+    /// also too low, so a locked result never hides corruption.
+    func testMalformedPaidSaveIsStillQuarantinedWhileLocked() throws {
+        let store = RoundSnapshotStore(directory: directory)
+        let state = try Fixtures.round(GameConfiguration(mode: .exactPose, boardSize: .sixteen))
+        var snapshot = try XCTUnwrap(RoundSnapshot(state: state, manifestVersion: "t"))
+        snapshot.tiles.removeLast()
+        try store.save(snapshot)
+        guard case .rejected(let error) = store.load(catalog: Fixtures.catalog(), policy: Fixtures.starter) else {
+            return XCTFail()
+        }
+        XCTAssertFalse(error.isAccessRestriction)
+        XCTAssertFalse(store.hasSnapshot)
+        XCTAssertEqual(store.quarantinedFiles.count, 1)
+    }
+
     func testQuarantineIsBounded() throws {
         let store = RoundSnapshotStore(directory: directory)
         for i in 0..<6 {

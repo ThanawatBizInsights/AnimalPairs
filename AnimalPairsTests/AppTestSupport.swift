@@ -21,14 +21,16 @@ enum AppTestSupport {
     static func makeModel(snapshotDirectory: URL? = nil,
                           history: CompletionHistoryStore? = nil,
                           defaults: UserDefaults? = nil,
-                          playsOpeningVideo: Bool = false) -> AppModel {
+                          playsOpeningVideo: Bool = false,
+                          purchases: PurchaseManager? = nil) -> AppModel {
         AppModel(settings: SettingsStore(defaults: defaults ?? isolatedDefaults()),
                  configuration: AppConfiguration(fullUnlockProductID: AppConfiguration.defaultFullUnlockProductID,
                                                  privacyPolicyURL: nil, supportURL: nil),
                  history: history ?? SwiftDataCompletionStore.inMemory(),
                  snapshots: RoundSnapshotStore(directory: snapshotDirectory ?? temporaryDirectory()),
                  playsOpeningVideo: playsOpeningVideo,
-                 audioSession: activeSession())
+                 audioSession: activeSession(),
+                 purchases: purchases)
     }
 
     /// An audio session controller that activates synchronously, so tests can

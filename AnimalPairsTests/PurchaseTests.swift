@@ -305,4 +305,67 @@ final class PurchaseTests: XCTestCase {
                        .networkUnavailable)
         XCTAssertEqual(PurchaseManager.flowState(for: URLError(.timedOut)), .networkUnavailable)
     }
+
+    // MARK: Saved Full Game Unlock rounds during StoreKit startup
+
+    /// A paid round saved on disk must survive a launch where the saved
+    /// round is checked before StoreKit has confirmed the purchase, and
+    /// become resumable once it has.
+    func testPaidSaveSurvivesStartupAndResumesWhenEntitlementArrives() async throws {
+        try session.buyProduct(productIdentifier: productID)
+        let directory = AppTestSupport.temporaryDirectory()
+
+        // First launch: owned and verified; a 20-card round is in progress.
+        let owner = PurchaseManager(productID: productID,
+                                    cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        await owner.refreshEntitlements()
+        let first = AppTestSupport.makeModel(snapshotDirectory: directory, purchases: owner)
+        try first.startNewGame(GameConfiguration(mode: .classic, boardSize: .twenty))
+        let saved = try XCTUnwrap(first.session?.state)
+        first.scenePhaseChanged(.background)
+
+        // Relaunch with no cached entitlement: StoreKit has not answered yet.
+        let launching = PurchaseManager(productID: productID,
+                                        cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        let relaunched = AppTestSupport.makeModel(snapshotDirectory: directory, purchases: launching)
+        XCTAssertEqual(launching.verifiedLevel, .starter)
+        relaunched.refreshResumableRound()                    // what start() does before StoreKit answers
+        XCTAssertNil(relaunched.resumableRound)
+        let store = RoundSnapshotStore(directory: directory)
+        XCTAssertTrue(store.hasSnapshot, "the paid save is kept on disk")
+        XCTAssertTrue(store.quarantinedFiles.isEmpty, "and not quarantined")
+        XCTAssertNil(relaunched.snapshotNotice)
+
+        // StoreKit confirms the purchase: the round becomes resumable by itself.
+        await launching.refreshEntitlements()
+        let restored = try XCTUnwrap(relaunched.resumableRound)
+        XCTAssertEqual(restored.roundID, saved.roundID)
+        XCTAssertEqual(restored.tiles.map(\.id), saved.tiles.map(\.id), "same card order")
+        relaunched.resumeSavedGame()
+        XCTAssertEqual(relaunched.route, .game)
+        XCTAssertEqual(relaunched.session?.state.roundID, saved.roundID)
+    }
+
+    func testConfirmedNonOwnerCannotResumeAPaidSaveButTheFileIsKept() async throws {
+        try session.buyProduct(productIdentifier: productID)
+        let directory = AppTestSupport.temporaryDirectory()
+        let owner = PurchaseManager(productID: productID,
+                                    cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        await owner.refreshEntitlements()
+        let first = AppTestSupport.makeModel(snapshotDirectory: directory, purchases: owner)
+        try first.startNewGame(GameConfiguration(mode: .exactPose, boardSize: .six))
+        first.scenePhaseChanged(.background)
+
+        session.clearTransactions()                            // e.g. another Apple Account
+        let other = PurchaseManager(productID: productID,
+                                    cacheStore: EntitlementCacheStore(defaults: AppTestSupport.isolatedDefaults()))
+        let model = AppTestSupport.makeModel(snapshotDirectory: directory, purchases: other)
+        await other.refreshEntitlements()
+        model.refreshResumableRound()
+        XCTAssertNil(model.resumableRound)
+        model.resumeSavedGame()                                 // Resume rechecks access
+        XCTAssertNil(model.session)
+        XCTAssertEqual(model.route, .home)
+        XCTAssertTrue(RoundSnapshotStore(directory: directory).hasSnapshot)
+    }
 }

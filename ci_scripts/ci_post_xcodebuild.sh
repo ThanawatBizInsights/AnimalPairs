@@ -1,11 +1,13 @@
 #!/bin/sh
-# Xcode Cloud: runs after xcodebuild. For the archive action, prints the
-# CFBundleIdentifier and CFBundleVersion of the main app inside the
-# .xcarchive and fails the action if the identifier is not the one the App
-# Store Connect app (6838152398) requires.
-set -eu
+# Xcode Cloud: runs after xcodebuild. For the archive action, reads the main
+# app's Info.plist inside the .xcarchive and fails the action, with a clear
+# message, unless both values are exactly what App Store Connect expects:
+#   CFBundleIdentifier    = com.littlesnowyowl.animalpairs          (app 6838152398)
+#   APFullUnlockProductID = com.littlesnowyowl.animalpairs.fullgame (Full Game Unlock)
+set -u
 
 EXPECTED_BUNDLE_ID="com.littlesnowyowl.animalpairs"
+EXPECTED_PRODUCT_ID="com.littlesnowyowl.animalpairs.fullgame"
 PLISTBUDDY="${PLISTBUDDY:-/usr/libexec/PlistBuddy}"
 
 [ "${CI_XCODEBUILD_ACTION:-}" = "archive" ] || exit 0
@@ -17,11 +19,27 @@ if [ -z "$ARCHIVE" ] || [ ! -f "$PLIST" ]; then
     exit 1
 fi
 
-ACTUAL=$("$PLISTBUDDY" -c "Print :CFBundleIdentifier" "$PLIST")
-VERSION=$("$PLISTBUDDY" -c "Print :CFBundleShortVersionString" "$PLIST")
-BUILD=$("$PLISTBUDDY" -c "Print :CFBundleVersion" "$PLIST")
-echo "Archived AnimalPairs.app: CFBundleIdentifier = $ACTUAL, version $VERSION ($BUILD)"
-if [ "$ACTUAL" != "$EXPECTED_BUNDLE_ID" ]; then
-    echo "error: expected $EXPECTED_BUNDLE_ID. Failing before distribution."
+# Prints the value, or nothing when the key is missing.
+read_key() { "$PLISTBUDDY" -c "Print :$1" "$PLIST" 2>/dev/null || true; }
+
+FAILED=0
+check() { # key, expected
+    actual=$(read_key "$1")
+    if [ -z "$actual" ]; then
+        echo "error: $1 is missing from AnimalPairs.app/Info.plist (expected $2)"
+        FAILED=1
+    elif [ "$actual" != "$2" ]; then
+        echo "error: $1 is $actual in AnimalPairs.app/Info.plist (expected $2)"
+        FAILED=1
+    else
+        echo "ok: $1 = $actual"
+    fi
+}
+
+echo "Archived AnimalPairs.app: version $(read_key CFBundleShortVersionString) ($(read_key CFBundleVersion))"
+check CFBundleIdentifier "$EXPECTED_BUNDLE_ID"
+check APFullUnlockProductID "$EXPECTED_PRODUCT_ID"
+if [ "$FAILED" -ne 0 ]; then
+    echo "error: archive check failed. Failing before distribution."
     exit 1
 fi

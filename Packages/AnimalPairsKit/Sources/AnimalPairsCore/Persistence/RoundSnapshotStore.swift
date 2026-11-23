@@ -3,6 +3,11 @@ import Foundation
 public enum SnapshotLoadResult: Equatable, Sendable {
     case none
     case restored(RoundState)
+    /// A well-formed save whose board or pictures the current access level
+    /// does not include (a Full Game Unlock round while StoreKit has not yet
+    /// confirmed the purchase, or for a non-owner). The file stays on disk,
+    /// untouched, so it can be offered again once access is confirmed.
+    case locked(SnapshotError)
     /// The file was unusable and moved aside (never silently deleted).
     case rejected(SnapshotError)
 }
@@ -62,11 +67,21 @@ public final class RoundSnapshotStore: @unchecked Sendable {
         return try SnapshotCodec.decode(data)
     }
 
-    /// Loads, validates and restores. Invalid data is quarantined.
+    /// Loads, validates and restores. Malformed or incompatible data is
+    /// quarantined; a valid save the current access level does not include is
+    /// kept on disk and reported as `.locked`.
     public func load(catalog: ContentCatalog, policy: ContentAccessPolicy) -> SnapshotLoadResult {
         do {
             guard let snapshot = try loadSnapshot() else { return .none }
-            return .restored(try snapshot.restore(catalog: catalog, policy: policy))
+            // 1. Structure and content, as if everything were unlocked: only a
+            //    file that fails here is broken.
+            _ = try snapshot.restore(catalog: catalog, policy: ContentAccessPolicy(level: .fullGame))
+            // 2. Access. Not owning the content (yet) is not corruption.
+            do {
+                return .restored(try snapshot.restore(catalog: catalog, policy: policy))
+            } catch let error as SnapshotError where error.isAccessRestriction {
+                return .locked(error)
+            }
         } catch let error as SnapshotError {
             quarantine()
             return .rejected(error)

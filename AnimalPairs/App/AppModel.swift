@@ -57,7 +57,8 @@ final class AppModel {
          snapshots: RoundSnapshotStore? = nil,
          contentBundle: Bundle = .main,
          playsOpeningVideo: Bool = true,
-         audioSession: AudioSessionController? = nil) {
+         audioSession: AudioSessionController? = nil,
+         purchases: PurchaseManager? = nil) {
         let settings = settings ?? SettingsStore()
         self.settings = settings
         self.configuration = configuration
@@ -70,7 +71,7 @@ final class AppModel {
             route = .home
         }
         localizer = Localizer()
-        purchases = PurchaseManager(productID: configuration.fullUnlockProductID)
+        self.purchases = purchases ?? PurchaseManager(productID: configuration.fullUnlockProductID)
         audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled,
                              musicEnabled: settings.musicEnabled, sessionController: audioSession)
 
@@ -95,6 +96,10 @@ final class AppModel {
             contentError = String(describing: error)
         }
         audio.loadAnimalClips(for: catalog.manifest.characters.map(\.id))
+        // A saved Full Game Unlock round can be found before StoreKit has
+        // confirmed the purchase. It is kept on disk (`.locked`) and offered
+        // again as soon as the access level changes.
+        self.purchases.onAccessLevelChange = { [weak self] _ in self?.refreshResumableRound() }
     }
 
     var policy: ContentAccessPolicy { ContentAccessPolicy(level: purchases.accessLevel) }
@@ -210,6 +215,9 @@ final class AppModel {
     }
 
     func resumeSavedGame() {
+        // Access is checked again at the moment of resuming: the save is
+        // re-read and re-validated against the current entitlement.
+        refreshResumableRound()
         guard let round = resumableRound else { return }
         attachSession(GameSession(state: round, catalog: catalog, audio: audio, localizer: localizer))
         resumableRound = nil
@@ -287,6 +295,10 @@ final class AppModel {
             resumableRound = nil
         case .restored(let round):
             resumableRound = round
+        case .locked:
+            // Valid, but needs Full Game Unlock, which is not confirmed (yet).
+            // The file stays on disk; nothing is reported as broken.
+            resumableRound = nil
         case .rejected(let error):
             resumableRound = nil
             snapshotNotice = String(describing: error)

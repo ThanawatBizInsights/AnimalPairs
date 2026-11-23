@@ -74,12 +74,18 @@ final class PurchaseManager {
     private let cacheStore: EntitlementCacheStore
     private var cache: CachedEntitlement?
     @ObservationIgnored private var updatesTask: Task<Void, Never>?
+    /// Called on the main actor whenever the level the game uses changes
+    /// (StoreKit confirming or removing the purchase, Restore, a refund).
+    @ObservationIgnored var onAccessLevelChange: ((AccessLevel) -> Void)?
 
     #if DEBUG
     /// DEBUG-only simulated unlock for UI work without StoreKit. This
     /// property does not exist in Release builds, so it cannot unlock them.
     var debugMockUnlocked: Bool {
-        didSet { UserDefaults.standard.set(debugMockUnlocked, forKey: "debug.mockUnlocked") }
+        didSet {
+            UserDefaults.standard.set(debugMockUnlocked, forKey: "debug.mockUnlocked")
+            if debugMockUnlocked != oldValue { onAccessLevelChange?(accessLevel) }
+        }
     }
     #endif
 
@@ -332,8 +338,10 @@ final class PurchaseManager {
     }
 
     private func apply(_ decision: EntitlementDecision) {
+        let before = accessLevel
         verifiedLevel = decision.level
         cache = decision.cache
         cacheStore.save(decision.cache)
+        if accessLevel != before { onAccessLevelChange?(accessLevel) }
     }
 }
