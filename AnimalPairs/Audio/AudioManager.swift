@@ -126,6 +126,9 @@ enum NarrationEvent {
 ///   buttons and animal clips; the Music switch (`musicEnabled`) covers only
 ///   the background tracks.
 /// * Delayed sounds are cancelled when a round is paused, restarted or left.
+/// * `isMuted` (the speaker button) silences every channel — effects, animal
+///   clips, narration and music — including queued and playing audio, without
+///   changing the per-channel switches; unmuting brings those back.
 @MainActor
 final class AudioManager {
     static let masterVolume: Float = 0.8
@@ -151,6 +154,26 @@ final class AudioManager {
             }
         }
     }
+
+    /// The speaker button: silences everything while true. The switches
+    /// above (and `musicEnabled`) keep their saved values underneath.
+    var isMuted: Bool = false {
+        didSet {
+            guard isMuted != oldValue else { return }
+            if isMuted {
+                cancelPending()                 // queued effects and narration
+                stopEffects()                   // effects and animal clips, fading ones included
+                voicePlayers.values.forEach { $0.stop() }
+                policy.reset()
+            }
+            music.enabled = musicPreference && !isMuted
+        }
+    }
+
+    /// Effects (and animal clips) may play.
+    private var effectsAudible: Bool { isEnabled && !isMuted }
+    /// Narration may play.
+    private var voiceAudible: Bool { voiceEnabled && !isMuted }
 
     private var players: [SoundEffect: AVAudioPlayer] = [:]
     private var voicePlayers: [NarrationCue: AVAudioPlayer] = [:]
@@ -185,11 +208,15 @@ final class AudioManager {
     /// Background music, one track at a time.
     let music: BackgroundMusicPlayer
 
-    /// The Music switch: background tracks only.
+    /// The saved Music switch: background tracks only. Heard only while not muted.
     var musicEnabled: Bool {
-        get { music.enabled }
-        set { music.enabled = newValue }
+        get { musicPreference }
+        set {
+            musicPreference = newValue
+            music.enabled = newValue && !isMuted
+        }
     }
+    private var musicPreference: Bool
 
     /// The app's audio session (configured and activated once, off the main thread).
     let session: AudioSessionController
@@ -201,6 +228,7 @@ final class AudioManager {
          musicScheduler: RoundScheduler? = nil) {
         self.isEnabled = isEnabled
         self.voiceEnabled = voiceEnabled
+        self.musicPreference = musicEnabled
         self.clock = clock
         self.bundle = bundle
         clipRandom = SeededGenerator(seed: randomSeed)
@@ -241,7 +269,7 @@ final class AudioManager {
 
     /// Plays an effect; `level` scales it (e.g. under an animal clip).
     func play(_ effect: SoundEffect, level: Float = 1) {
-        guard isEnabled, let player = players[effect], sessionReady() else { return }
+        guard effectsAudible, let player = players[effect], sessionReady() else { return }
         let rule = SoundRule(minInterval: effect.minInterval, priority: effect.priority,
                              duration: max(player.duration, 0.05))
         switch policy.request(effect.rawValue, rule: rule, at: clock()) {
@@ -299,7 +327,7 @@ final class AudioManager {
     /// clip, or nil when sound is off or the animal has no clip.
     @discardableResult
     func playMatchClip(for character: CharacterID?) -> AnimalClip? {
-        guard isEnabled, sessionReady(), let character,
+        guard effectsAudible, sessionReady(), let character,
               let clip = clipPicker.pick(for: character, moment: .matched, in: clipLibrary, using: &clipRandom)
         else { return nil }
         start(clip, moment: .matched, stopAfter: matchEnds[clip.name] ?? Self.defaultMatchLength)
@@ -377,7 +405,7 @@ final class AudioManager {
     /// caller can leave out an effect that would compete with it.
     @discardableResult
     func narrate(_ event: NarrationEvent, after delay: TimeInterval) -> Bool {
-        guard voiceEnabled, voicePlayers[event.cue] != nil, !isSpeaking else { return false }
+        guard voiceAudible, voicePlayers[event.cue] != nil, !isSpeaking else { return false }
         let now = clock()
         let decision: NarrationCue?
         switch event {
@@ -392,7 +420,7 @@ final class AudioManager {
     }
 
     private func speak(_ cue: NarrationCue) {
-        guard voiceEnabled, let player = voicePlayers[cue], !isSpeaking, sessionReady() else { return }
+        guard voiceAudible, let player = voicePlayers[cue], !isSpeaking, sessionReady() else { return }
         player.currentTime = 0
         player.play()
     }

@@ -324,6 +324,31 @@ final class Clock { var now = 100.0 }
     music.setScene(.game); advance(4)
     check(audible() == [.playground] && music.playingTracks == [.playground], "settles on one track: \(music.playingTracks)")
     check(sessionMainThreadActivations == 0, "\(sessionMainThreadActivations) activations on the main thread")
+    // MARK: Speaker button (master mute)
+    music.setScene(.game); advance(4)
+    _ = audio.playMatchClip(for: withClips[0])
+    check(clipPlayers().contains { $0.isPlaying }, "a clip is playing before muting")
+    audio.isMuted = true
+    check(clipPlayers().allSatisfy { !$0.isPlaying }, "muting stops the playing animal clip")
+    startedLog.removeAll()
+    for effect in SoundEffect.allCases { audio.play(effect) }
+    check(audio.playMatchClip(for: withClips[1]) == nil, "no animal clip while muted")
+    check(startedLog.isEmpty, "muted: sounds started \(startedLog)")
+    advance(3)
+    // Only the players the music player owns count: a player it replaced
+    // earlier is released in the app (the stand-in keeps it in `allPlayers`).
+    check(music.playingTracks.isEmpty && music.currentTrack == nil, "music still playing while muted: \(music.playingTracks)")
+    check(audio.musicEnabled && audio.isEnabled, "muting keeps the Music and Sound Effects switches")
+    audio.appDidEnterBackground(); audio.appDidBecomeActive(); advance(2)
+    check(music.playingTracks.isEmpty, "an app switch does not bring music back while muted: \(music.playingTracks)")
+    audio.isMuted = false
+    advance(4)
+    check(music.playingTracks == [.playground] && (music.player(of: .playground)?.volume ?? 0) > 0.001,
+          "unmuting restores the music: \(music.playingTracks)")
+    audio.play(SoundEffect.allCases[0])
+    check(!startedLog.isEmpty, "unmuting restores sound effects")
+    print("mute: clip stopped, effects, clips and music silent (also across an app switch); unmute restored them")
+
     print("music: Home loop resumed after 5 app switches at the same position; navigation, interruptions, "
           + "route loss, Music off, 20 animal-sound dips, failures and 500 random steps checked")
 

@@ -26,22 +26,67 @@ final class AppFlowTests: XCTestCase {
         }
     }
 
-    func testSpeakerButtonTurnsAllSoundOffAndOnTogether() {
+    func testSpeakerButtonMutesEverythingAndRestoresParentsChoices() {
         let defaults = AppTestSupport.isolatedDefaults()
         let model = AppTestSupport.makeModel(defaults: defaults)
+        // Parents: music off, effects and voice on.
+        model.setMusicEnabled(false)
         XCTAssertTrue(model.isAnySoundOn)
-        model.toggleAllSound()
+
+        model.toggleAllSound()                          // mute
+        XCTAssertFalse(model.isAnySoundOn)
+        XCTAssertTrue(model.settings.allSoundMuted)
+        XCTAssertTrue(model.audio.isMuted)
+        XCTAssertFalse(model.audio.music.enabled, "no music while muted")
+        XCTAssertFalse(model.audio.narrate(.roundStarted, after: 0), "no narration while muted")
+        XCTAssertNil(model.audio.playMatchClip(for: model.catalog.manifest.characters.first?.id),
+                     "no animal clip while muted")
+        XCTAssertFalse(model.openingVideoAudible)
+        // The Parents switches are untouched underneath.
+        XCTAssertTrue(model.settings.soundEnabled)
+        XCTAssertTrue(model.settings.voiceEnabled)
         XCTAssertFalse(model.settings.musicEnabled)
-        XCTAssertFalse(model.settings.soundEnabled)
-        XCTAssertFalse(model.audio.musicEnabled)
-        XCTAssertFalse(model.audio.isEnabled)
-        model.setMusicEnabled(true)                     // Settings: music only
+
+        // Mute survives a relaunch.
+        XCTAssertFalse(AppTestSupport.makeModel(defaults: defaults).isAnySoundOn)
+
+        model.toggleAllSound()                          // unmute restores exactly
         XCTAssertTrue(model.isAnySoundOn)
-        model.toggleAllSound()                          // anything on → everything off
+        XCTAssertFalse(model.audio.isMuted)
+        XCTAssertTrue(model.settings.soundEnabled && model.settings.voiceEnabled)
+        XCTAssertFalse(model.settings.musicEnabled, "music stays off as chosen in Parents")
+        XCTAssertFalse(model.audio.music.enabled)
+    }
+
+    func testSpeakerButtonShowsOnWhenOnlyNarrationIsEnabled() {
+        let model = AppTestSupport.makeModel()
+        model.setMusicEnabled(false)
+        model.setSoundEnabled(false)
+        XCTAssertTrue(model.settings.voiceEnabled)
+        XCTAssertTrue(model.isAnySoundOn, "narration alone is audible, so the icon shows sound on")
+        model.toggleAllSound()
+        XCTAssertFalse(model.isAnySoundOn)
+        XCTAssertTrue(model.audio.isMuted)
+    }
+
+    func testSpeakerButtonWithEverySwitchOffTurnsThemOn() {
+        let model = AppTestSupport.makeModel()
+        model.setMusicEnabled(false)
+        model.setSoundEnabled(false)
+        model.setVoiceEnabled(false)
         XCTAssertFalse(model.isAnySoundOn)
         model.toggleAllSound()
-        let relaunched = AppTestSupport.makeModel(defaults: defaults)
-        XCTAssertTrue(relaunched.settings.musicEnabled && relaunched.settings.soundEnabled, "saved")
+        XCTAssertTrue(model.isAnySoundOn)
+        XCTAssertTrue(model.settings.musicEnabled && model.settings.soundEnabled && model.settings.voiceEnabled)
+    }
+
+    func testTurningASwitchOnInParentsLiftsTheMute() {
+        let model = AppTestSupport.makeModel()
+        model.toggleAllSound()
+        XCTAssertTrue(model.audio.isMuted)
+        model.setMusicEnabled(true)
+        XCTAssertFalse(model.audio.isMuted)
+        XCTAssertTrue(model.isAnySoundOn)
     }
 
     func testInterfaceGraphicsAndIconAreBundled() {
@@ -126,6 +171,9 @@ final class AppFlowTests: XCTestCase {
         XCTAssertTrue(model.openingVideoAudible, "Music is still on")
         model.setMusicEnabled(false)
         XCTAssertFalse(model.openingVideoAudible, "muted when both switches are off")
+        model.setMusicEnabled(true)
+        model.toggleAllSound()
+        XCTAssertFalse(model.openingVideoAudible, "the speaker button's mute silences the video too")
     }
 
     func testMusicAndSoundEffectsAreSavedIndependently() {

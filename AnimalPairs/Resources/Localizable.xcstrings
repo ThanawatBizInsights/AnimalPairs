@@ -986,7 +986,7 @@
         "en": {
           "stringUnit": {
             "state": "translated",
-            "value": "Turns the music and sound effects on or off together."
+            "value": "Mutes or unmutes all sound: music, sound effects, animal sounds and voice. The choices in the Parents area are kept."
           }
         }
       }

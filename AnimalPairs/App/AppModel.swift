@@ -74,6 +74,7 @@ final class AppModel {
         self.purchases = purchases ?? PurchaseManager(productID: configuration.fullUnlockProductID)
         audio = AudioManager(isEnabled: settings.soundEnabled, voiceEnabled: settings.voiceEnabled,
                              musicEnabled: settings.musicEnabled, sessionController: audioSession)
+        audio.isMuted = settings.allSoundMuted
 
         if let history {
             self.history = history
@@ -126,35 +127,62 @@ final class AppModel {
     // MARK: Settings
 
     /// The saved "Sound effects" setting (persisted by SettingsStore).
+    /// Turning a switch on in Parents also lifts the speaker-button mute, so
+    /// the grown-up hears what they just chose.
     func setSoundEnabled(_ enabled: Bool) {
         settings.soundEnabled = enabled
         audio.isEnabled = enabled
-        if enabled { audio.play(.buttonTap) }
+        if enabled {
+            setMuted(false)
+            audio.play(.buttonTap)
+        }
     }
 
-    /// The speaker button on Home and the board: shows "on" while music or
-    /// sound effects are on.
-    var isAnySoundOn: Bool { settings.soundEnabled || settings.musicEnabled }
+    /// True when any channel (music, sound effects with the animal clips, or
+    /// narration) is switched on in Parents.
+    var hasAnySoundChannelOn: Bool { settings.soundEnabled || settings.musicEnabled || settings.voiceEnabled }
 
-    /// The speaker button: everything off when anything is on, otherwise
-    /// both back on. Each switch is still saved separately (Settings).
+    /// The speaker button on Home and the board: shows "on" only while
+    /// something can actually be heard (not muted, and at least one channel
+    /// on — narration alone counts).
+    var isAnySoundOn: Bool { !settings.allSoundMuted && hasAnySoundChannelOn }
+
+    /// The speaker button. Sound on → mute everything (music, effects, animal
+    /// clips, narration; queued and playing audio stops). Muted → unmute,
+    /// which restores the Parents switches exactly as they were. If every
+    /// switch is off in Parents there is nothing to restore, so the button
+    /// turns them all on (otherwise it would do nothing a child could hear).
     func toggleAllSound() {
-        let on = !isAnySoundOn
-        setMusicEnabled(on)
-        setSoundEnabled(on)
+        if isAnySoundOn {
+            setMuted(true)
+        } else if settings.allSoundMuted && hasAnySoundChannelOn {
+            setMuted(false)
+        } else {
+            setMuted(false)
+            setMusicEnabled(true)
+            setVoiceEnabled(true)
+            setSoundEnabled(true)
+        }
+    }
+
+    private func setMuted(_ muted: Bool) {
+        settings.allSoundMuted = muted
+        audio.isMuted = muted
     }
 
     /// The saved "Music" setting: background tracks only (persisted by SettingsStore).
     func setMusicEnabled(_ enabled: Bool) {
         settings.musicEnabled = enabled
         audio.musicEnabled = enabled
+        if enabled { setMuted(false) }
     }
 
     /// True when the background tracks are bundled.
     var hasMusic: Bool { !audio.music.availableTracks.isEmpty }
 
-    /// The opening video's audio plays only if Sound Effects or Music is on.
-    var openingVideoAudible: Bool { settings.soundEnabled || settings.musicEnabled }
+    /// The opening video's audio plays only if Sound Effects or Music is on
+    /// and the speaker button has not muted everything.
+    var openingVideoAudible: Bool { !settings.allSoundMuted && (settings.soundEnabled || settings.musicEnabled) }
 
     /// Leaves the opening video for Home.
     func finishOpening() {
@@ -167,6 +195,7 @@ final class AppModel {
     func setVoiceEnabled(_ enabled: Bool) {
         settings.voiceEnabled = enabled
         audio.voiceEnabled = enabled
+        if enabled { setMuted(false) }
     }
 
     // MARK: Navigation
