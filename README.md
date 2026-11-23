@@ -77,7 +77,7 @@ All configurable values are build settings on the **AnimalPairs** target
 
 | Setting | Default | Purpose |
 | --- | --- | --- |
-| `AP_FULL_UNLOCK_PRODUCT_ID` | `com.littlepenguinstudio.animalpairs.fullgame` | Non-consumable *Full Game Unlock* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID and configuration](#product-id-and-configuration). |
+| `AP_FULL_UNLOCK_PRODUCT_ID` | `com.littlesnowyowl.animalpairs.fullgame` | Non-consumable *Full Game Unlock* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID and configuration](#product-id-and-configuration). |
 | `AP_TERMS_OF_USE_URL` | empty | Optional `https://` Terms of Use; shown in Parents (behind the gate) only when set. Apple's standard EULA applies otherwise. |
 | `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). Required by the App Store. |
 | `AP_SUPPORT_URL` | empty | `https://` support page. |
@@ -219,7 +219,7 @@ Full Game Unlock**, behind the gate:
 
 | Build setting | Value |
 | --- | --- |
-| `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlepenguinstudio.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
+| `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlesnowyowl.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.littlesnowyowl.animalpairs` (the product ID does not depend on it) |
 | `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | the Little Penguin Studio pages |
 | `AP_TERMS_OF_USE_URL` | Apple's standard EULA (`https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`) |

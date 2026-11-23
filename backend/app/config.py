@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     apple_environment: Literal["Sandbox", "Production", "Xcode", "LocalTesting"] = "Sandbox"
     apple_root_cert_paths: list[Path] = Field(default_factory=list)
     apple_enable_online_checks: bool = True
-    full_unlock_product_id: str = "com.littlepenguinstudio.animalpairs.fullgame"
+    full_unlock_product_id: str = "com.littlesnowyowl.animalpairs.fullgame"
 
     # Private asset storage.
     storage_backend: Literal["local", "s3"] = "local"

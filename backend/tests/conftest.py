@@ -17,7 +17,7 @@ from app.storage import LocalSignedStorage
 
 ROOT = Path(__file__).resolve().parents[2]
 ADMIN_TOKEN = "test-admin-token"
-PRODUCT = "com.littlepenguinstudio.animalpairs.fullgame"
+PRODUCT = "com.littlesnowyowl.animalpairs.fullgame"
 
 
 class FakeVerifier:

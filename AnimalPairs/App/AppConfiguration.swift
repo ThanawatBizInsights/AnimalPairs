@@ -16,7 +16,7 @@ struct AppConfiguration: Sendable {
     /// The Full Game Unlock product ID. A product ID need not match the
     /// bundle ID; this one must be created in App Store Connect as a
     /// Non-Consumable. Used when the build setting is empty.
-    static let defaultFullUnlockProductID = "com.littlepenguinstudio.animalpairs.fullgame"
+    static let defaultFullUnlockProductID = "com.littlesnowyowl.animalpairs.fullgame"
 
     let fullUnlockProductID: String
     let termsOfUseURL: URL?
