@@ -277,14 +277,16 @@ Settings, each remembered between launches:
 
 ### Opening video
 
-`AnimalPairs/Resources/Video/opening_video.mp4` (720×1280 portrait, 8 s, H.264 +
-AAC) plays **once per app launch**, then hands over to Home (there is no separate
+`AnimalPairs/Resources/Video/opening_video.mp4` (1080×1920 portrait, 7.9 s,
+H.264 High + AAC stereo, 2.2 MB, bundled; never streamed) plays **once per app launch**, then hands over to Home (there is no separate
 introduction page, on first launch or ever). It
 never replays when returning from a board. It is aspect-fit on a matching
 backdrop so no animal is cropped, has a native **Skip** button, and moves on by
 itself when it ends, fails to load, runs longer than 15 s, or the app goes to
-the background. Its audio plays only if Sound Effects or Music is on, and all
-other audio is stopped while it plays. The title and Play button stay native UI
+the background. It is skipped when Auto-Play Video Previews is off (Settings ›
+Accessibility › Motion). Its audio plays only if Sound Effects or Music is on
+and the speaker button has not muted everything, and all other audio is
+stopped while it plays. The title and Play button stay native UI
 on Home.
 
 ### Event map

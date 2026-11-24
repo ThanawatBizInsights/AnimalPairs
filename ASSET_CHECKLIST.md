@@ -49,7 +49,7 @@ Status of every artwork slot in `AnimalPairs/Resources/ArtworkManifest.json` (ma
 | Music loops (4): playground, focus, celebration, meadow | `AnimalPairs/Resources/Music/*.caf` (Apple Lossless, exact loops) + `music_tracks.json`; masters in `Design/Audio/Music/` | **bundled**; playground (Home + gameplay), celebration (results), meadow (Parents); focus not assigned |
 | Animal clips, all 10 animals × greeting, curious, excited, calm (40) | `AnimalPairs/Resources/Sounds/Animals/<animal>_<variant>.m4a` + `animal_clips.json` | **bundled** (generated with ElevenLabs; masters, originals and every take in `Design/Audio/Animals/`); `mochi_excited` is 2.0 s, a little under the 3–5 s aim |
 | Voice recordings | — | none (English only; the planned Thai lines were removed) |
-| Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user) |
+| Opening video | `AnimalPairs/Resources/Video/opening_video.mp4` | **approved**, bundled (supplied by the user); 1080×1920 H.264 + AAC, 7.93 s, 2.22 MB (replaced the 720×1280 version on 24 Nov 2026) |
 | Synthesized tones (`flip`, `match`, `mismatch`, `complete`, `tap`, `hint_synth`) | `AnimalPairs/Resources/Sounds` ← `Tools/audio/build_sounds.py` | fallbacks only |
 | Full sound list, prompts, credits and status | `Tools/audio/audio_manifest.json` | source of truth |
 | Launch screen | Info.plist `UILaunchScreen` (ivory colour) | final (colour only) |

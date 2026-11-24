@@ -7,6 +7,7 @@
 #   APSupportURL          = https://littlesnowyowl.com/games/animal-pairs/support/
 #   APPrivacyPolicyURL    = https://littlesnowyowl.com/games/animal-pairs/privacy/
 #   APTermsOfUseURL       = Apple's standard EULA (opened from Parents)
+# and that the opening video is bundled in the app.
 set -u
 
 EXPECTED_BUNDLE_ID="com.littlesnowyowl.animalpairs"
@@ -48,6 +49,15 @@ check APFullUnlockProductID "$EXPECTED_PRODUCT_ID"
 check APSupportURL "$EXPECTED_SUPPORT_URL"
 check APPrivacyPolicyURL "$EXPECTED_PRIVACY_URL"
 check APTermsOfUseURL "$EXPECTED_TERMS_URL"
+# The bundled opening video (never streamed).
+VIDEO="$ARCHIVE/Products/Applications/AnimalPairs.app/opening_video.mp4"
+if [ -f "$VIDEO" ] && [ "$(wc -c < "$VIDEO")" -gt 1000000 ]; then
+    echo "ok: opening_video.mp4 bundled ($(wc -c < "$VIDEO" | tr -d ' ') bytes)"
+else
+    echo "error: opening_video.mp4 is missing from AnimalPairs.app (or too small)"
+    FAILED=1
+fi
+
 if [ "$FAILED" -ne 0 ]; then
     echo "error: archive check failed. Failing before distribution."
     exit 1

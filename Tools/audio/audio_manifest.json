@@ -2197,9 +2197,9 @@
     {
       "name": "opening_video",
       "file": "AnimalPairs/Resources/Video/opening_video.mp4",
-      "source": "Supplied by the user (Animals_gathering_for_memory_game.mp4)",
+      "source": "Supplied by the user (higher-resolution replacement, 24 Nov 2026; the same sequence as the earlier 720x1280 Animals_gathering_for_memory_game.mp4). Remuxed without re-encoding (+faststart).",
       "status": "approved",
-      "format": "H.264 High 720x1280 (9:16 portrait), 24 fps, AAC stereo 48 kHz, 8.04 s",
+      "format": "H.264 High 1080x1920 (9:16 portrait), 24 fps, AAC stereo 48 kHz, 7.93 s, 2.22 MB",
       "audio_loudness": "-22.4 LUFS integrated, peak -8.1 dBFS",
       "use": "Plays once per app launch before Home"
     }

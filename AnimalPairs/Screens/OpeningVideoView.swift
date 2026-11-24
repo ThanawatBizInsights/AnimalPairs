@@ -4,8 +4,9 @@ import SwiftUI
 import UIKit
 
 /// The approved opening video (Resources/Video/opening_video.mp4,
-/// 720×1280 portrait, 8 s, H.264 + AAC). It has no text baked in; the title
-/// and Play button stay native on Home.
+/// 1080×1920 portrait, 7.9 s, H.264 High + AAC stereo, bundled — never
+/// streamed). It has no text baked in; the title and Play button stay native
+/// on Home.
 enum OpeningVideo {
     static let resource = "opening_video"
     static let fileExtension = "mp4"
@@ -20,7 +21,9 @@ enum OpeningVideo {
 }
 
 /// Plays the opening video once per app launch, then hands over to Home.
-/// Always skippable; any failure simply continues.
+/// Always skippable; any failure simply continues. Skipped entirely when the
+/// person has turned off Auto-Play Video Previews (Settings › Accessibility ›
+/// Motion), the system's setting for videos that start by themselves.
 struct OpeningVideoView: View {
     @Environment(AppModel.self) private var model
     @State private var player: AVPlayer?
@@ -71,7 +74,7 @@ struct OpeningVideoView: View {
 
     private func start() {
         guard player == nil, !finished else { return }
-        guard let url = OpeningVideo.url() else {
+        guard UIAccessibility.isVideoAutoplayEnabled, let url = OpeningVideo.url() else {
             finish()
             return
         }

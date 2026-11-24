@@ -1,3 +1,4 @@
+import AVFoundation
 import AnimalPairsCore
 import SwiftUI
 import UIKit
@@ -152,6 +153,19 @@ final class AppFlowTests: XCTestCase {
         XCTAssertEqual(nextLaunch.route, .opening)
         nextLaunch.finishOpening()
         XCTAssertEqual(nextLaunch.route, .home, "later launches go to Home after the video")
+    }
+
+    func testBundledOpeningVideoIsTheHighResolutionVersion() async throws {
+        let url = try XCTUnwrap(OpeningVideo.url())
+        let asset = AVURLAsset(url: url)
+        let video = try XCTUnwrap(try await asset.loadTracks(withMediaType: .video).first)
+        let size = try await video.load(.naturalSize)
+        XCTAssertEqual(size.width, 1080)
+        XCTAssertEqual(size.height, 1920, "portrait 9:16, shown aspect-fit (never stretched or cropped)")
+        XCTAssertFalse(try await asset.loadTracks(withMediaType: .audio).isEmpty, "the video keeps its soundtrack")
+        let seconds = try await asset.load(.duration).seconds
+        XCTAssertEqual(seconds, 7.93, accuracy: 0.1)
+        XCTAssertLessThan(seconds, OpeningVideo.maximumDuration)
     }
 
     func testBackgroundingDuringTheVideoContinuesToHome() {
