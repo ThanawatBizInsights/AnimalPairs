@@ -4,11 +4,16 @@
 # build before anything is archived or uploaded unless:
 #   PRODUCT_BUNDLE_IDENTIFIER = com.littlesnowyowl.animalpairs
 #   AP_FULL_UNLOCK_PRODUCT_ID = com.littlesnowyowl.animalpairs.fullgame
+#   AP_SUPPORT_URL, AP_PRIVACY_POLICY_URL = the littlesnowyowl.com Animal Pairs pages
+#   AP_TERMS_OF_USE_URL = Apple's standard EULA
 #   Config/Products.storekit holds exactly one product: that ID, NonConsumable
 set -u
 
 EXPECTED_BUNDLE_ID="com.littlesnowyowl.animalpairs"
 EXPECTED_PRODUCT_ID="com.littlesnowyowl.animalpairs.fullgame"
+EXPECTED_SUPPORT_URL="https://littlesnowyowl.com/games/animal-pairs/support/"
+EXPECTED_PRIVACY_URL="https://littlesnowyowl.com/games/animal-pairs/privacy/"
+EXPECTED_TERMS_URL="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
 APP_TARGET="AnimalPairs"
 
 [ "${CI_XCODEBUILD_ACTION:-}" = "archive" ] || exit 0
@@ -42,6 +47,9 @@ check() { # label, actual, expected
 echo "Scheme $SCHEME, Release, target $APP_TARGET:"
 check PRODUCT_BUNDLE_IDENTIFIER "$(setting PRODUCT_BUNDLE_IDENTIFIER)" "$EXPECTED_BUNDLE_ID"
 check AP_FULL_UNLOCK_PRODUCT_ID "$(setting AP_FULL_UNLOCK_PRODUCT_ID)" "$EXPECTED_PRODUCT_ID"
+check AP_SUPPORT_URL "$(setting AP_SUPPORT_URL)" "$EXPECTED_SUPPORT_URL"
+check AP_PRIVACY_POLICY_URL "$(setting AP_PRIVACY_POLICY_URL)" "$EXPECTED_PRIVACY_URL"
+check AP_TERMS_OF_USE_URL "$(setting AP_TERMS_OF_USE_URL)" "$EXPECTED_TERMS_URL"
 
 # The local StoreKit configuration must describe the same single non-consumable.
 extract() { plutil -extract "$1" raw -o - "$STOREKIT" 2>/dev/null || true; }

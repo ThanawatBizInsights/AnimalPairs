@@ -78,9 +78,9 @@ All configurable values are build settings on the **AnimalPairs** target
 | Setting | Default | Purpose |
 | --- | --- | --- |
 | `AP_FULL_UNLOCK_PRODUCT_ID` | `com.littlesnowyowl.animalpairs.fullgame` | Non-consumable *Full Game Unlock* product ID. Must match App Store Connect and `Config/Products.storekit` — see [Product ID and configuration](#product-id-and-configuration). |
-| `AP_TERMS_OF_USE_URL` | empty | Optional `https://` Terms of Use; shown in Parents (behind the gate) only when set. Apple's standard EULA applies otherwise. |
-| `AP_PRIVACY_POLICY_URL` | empty | `https://` privacy policy, opened from Parents (behind the gate). Required by the App Store. |
-| `AP_SUPPORT_URL` | empty | `https://` support page. |
+| `AP_TERMS_OF_USE_URL` | `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/` | Terms of Use (Apple's standard EULA), shown in Parents (behind the gate). |
+| `AP_PRIVACY_POLICY_URL` | `https://littlesnowyowl.com/games/animal-pairs/privacy/` | Privacy policy, opened from Parents (behind the gate). Required by the App Store. |
+| `AP_SUPPORT_URL` | `https://littlesnowyowl.com/games/animal-pairs/support/` | Support page, opened from Parents (behind the gate). |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.littlesnowyowl.animalpairs` | Must stay equal to the App Store Connect app's bundle ID. Xcode Cloud checks it before and after archiving (`ci_scripts/`). |
 
 When a value is missing the app says so in the Parents area instead of pretending
@@ -132,9 +132,13 @@ restart or exit, so stale work cannot touch a new round.
 round is normalized (a pending match is committed once, a pending mismatch is
 covered, a single open card is kept) and written as a versioned JSON snapshot
 with an atomic write. On launch the snapshot is validated against the current
-manifest, installed artwork and access level; anything invalid is moved aside
-(never silently deleted). Home has no Resume button (it was removed from the
-Home design), so a saved round is not offered after a relaunch. Completed
+manifest and installed artwork; a malformed or incompatible file is moved
+aside (never silently deleted). A valid round that needs Full Game Unlock while
+StoreKit has not (yet) confirmed the purchase stays on disk untouched. Home has
+no Resume button (Keep Playing was removed from the Home design), so a saved
+round is not offered after the app is closed; it is replaced when the next
+round starts and removed by Reset progress. The pause menu's "Keep playing"
+only continues the round that is still open. Completed
 rounds go to SwiftData, unique by round ID; the newest 100 are kept and the
 totals cover every round. If the store cannot be opened the file is left
 untouched and an in-memory store is used for that session. Resetting progress
@@ -221,7 +225,7 @@ Full Game Unlock**, behind the gate:
 | --- | --- |
 | `AP_FULL_UNLOCK_PRODUCT_ID` | **`com.littlesnowyowl.animalpairs.fullgame`** — also `productID` in `Config/Products.storekit` (`PurchaseTests` fails if they differ) |
 | `PRODUCT_BUNDLE_IDENTIFIER` | `com.littlesnowyowl.animalpairs` (the product ID does not depend on it) |
-| `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | the Little Penguin Studio pages |
+| `AP_PRIVACY_POLICY_URL`, `AP_SUPPORT_URL` | `https://littlesnowyowl.com/games/animal-pairs/privacy/` and `https://littlesnowyowl.com/games/animal-pairs/support/` (the only place they are set; Parents reads them through `AppConfiguration`) |
 | `AP_TERMS_OF_USE_URL` | Apple's standard EULA (`https://www.apple.com/legal/internet-services/itunes/dev/stdeula/`) |
 
 **Migration from the monthly subscription:** the earlier *Animal Pairs Plus*

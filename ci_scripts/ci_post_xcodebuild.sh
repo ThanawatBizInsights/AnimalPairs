@@ -4,10 +4,16 @@
 # message, unless both values are exactly what App Store Connect expects:
 #   CFBundleIdentifier    = com.littlesnowyowl.animalpairs          (app 6838152398)
 #   APFullUnlockProductID = com.littlesnowyowl.animalpairs.fullgame (Full Game Unlock)
+#   APSupportURL          = https://littlesnowyowl.com/games/animal-pairs/support/
+#   APPrivacyPolicyURL    = https://littlesnowyowl.com/games/animal-pairs/privacy/
+#   APTermsOfUseURL       = Apple's standard EULA (opened from Parents)
 set -u
 
 EXPECTED_BUNDLE_ID="com.littlesnowyowl.animalpairs"
 EXPECTED_PRODUCT_ID="com.littlesnowyowl.animalpairs.fullgame"
+EXPECTED_SUPPORT_URL="https://littlesnowyowl.com/games/animal-pairs/support/"
+EXPECTED_PRIVACY_URL="https://littlesnowyowl.com/games/animal-pairs/privacy/"
+EXPECTED_TERMS_URL="https://www.apple.com/legal/internet-services/itunes/dev/stdeula/"
 PLISTBUDDY="${PLISTBUDDY:-/usr/libexec/PlistBuddy}"
 
 [ "${CI_XCODEBUILD_ACTION:-}" = "archive" ] || exit 0
@@ -39,6 +45,9 @@ check() { # key, expected
 echo "Archived AnimalPairs.app: version $(read_key CFBundleShortVersionString) ($(read_key CFBundleVersion))"
 check CFBundleIdentifier "$EXPECTED_BUNDLE_ID"
 check APFullUnlockProductID "$EXPECTED_PRODUCT_ID"
+check APSupportURL "$EXPECTED_SUPPORT_URL"
+check APPrivacyPolicyURL "$EXPECTED_PRIVACY_URL"
+check APTermsOfUseURL "$EXPECTED_TERMS_URL"
 if [ "$FAILED" -ne 0 ]; then
     echo "error: archive check failed. Failing before distribution."
     exit 1

@@ -12,9 +12,22 @@ published by Claude: every App Store Connect step below is yours to do.
 | **Product ID** | set in the project: **`com.littlesnowyowl.animalpairs.fullgame`**. It does **not** exist in App Store Connect until you create it (below). To use a different ID, change `AP_FULL_UNLOCK_PRODUCT_ID` and `productID` in `Config/Products.storekit` together | build setting + StoreKit file |
 | **Price** | US$3.99 (set in App Store Connect). The local StoreKit test file mirrors it (3.99, US storefront) for simulator testing only; the app always shows the price StoreKit returns | App Store Connect → the in-app purchase → Price Schedule |
 | **Family Sharing** | ❗ your decision (off in the local test file). Once turned on in App Store Connect it cannot be turned off | the in-app purchase → Family Sharing |
-| **Privacy Policy URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/` (the page is still a website *draft* until the publisher name, effective date, age rating and availability are filled in) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy |
-| **Support URL** | set: `https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/support/` | `AP_SUPPORT_URL`; version page → Support URL |
+| **Privacy Policy URL** | set: `https://littlesnowyowl.com/games/animal-pairs/privacy/` (live, published policy; checked 24 Nov 2026) | `AP_PRIVACY_POLICY_URL`; App Store Connect → App Privacy → Privacy Policy URL |
+| **Support URL** | set: `https://littlesnowyowl.com/games/animal-pairs/support/` (live; checked 24 Nov 2026) | `AP_SUPPORT_URL`; version page → Support URL |
 | **Terms of Use** | set to Apple's standard EULA, `https://www.apple.com/legal/internet-services/itunes/dev/stdeula/` (your choice, recorded on the website 19 Nov 2026); shown in Parents | `AP_TERMS_OF_USE_URL` |
+
+## Legacy website links (builds made before 24 Nov 2026)
+
+Builds made before this change, including the build submitted to App Review
+in November 2026, open the old website host from Parents:
+`https://littlepenguinstudio.krai-thanawat.workers.dev/games/animal-pairs/privacy/`
+and `/support/`. That host stopped serving when the website's Cloudflare Worker
+was renamed on 23 Nov 2026. The website repository's branch
+`claude/restore-legacy-workers-dev-urls` holds a small Worker
+(`legacy-redirect/`) that takes the old name back and 301-redirects each path
+to the same page on `https://littlesnowyowl.com`. Until it is deployed
+(`cd legacy-redirect && npx wrangler deploy`), those older builds' links
+return 404. Current builds use the `littlesnowyowl.com` URLs above.
 
 ## App Store Connect: the in-app purchase
 
