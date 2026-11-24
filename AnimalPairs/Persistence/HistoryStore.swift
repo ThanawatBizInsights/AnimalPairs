@@ -83,7 +83,10 @@ final class SwiftDataCompletionStore: CompletionHistoryStore {
         do {
             let directory = URL.applicationSupportDirectory.appending(path: "History", directoryHint: .isDirectory)
             try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
-            let configuration = ModelConfiguration(schema: schema, url: directory.appending(path: "History.store"))
+            // On this device only: never synced through iCloud, even if an
+            // iCloud capability is added to the target later.
+            let configuration = ModelConfiguration(schema: schema, url: directory.appending(path: "History.store"),
+                                                   cloudKitDatabase: .none)
             let container = try ModelContainer(for: schema, migrationPlan: HistoryMigrationPlan.self, configurations: configuration)
             return (SwiftDataCompletionStore(container: container), nil)
         } catch {

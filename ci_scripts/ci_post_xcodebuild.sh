@@ -58,6 +58,16 @@ else
     FAILED=1
 fi
 
+# The privacy manifest ships in the app and declares no tracking.
+MANIFEST="$ARCHIVE/Products/Applications/AnimalPairs.app/PrivacyInfo.xcprivacy"
+TRACKING=$("$PLISTBUDDY" -c "Print :NSPrivacyTracking" "$MANIFEST" 2>/dev/null || true)
+if [ "$(printf %s "$TRACKING" | tr "[:upper:]" "[:lower:]")" = "false" ]; then
+    echo "ok: PrivacyInfo.xcprivacy bundled (NSPrivacyTracking = false)"
+else
+    echo "error: PrivacyInfo.xcprivacy missing from AnimalPairs.app or NSPrivacyTracking is not false"
+    FAILED=1
+fi
+
 if [ "$FAILED" -ne 0 ]; then
     echo "error: archive check failed. Failing before distribution."
     exit 1

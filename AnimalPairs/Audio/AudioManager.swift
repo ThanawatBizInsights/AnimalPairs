@@ -222,6 +222,8 @@ final class AudioManager {
     let session: AudioSessionController
 
     init(isEnabled: Bool, voiceEnabled: Bool, musicEnabled: Bool = false, bundle: Bundle = .main,
+         // Time since boot, only to measure intervals between sounds in this
+         // session (privacy manifest: System Boot Time, reason 35F9.1).
          clock: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime },
          randomSeed: UInt64 = UInt64.random(in: .min ... .max),
          sessionController: AudioSessionController? = nil,
