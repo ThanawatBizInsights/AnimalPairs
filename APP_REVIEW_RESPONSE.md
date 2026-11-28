@@ -88,7 +88,7 @@ Thanawat Kraiananyawich (Little Snowy Owl Studio)
 ## [confirm] before sending
 
 1. **Signature and seller name**: "Thanawat Kraiananyawich (Little Snowy Owl Studio)" is taken from the published privacy policy; use the exact name shown as the seller in App Store Connect.
-2. **Support email handling**: the website says support emails go to `littlepenguinsupport@icloud.com` (Apple iCloud Mail) and are deleted 12 months after the last reply. Confirm that is your practice, or remove that sentence.
+2. **Support email handling**: the website says support emails go to `littlesnowysupport@icloud.com` (Apple iCloud Mail; the address changed on the website on 25 Nov 2026) and are deleted 12 months after the last reply. Confirm that is your practice, or remove that sentence.
 3. **Website analytics**: the reply does not mention the website. The site's README says it has no analytics, cookies or trackers; if you enabled Cloudflare Web Analytics or similar, say so if Apple asks about the website.
 4. **App Analytics in App Store Connect**: Apple may show you aggregated usage/crash data from users who opted in to share with developers. That is Apple's own service, not in the app; mention it only if asked.
 5. **The backend** has never been deployed for the app (the app cannot reach it). Confirm.
